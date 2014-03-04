@@ -1,0 +1,8 @@
+# depslib dependency file v1.0
+1393752694 source:c:\documents and settings\stephen\desktop\8086-emulator\src\test\thread\c\thread.c
+	<Windows.h>
+	"thread.h"
+
+1393752672 c:\documents and settings\stephen\desktop\8086-emulator\src\test\thread\c\thread.h
+	<windows.h>
+

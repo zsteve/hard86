@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_layout_file>
+	<ActiveTarget name="Debug" />
+	<File name="main.cpp" open="1" top="1" tabpos="2">
+		<Cursor position="103" topLine="0" />
+	</File>
+	<File name="mutex.h" open="1" top="0" tabpos="1">
+		<Cursor position="360" topLine="7" />
+	</File>
+</CodeBlocks_layout_file>
