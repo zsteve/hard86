@@ -1,0 +1,12 @@
+# depslib dependency file v1.0
+1189872156 source:g:\code\projects\repositories\hard86\hard86\src\system\multithreading\event\c\main.c
+	<stdio.h>
+	<stdlib.h>
+
+1394269781 source:g:\code\projects\repositories\hard86\hard86\src\system\multithreading\event\c\event.c
+	<windows.h>
+	"event.h"
+
+1394269772 g:\code\projects\repositories\hard86\hard86\src\system\multithreading\event\c\event.h
+	<windows.h>
+

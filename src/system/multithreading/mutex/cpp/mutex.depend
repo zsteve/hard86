@@ -1,0 +1,13 @@
+# depslib dependency file v1.0
+1394265336 source:g:\code\projects\repositories\hard86\hard86\src\system\mutex\cpp\mutex.cpp
+	<Windows.h>
+	"mutex.h"
+
+1394254904 g:\code\projects\repositories\hard86\hard86\src\system\mutex\cpp\mutex.h
+	<Windows.h>
+
+1394265340 source:g:\code\projects\repositories\hard86\hard86\src\system\mutex\cpp\main.cpp
+	<Windows.h>
+	<cstdio>
+	"mutex.h"
+

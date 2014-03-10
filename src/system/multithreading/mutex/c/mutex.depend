@@ -1,0 +1,70 @@
+# depslib dependency file v1.0
+1393756272 source:c:\documents and settings\stephen\desktop\8086-emulator\src\test\mutex\c\main.c
+	<windows.h>
+	<stdio.h>
+	<stdlib.h>
+	<conio.h>
+	"mutex.h"
+	"../../thread/c/thread.h"
+
+1393753405 source:c:\documents and settings\stephen\desktop\8086-emulator\src\test\mutex\c\mutex.c
+	<windows.h>
+	"mutex.h"
+
+1393755220 c:\documents and settings\stephen\desktop\8086-emulator\src\test\mutex\c\mutex.h
+
+1393752672 c:\documents and settings\stephen\desktop\8086-emulator\src\test\thread\c\thread.h
+	<windows.h>
+
+1393752694 source:c:\documents and settings\stephen\desktop\8086-emulator\src\test\thread\c\thread.c
+	<Windows.h>
+	"thread.h"
+
+1394253838 source:g:\code\projects\repositories\hard86\hard86\src\test\mutex\c\mutex.c
+	<windows.h>
+	"mutex.h"
+
+1394253867 g:\code\projects\repositories\hard86\hard86\src\test\mutex\c\mutex.h
+
+1394254093 source:g:\code\projects\repositories\hard86\hard86\src\test\thread\c\thread.c
+	<Windows.h>
+	"thread.h"
+
+1394254120 g:\code\projects\repositories\hard86\hard86\src\test\thread\c\thread.h
+	<windows.h>
+
+1394253896 source:g:\code\projects\repositories\hard86\hard86\src\test\mutex\c\main.c
+	<windows.h>
+	<stdio.h>
+	<stdlib.h>
+	<conio.h>
+	"mutex.h"
+	"../../thread/c/thread.h"
+
+1394253896 source:g:\code\projects\repositories\hard86\hard86\src\system\mutex\c\main.c
+	<windows.h>
+	<stdio.h>
+	<stdlib.h>
+	<conio.h>
+	"mutex.h"
+	"../../thread/c/thread.h"
+
+1394253867 g:\code\projects\repositories\hard86\hard86\src\system\mutex\c\mutex.h
+
+1394254874 g:\code\projects\repositories\hard86\hard86\src\system\thread\c\thread.h
+	<windows.h>
+
+1394270639 source:g:\code\projects\repositories\hard86\hard86\src\system\multithreading\mutex\c\mutex.c
+	<windows.h>
+	"mutex.h"
+	"../../../../global/defines.h"
+	"../../../../global/typedefs.h"
+
+1394270633 g:\code\projects\repositories\hard86\hard86\src\system\multithreading\mutex\c\mutex.h
+	"../../../../global/defines.h"
+	"../../../../global/typedefs.h"
+
+1394270502 g:\code\projects\repositories\hard86\hard86\src\global\defines.h
+
+1394270492 g:\code\projects\repositories\hard86\hard86\src\global\typedefs.h
+

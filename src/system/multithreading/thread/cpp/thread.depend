@@ -1,0 +1,20 @@
+# depslib dependency file v1.0
+1393665800 source:c:\documents and settings\stephen\desktop\8086-emulator\src\test\thread\cpp\thread.cpp
+	"thread.h"
+	<Windows.h>
+
+1393665788 c:\documents and settings\stephen\desktop\8086-emulator\src\test\thread\cpp\thread.h
+	<Windows.h>
+
+1394265079 source:g:\code\projects\repositories\hard86\hard86\src\system\thread\cpp\thread.cpp
+	"thread.h"
+	<Windows.h>
+
+1394265060 g:\code\projects\repositories\hard86\hard86\src\system\thread\cpp\thread.h
+	<Windows.h>
+
+1393751698 source:g:\code\projects\repositories\hard86\hard86\src\system\thread\cpp\main.cpp
+	<iostream>
+	<conio.h>
+	"thread.h"
+
