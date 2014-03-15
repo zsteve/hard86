@@ -14,7 +14,12 @@ int op_??(){
 }
 */
 
+void process_instr_prefixes();
+
 int op_0xeb();
 int op_0xb8();
+int op_0x04();
+int op_0x05();
+int op_0x80();
 
 #endif

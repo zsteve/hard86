@@ -32,8 +32,8 @@
 #define op_0x01 op_unknown
 #define op_0x02 op_unknown
 #define op_0x03 op_unknown
-#define op_0x04 op_unknown
-#define op_0x05 op_unknown
+//#define op_0x04 op_unknown
+//#define op_0x05 op_unknown
 #define op_0x06 op_unknown
 #define op_0x07 op_unknown
 #define op_0x08 op_unknown
@@ -156,7 +156,7 @@
 #define op_0x7d op_unknown
 #define op_0x7e op_unknown
 #define op_0x7f op_unknown
-#define op_0x80 op_unknown
+//#define op_0x80 op_unknown
 #define op_0x81 op_unknown
 #define op_0x82 op_unknown
 #define op_0x83 op_unknown
@@ -330,7 +330,8 @@ typedef struct{
 
 	/* pointers & indicators */
 	uint16 ip;
-	uint8* m_ip;	/* a byte ptr which points to the same data is IP */
+	uint32 r_ip;	/*	this is the 'real' ip value
+						that is, not segmented	*/
 
 	/*	flags register
 		format :
@@ -369,9 +370,8 @@ typedef struct{
 */
 typedef struct{
 	/* prefixes */
-	int LOCK, REP, REPNE,\
-		/* segment overrides */
-		SEG_CS, SEG_SS, SEG_DS, SEG_ES, SEG_FS, SEG_GS;
+	int lock, rep, repne;	/* nonzero for present, 0 for not present */
+	uint8 seg_ovr;			/* segment override, 0 if none present */
 	union{
 		struct{
 			uint8 rm:3;
@@ -381,18 +381,23 @@ typedef struct{
 		uint8 mod_reg_rm;
 	};
 
+	/*	these are the segments for the instruction to use
+		if not overridden, they will be their defaults 
+	*/
+
+	uint16 cs, ss, ds, es;
+
 	uint8 op_size;
 }op_data_type;
 
 #define MOD_REG_RM(offset)\
-	op_data.mod_reg_rm=*(sys_state.m_ip+offset)
+	op_data.mod_reg_rm=read_mem_8(R_IP+offset);
 
 /* memory access */
 
 /* get the real address of a segment address and segment number */
 #define GET_ADDR(address, segment)\
 	(segment*0x10)+address
-
 
 /* register access */
 #define REG_16(rg) *((uint16*)sys_state.rg)
@@ -424,6 +429,9 @@ typedef struct{
 #define BP sys_state.bp
 #define SI sys_state.si
 #define DI sys_state.di
+
+/* special R_IP access */
+#define R_IP sys_state.r_ip
 
 /* registers */
 #define REG_AX	0
@@ -466,6 +474,9 @@ uint16 read_mem_16(uint32 addr);
 void write_mem_16(uint16 val, uint32 addr);
 uint8 read_mem_8(uint32 addr);
 void write_mem_8(uint8 val, uint32 addr);
+
+void write_reg(int reg, uint16 val);
+uint16 read_reg(int reg);
 
 /* TODO */
 

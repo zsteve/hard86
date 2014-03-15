@@ -250,8 +250,10 @@ void write_io_port(uint8 val, uint16 port){
 
 void system_load_mem(uint8* data, uint32 size){
 	int i;
+	uint32 o=DS<<4;
+	o+=0x100;
 	for(i=0; i<size; i++){
-		*(sys_state.mem+i)=*(data+i);
+		*(sys_state.mem+i+o)=*(data+i);
 	}
 }
 
@@ -279,7 +281,12 @@ int system_init(MUTEX sys_mutex_){
 	SET_RESERVED_FLAGS(sys_state);
 
 	/* initialize registers, default value is 0 */
-	sys_state.sp=0x100;	/* default stack pointer */
+	CS=0x700;
+	IP=0x100;
+	SS=0x700;
+	SP=0xFFFE;
+	DS=0x700;
+	ES=0x700;
 	sys_state.f_bits.IOPL=0x0;	/* no IO protection */
 	sys_state.f_bits.NT=0;		/* no nested tasks */
 
@@ -295,23 +302,30 @@ int system_destroy(){
 	return 0;
 }
 
+void system_print_state(){
+	printf("AX: %X\tBX: %X\tCX: %X\tDX: %X\n"\
+		"CS: %X\tSS: %X\tDS: %X\tES: %X\n"\
+		"IP: %X\t\n", \
+		AX, BX, CX, DX, CS, SS, DS, ES, IP);
+	_getch();
+}
+
 int system_execute(){
 	while(1){
-		sys_state.m_ip=sys_state.mem+GET_ADDR(IP, CS);
-		printf("IP : %X\n", IP);
-		printf("SS : %X\n", SS);
-		printf("[IP] : %X\n", read_mem_8(GET_ADDR(IP, CS)));
-		MOD_REG_RM(1);
-		printf("MOD REG R/M : %X\n", op_data.mod_reg_rm);
-		printf("MOD : %X REG : %X RM : %X\n", op_data.mod, op_data.reg, op_data.rm);
+		/* update r_ip */
+		R_IP=GET_ADDR(IP, CS);
+		process_instr_prefixes();
 
-		(*op_table[read_mem_8(GET_ADDR(CS, IP))])();
+		system_print_state();
+
+		(*op_table[read_mem_8(GET_ADDR(IP, CS))])();
 	}
 	return 0;
 }
 
-int op_unknown(){
+static int op_unknown(){
 	WRITE_DEBUG("Error : Unknown opcode encountered");
+	printf("Unknown opcode\n");
 	return 0;
 }
 
