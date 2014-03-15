@@ -10,6 +10,7 @@
 #include "opcodes.h"
 #include "emulator_engine.h"
 #include "emulator_engine_interface.h"
+#include "flags.h"
 
 #define SHOW_DEBUG
 
@@ -26,21 +27,27 @@ extern char text_regs[22][6];
 #define RMEM16(addr)\
 	read_mem_16(addr)
 
+static uint32 disp_size;	/* size of displacement, can be 0, 1 or 2 */
+
 uint8 read_rm_val_8(uint16 seg){
 	/* assumes you have mod-reg-rm */
 	/* does MOD RM <- VAL */
 	uint16 disp16=RMEM16(R_IP+2);
 	uint8 disp8=RMEM8(R_IP+2);
 	uint32 addr=0;
+	disp_size=0;
 	switch(op_data.mod){
 		/* modes */
 	case 0:
 		if(op_data.rm==6){
 			addr=disp16;
-			break;
+			disp_size=2;
+			goto end;
 		}
 	case 1:
 	case 2:
+		if(op_data.mod==1) disp_size=1;
+		else if(op_data.mod==2) disp_size=2;
 		/* two byte signed displacement */
 		switch(op_data.rm){
 		case 0:	/* BX + SI */
@@ -67,6 +74,7 @@ uint8 read_rm_val_8(uint16 seg){
 			addr=BX;
 			break;
 		}
+		end:
 		addr=GET_ADDR(addr&0xffff, seg);
 		return read_mem_8(addr);
 	case 3:
@@ -83,11 +91,19 @@ uint16 read_rm_val_16(uint16 seg){
 	uint16 disp16=RMEM16(R_IP+2);
 	uint8 disp8=RMEM8(R_IP+2);
 	uint32 addr=0;
+	disp_size=0;
 	switch(op_data.mod){
 		/* modes */
 	case 0:
+		if(op_data.rm==6){
+			addr=disp16;
+			disp_size=2;
+			goto end;
+		}
 	case 1:
 	case 2:
+		if(op_data.mod==1) disp_size=1;
+		else if(op_data.mod==2) disp_size=2;
 		/* two byte signed displacement */
 		switch(op_data.rm){
 		case 0:	/* BX + SI */
@@ -114,6 +130,7 @@ uint16 read_rm_val_16(uint16 seg){
 			addr=BX;
 			break;
 		}
+		end:
 		addr=GET_ADDR(addr&0xffff, seg);
 		return read_mem_16(addr);
 	case 3:
@@ -247,12 +264,19 @@ int write_rm_val_8(uint8 val, uint16 seg){
 	uint16 disp16=RMEM16(R_IP+2);
 	uint8 disp8=RMEM8(R_IP+2);
 	uint32 addr=0;
+	disp_size=0;
 	switch(op_data.mod){
 		/* modes */
 	case 0:
-
+		if(op_data.rm==6){
+			addr=disp16;
+			disp_size=2;
+			goto end;
+		}
 	case 1:
 	case 2:
+		if(op_data.mod==1) disp_size=1;
+		else if(op_data.mod==2) disp_size=2;
 		/* two byte signed displacement */
 		switch(op_data.rm){
 		case 0:	/* BX + SI */
@@ -279,6 +303,7 @@ int write_rm_val_8(uint8 val, uint16 seg){
 			addr=BX;
 			break;
 		}
+		end:
 		addr=GET_ADDR(addr & 0xffff, seg);
 		write_mem_8(val, addr);
 		return 0;
@@ -296,11 +321,19 @@ int write_rm_val_16(uint16 val, uint16 seg){
 	uint16 disp16=RMEM16(R_IP+2);
 	uint8 disp8=RMEM8(R_IP+2);
 	uint32 addr=0;
+	disp_size=0;
 	switch(op_data.mod){
 		/* modes */
 	case 0:
+		if(op_data.rm==6){
+			addr=disp16;
+			disp_size=2;
+			goto end;
+		}
 	case 1:
 	case 2:
+		if(op_data.mod==1) disp_size=1;
+		else if(op_data.mod==2) disp_size=2;
 		/* two byte signed displacement */
 		switch(op_data.rm){
 		case 0:	/* BX + SI */
@@ -327,6 +360,7 @@ int write_rm_val_16(uint16 val, uint16 seg){
 			addr=BX;
 			break;
 		}
+		end:
 		addr=GET_ADDR(addr&0xffff, seg);
 		write_mem_16(val, addr);
 		return 0;
@@ -405,12 +439,16 @@ void process_instr_prefixes(){
 	/* when we get here, R_IP and IP point to opcode */
 }
 
+#define OP_DS op_data.ds
+#define OP_SS op_data.ss
+#define M_REG op_data.reg
+
 /* JMP rel8 */
 int op_0xeb(){
 	int8 rel8=(int8)RMEM8(R_IP+1);	/* signed */
 	IP+=rel8+2;
 #ifdef SHOW_DEBUG
-	printf("JMP %X\n", IP);
+	out_opinfo("JMP %X\n", IP);
 #endif
 	return 0;
 }
@@ -420,10 +458,12 @@ int op_0xe9(){
 	int16 rel16=(int16)RMEM16(R_IP+1);
 	IP+=rel16+1;
 #ifdef SHOW_DEBUG
-	printf("JMP %X\n", IP);
+	out_opinfo("JMP %X\n", IP);
 #endif
 	return 0;
 }
+
+/** MOV Instructions **/
 
 /* MOV+ r16, imm16 */
 int op_0xb8(){
@@ -437,44 +477,145 @@ int op_0xb8(){
 
 	IP+=3;
 #ifdef SHOW_DEBUG
-	printf("MOV %s, %X\n", text_regs[r16], imm16);
+	out_opinfo("MOV %s, %X\n", text_regs[r16], (uint32)imm16);
 #endif
 	return 0;
 }
 
-/* ADD AL, imm8 */
-int op_0x04(){
-	int8 imm8=RMEM8(R_IP+1);
-	AL+=imm8;
+/* MOV r/m8, r8 */
+int op_0x88(){
+	uint8 r8;
+	MOD_REG_RM(1);
+	r8=read_reg(TO_BYTE_REG(M_REG));
+	write_rm_val_8(r8, OP_DS);
+
+#ifdef SHOW_DEBUG
+	out_opinfo("MOV %S, %S\n", print_rm_val_8(OP_DS), text_regs[TO_BYTE_REG(r8)]);
+#endif
+	return 0;
+}
+
+/* MOV r/m16, r16 */
+int op_0x89(){
+	uint16 r16;
+	MOD_REG_RM(1);
+	r16=read_reg(M_REG);
+	write_rm_val_16(r16, OP_DS);
+
+	IP+=1+disp_size;
+#ifdef SHOW_DEBUG
+	out_opinfo("MOV %S, %S\n", print_rm_val_16(OP_DS), text_regs[r16]);
+#endif
+	return 0;
+}
+
+/* MOV r8, r/m8 */
+int op_0x8a(){
+	uint8 rm8;
+	MOD_REG_RM(1);
+	rm8=read_rm_val_8(OP_DS);
+	write_reg(TO_BYTE_REG(M_REG), rm8);
+
+	IP+=1+disp_size;
+#ifdef SHOW_DEBUG
+	out_opinfo("MOV %S, %S\n", text_regs[TO_BYTE_REG(M_REG)], print_rm_val_8(OP_DS));
+#endif
+	return 0;
+}
+
+/* MOV r16, r/m16 */
+int op_0x8b(){
+	uint8 rm16;
+	MOD_REG_RM(1);
+	rm16=read_rm_val_16(OP_DS);
+	write_reg((M_REG), rm16);
+
+	IP+=1+disp_size;
+#ifdef SHOW_DEBUG
+	out_opinfo("MOV %S, %S\n", text_regs[(M_REG)], print_rm_val_16(OP_DS));
+#endif
+	return 0;
+}
+
+/* MOV r/m16, Sreg */
+int op_0x8c(){
+	uint16 sreg;
+	MOD_REG_RM(1);
+	sreg=read_reg(M_REG);
+	write_rm_val_16(sreg, OP_DS);
+
+	IP+=1+disp_size;
+#ifdef SHOW_DEBUG
+	out_opinfo("MOV %S, %S\n", print_rm_val_16(OP_DS), text_regs[M_REG]);
+#endif
+	return 0;
+}
+
+/* MOV Sreg, r/m16 */
+int op_0x8e(){
+	uint16 rm16;
+	MOD_REG_RM(1);
+	rm16=read_rm_val_16(OP_DS);
+	write_reg(M_REG, rm16);
+
+	IP+=1+disp_size;
+#ifdef SHOW_DEBUG
+	out_opinfo("MOV %S, %S\n", text_regs[M_REG], print_rm_val_16(OP_DS));
+#endif
+	return 0;
+}
+
+/* MOV al, moffs8 */
+int op_0xa0(){
+	uint8 moffs8=RMEM8(R_IP+1);
+	AL=moffs8;
 	IP+=2;
 #ifdef SHOW_DEBUG
-	printf("ADD AL, %X\n", imm8);
+	out_opinfo("MOV AL, %X\n", (uint32)moffs8);
+#endif
+}
+
+/* ADD AL, imm8 */
+int op_0x04(){
+	uint8 imm8=RMEM8(R_IP+1);
+	AL+=imm8;
+
+	setf_add8(AL, imm8);
+
+	IP+=2;
+#ifdef SHOW_DEBUG
+	out_opinfo("ADD AL, %X\n", (uint32)imm8);
 #endif
 	return 0;
 }
 
 /* ADD AX, imm16 */
 int op_0x05(){
-	int16 imm16=RMEM16(R_IP+1);
-	AL+=imm16;
+	uint16 imm16=RMEM16(R_IP+1);
+	AX+=imm16;
+
+	setf_add16(AX, imm16);
 	IP+=3;
 #ifdef SHOW_DEBUG
-	printf("ADD AX, %X", imm16);
+	out_opinfo("ADD AX, %X", (uint32)imm16);
 #endif
 	return 0;
 }
 
 /* ADD r/m8, imm8 */
 int op_0x80(){
-	int8 imm8=RMEM8(R_IP+2);
-	int8 rm8;
+	uint8 imm8=RMEM8(R_IP+2);
+	uint8 rm8;
 	MOD_REG_RM(1);
-	rm8=read_rm_val_8(op_data.ds);
+	rm8=read_rm_val_8(OP_DS);
 	rm8+=imm8;
-	write_rm_val_8(rm8, op_data.ds);
+	write_rm_val_8(rm8, OP_DS);
+
+	setf_add8(rm8, imm8);
+
 	IP+=3;
 #ifdef SHOW_DEBUG
-	printf("ADD %s, %X\n", print_rm_val_8(op_data.ds), imm8);
+	out_opinfo("ADD %s, %X\n", print_rm_val_8(OP_DS), (uint32)imm8);
 #endif
 	return 0;
 }

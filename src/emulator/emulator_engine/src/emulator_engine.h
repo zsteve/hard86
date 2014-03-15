@@ -164,13 +164,13 @@
 #define op_0x85 op_unknown
 #define op_0x86 op_unknown
 #define op_0x87 op_unknown
-#define op_0x88 op_unknown
-#define op_0x89 op_unknown
-#define op_0x8a op_unknown
-#define op_0x8b op_unknown
-#define op_0x8c op_unknown
+//#define op_0x88 op_unknown
+//#define op_0x89 op_unknown
+//#define op_0x8a op_unknown
+//#define op_0x8b op_unknown
+//#define op_0x8c op_unknown
 #define op_0x8d op_unknown
-#define op_0x8e op_unknown
+//#define op_0x8e op_unknown
 #define op_0x8f op_unknown
 #define op_0x90 op_unknown
 #define op_0x91 op_unknown
@@ -188,7 +188,7 @@
 #define op_0x9d op_unknown
 #define op_0x9e op_unknown
 #define op_0x9f op_unknown
-#define op_0xa0 op_unknown
+//#define op_0xa0 op_unknown
 #define op_0xa1 op_unknown
 #define op_0xa2 op_unknown
 #define op_0xa3 op_unknown
@@ -213,13 +213,13 @@
 #define op_0xb6 op_unknown
 #define op_0xb7 op_unknown
 //#define op_0xb8 op_unknown
-#define op_0xb9 op_unknown
+#define op_0xb9 op_0xb8
 #define op_0xba op_0xb8
-#define op_0xbb op_unknown
-#define op_0xbc op_unknown
-#define op_0xbd op_unknown
-#define op_0xbe op_unknown
-#define op_0xbf op_unknown
+#define op_0xbb op_0xb8
+#define op_0xbc op_0xb8
+#define op_0xbd op_0xb8
+#define op_0xbe op_0xb8
+#define op_0xbf op_0xb8
 #define op_0xc0 op_unknown
 #define op_0xc1 op_unknown
 #define op_0xc2 op_unknown
@@ -477,6 +477,8 @@ void write_mem_8(uint8 val, uint32 addr);
 
 void write_reg(int reg, uint16 val);
 uint16 read_reg(int reg);
+
+void out_opinfo(char* str, ...);
 
 /* TODO */
 

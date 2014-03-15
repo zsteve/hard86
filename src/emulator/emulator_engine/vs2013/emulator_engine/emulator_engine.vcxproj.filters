@@ -33,6 +33,9 @@
     <ClCompile Include="..\..\..\..\system\multithreading\mutex\c\mutex.c">
       <Filter>Dependencies\mutex</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\flags.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\emulator_engine.h">
@@ -46,6 +49,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\system\multithreading\mutex\c\mutex.h">
       <Filter>Dependencies\mutex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\flags.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

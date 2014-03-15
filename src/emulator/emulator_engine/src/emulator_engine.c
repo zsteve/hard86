@@ -10,9 +10,11 @@
 #include <ctype.h>
 #include <math.h>
 #include <wchar.h>
+#include <varargs.h>
 
 #include "emulator_engine.h"
 #include "opcodes.h"
+#include "flags.h"
 #include "../../../global/defines.h"
 #include "../../../global/typedefs.h"
 
@@ -49,6 +51,13 @@ MUTEX sys_mutex;
 	sprintf(s, "%s %d : %s\n", file, line, str);
 	fprintf(f, "%s", s);
 	fclose(f);
+}
+
+void out_opinfo(char* str, ...){
+	va_list v;
+	va_start(v, str);
+	vprintf(str, v);
+	va_end(v);
 }
 
 /* register access */
@@ -307,6 +316,8 @@ void system_print_state(){
 		"CS: %X\tSS: %X\tDS: %X\tES: %X\n"\
 		"IP: %X\t\n", \
 		AX, BX, CX, DX, CS, SS, DS, ES, IP);
+	printf("O : %d\tD: %d\tI: %d\tT: %d\tS: %d\t Z: %d\tA: %d\t P: %d\tC: %d\n",
+		FLAG_OF, FLAG_DF, FLAG_IF, FLAG_TF, FLAG_SF, FLAG_ZF, FLAG_AF, FLAG_PF, FLAG_CF);
 	_getch();
 }
 

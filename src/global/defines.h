@@ -32,4 +32,15 @@
 #define BIT_14  16384
 #define BIT_15  32768
 
+/* bit operations */
+#define LO_BYTE(w) (unsigned char)(w & 0xff)
+#define HI_BYTE(w) (unsigned char)(w & 0xff00) >> 8
+#define WORD_B(h, l) ((unsigned short)h)<<8 | l
+
+/* MB and KB, RANGE_8/16 definitions */
+#define KB 1024
+#define MB KB*KB
+#define RANGE_8 256
+#define RANGE_16 65536
+
 #endif
