@@ -241,6 +241,18 @@ void write_mem_8(uint8 val, uint32 addr){
 	*(sys_state.mem+addr)=val;
 }
 
+/* Stack operations */
+void stack_push(uint16 val){
+	sys_state.sp-=2;
+	write_mem_16(val, GET_ADDR(sys_state.sp, sys_state.ss));
+}
+
+uint16 stack_pop(){
+	uint16 val=read_mem_16(GET_ADDR(sys_state.sp, sys_state.ss));
+	sys_state.sp+=2;
+	return val;
+}
+
 /* I/O port access */
 
 /**
@@ -312,13 +324,16 @@ int system_destroy(){
 }
 
 void system_print_state(){
+	printf("----------------------------------------\n");
 	printf("AX: %X\tBX: %X\tCX: %X\tDX: %X\n"\
 		"CS: %X\tSS: %X\tDS: %X\tES: %X\n"\
 		"IP: %X\t\n", \
 		AX, BX, CX, DX, CS, SS, DS, ES, IP);
+	printf("\n");
 	printf("O : %d\tD: %d\tI: %d\tT: %d\tS: %d\t Z: %d\tA: %d\t P: %d\tC: %d\n",
 		FLAG_OF, FLAG_DF, FLAG_IF, FLAG_TF, FLAG_SF, FLAG_ZF, FLAG_AF, FLAG_PF, FLAG_CF);
-	_getch();
+	printf("----------------------------------------\n");
+	//_getch();
 }
 
 int system_execute(){
@@ -337,6 +352,7 @@ int system_execute(){
 static int op_unknown(){
 	WRITE_DEBUG("Error : Unknown opcode encountered");
 	printf("Unknown opcode\n");
+	abort();
 	return 0;
 }
 

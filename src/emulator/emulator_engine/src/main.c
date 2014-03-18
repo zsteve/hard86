@@ -23,7 +23,7 @@ long fsize(FILE *stream)
 
 int main(){
 	MUTEX mutex;
-	FILE* in_file=fopen("test.com", "r");
+	FILE* in_file=fopen("test/test.com", "r");
 	int size=fsize(in_file);
 	uint8* data=(uint8*)malloc(size);
 	fread(data, 1, size, in_file);

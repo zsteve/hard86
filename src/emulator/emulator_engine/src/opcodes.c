@@ -27,6 +27,20 @@ extern char text_regs[22][6];
 #define RMEM16(addr)\
 	read_mem_16(addr)
 
+#define SRMEM8(addr, seg)\
+	read_mem_8(GET_ADDR(addr, seg))
+
+#define SRMEM16(addr, seg)\
+	read_mem_16(GET_ADDR(addr, seg))
+
+#define SWMEM8(val, addr, seg)\
+	write_mem_8(val, GET_ADDR(addr, seg))
+
+#define SWMEM16(val, addr, seg)\
+	write_mem_16(val, GET_ADDR(addr, seg))
+
+#define RET_GOOD return 0
+
 static uint32 disp_size;	/* size of displacement, can be 0, 1 or 2 */
 
 uint8 read_rm_val_8(uint16 seg){
@@ -82,7 +96,7 @@ uint8 read_rm_val_8(uint16 seg){
 		return read_reg(TO_BYTE_REG(op_data.rm));
 		break;
 	}
-	return 0;
+	RET_GOOD;
 }
 
 uint16 read_rm_val_16(uint16 seg){
@@ -138,7 +152,7 @@ uint16 read_rm_val_16(uint16 seg){
 		return read_reg(TO_BYTE_REG(op_data.rm));
 		break;
 	}
-	return 0;
+	RET_GOOD;
 }
 
 static char rm_val_str[80]="";
@@ -306,13 +320,13 @@ int write_rm_val_8(uint8 val, uint16 seg){
 		end:
 		addr=GET_ADDR(addr & 0xffff, seg);
 		write_mem_8(val, addr);
-		return 0;
+		RET_GOOD;
 	case 3:
 		/* register addressing */
 		write_reg(TO_BYTE_REG(op_data.rm), val);
 		break;
 	}
-	return 0;
+	RET_GOOD;
 }
 
 int write_rm_val_16(uint16 val, uint16 seg){
@@ -363,13 +377,13 @@ int write_rm_val_16(uint16 val, uint16 seg){
 		end:
 		addr=GET_ADDR(addr&0xffff, seg);
 		write_mem_16(val, addr);
-		return 0;
+		RET_GOOD;
 	case 3:
 		/* register addressing */
 		write_reg(TO_BYTE_REG(op_data.rm), val);
 		break;
 	}
-	return 0;
+	RET_GOOD;
 }
 
 static void set_def_segs(){
@@ -450,7 +464,7 @@ int op_0xeb(){
 #ifdef SHOW_DEBUG
 	out_opinfo("JMP %X\n", IP);
 #endif
-	return 0;
+	RET_GOOD;
 }
 
 /* JMP rel16 */
@@ -460,7 +474,7 @@ int op_0xe9(){
 #ifdef SHOW_DEBUG
 	out_opinfo("JMP %X\n", IP);
 #endif
-	return 0;
+	RET_GOOD;
 }
 
 /** MOV Instructions **/
@@ -469,7 +483,7 @@ int op_0xe9(){
 int op_0xb8(){
 	uint8 r16;
 	uint16 imm16;
-	MOD_REG_RM(1);
+	MOD_REG_RM(0);
 	r16=op_data.rm;
 	/* r16 is in lower 3 bits of instruction */
 	imm16=RMEM16(R_IP+1);
@@ -479,7 +493,7 @@ int op_0xb8(){
 #ifdef SHOW_DEBUG
 	out_opinfo("MOV %s, %X\n", text_regs[r16], (uint32)imm16);
 #endif
-	return 0;
+	RET_GOOD;
 }
 
 /* MOV r/m8, r8 */
@@ -492,7 +506,7 @@ int op_0x88(){
 #ifdef SHOW_DEBUG
 	out_opinfo("MOV %S, %S\n", print_rm_val_8(OP_DS), text_regs[TO_BYTE_REG(r8)]);
 #endif
-	return 0;
+	RET_GOOD;
 }
 
 /* MOV r/m16, r16 */
@@ -502,11 +516,11 @@ int op_0x89(){
 	r16=read_reg(M_REG);
 	write_rm_val_16(r16, OP_DS);
 
-	IP+=1+disp_size;
+	IP+=2+disp_size;
 #ifdef SHOW_DEBUG
-	out_opinfo("MOV %S, %S\n", print_rm_val_16(OP_DS), text_regs[r16]);
+	out_opinfo("MOV %s, %s\n", print_rm_val_16(OP_DS), text_regs[r16]);
 #endif
-	return 0;
+	RET_GOOD;
 }
 
 /* MOV r8, r/m8 */
@@ -520,7 +534,7 @@ int op_0x8a(){
 #ifdef SHOW_DEBUG
 	out_opinfo("MOV %S, %S\n", text_regs[TO_BYTE_REG(M_REG)], print_rm_val_8(OP_DS));
 #endif
-	return 0;
+	RET_GOOD;
 }
 
 /* MOV r16, r/m16 */
@@ -530,11 +544,11 @@ int op_0x8b(){
 	rm16=read_rm_val_16(OP_DS);
 	write_reg((M_REG), rm16);
 
-	IP+=1+disp_size;
+	IP+=2+disp_size;
 #ifdef SHOW_DEBUG
-	out_opinfo("MOV %S, %S\n", text_regs[(M_REG)], print_rm_val_16(OP_DS));
+	out_opinfo("MOV %s, %s\n", text_regs[(M_REG)], print_rm_val_16(OP_DS));
 #endif
-	return 0;
+	RET_GOOD;
 }
 
 /* MOV r/m16, Sreg */
@@ -548,7 +562,7 @@ int op_0x8c(){
 #ifdef SHOW_DEBUG
 	out_opinfo("MOV %S, %S\n", print_rm_val_16(OP_DS), text_regs[M_REG]);
 #endif
-	return 0;
+	RET_GOOD;
 }
 
 /* MOV Sreg, r/m16 */
@@ -562,17 +576,65 @@ int op_0x8e(){
 #ifdef SHOW_DEBUG
 	out_opinfo("MOV %S, %S\n", text_regs[M_REG], print_rm_val_16(OP_DS));
 #endif
-	return 0;
+	RET_GOOD;
 }
 
 /* MOV al, moffs8 */
 int op_0xa0(){
-	uint8 moffs8=RMEM8(R_IP+1);
-	AL=moffs8;
+	uint16 moffs8=RMEM16(R_IP+1);
+	AL=SRMEM8(moffs8, OP_DS);
+	IP+=3;
+#ifdef SHOW_DEBUG
+	out_opinfo("MOV AL, [%X]\n", (uint32)moffs8);
+#endif
+	RET_GOOD;
+}
+
+/* MOV AX, moffs16 */
+int op_0xa1(){
+	uint16 moffs16=RMEM16(R_IP+1);
+	AX=SRMEM16(moffs16, OP_DS);
+	IP+=3;
+#ifdef SHOW_DEBUG
+	out_opinfo("MOV AL, [%X]\n", (uint32)moffs16);
+#endif
+	RET_GOOD;
+}
+
+/* MOV moffs8, AL */
+int op_0xa2(){
+	uint16 moffs8=RMEM16(R_IP+1);
+	SWMEM8(AL, moffs8, OP_DS);
+	IP+=3;
+#ifdef SHOW_DEBUG
+	out_opinfo("MOV [%X], AL\n", (uint32)moffs8);
+#endif
+	RET_GOOD;
+}
+
+/* MOV moffs16, AX */
+int op_0xa3(){
+	uint16 moffs16=RMEM16(R_IP+1);
+	SWMEM16(AX, moffs16, OP_DS);
+	IP+=3;
+#ifdef SHOW_DEBUG
+	out_opinfo("MOV [%X], AX\n", (uint32)moffs16);
+#endif
+	RET_GOOD;
+}
+
+/* MOV+ r8, imm8 */
+int op_0xb0(){
+	uint8 r8;
+	uint8 imm8=RMEM8(R_IP+1);
+	MOD_REG_RM(0);
+	r8=op_data.reg;
+	write_reg(TO_BYTE_REG(r8), r8);
 	IP+=2;
 #ifdef SHOW_DEBUG
-	out_opinfo("MOV AL, %X\n", (uint32)moffs8);
+	out_opinfo("MOV %s, %X\n", (uint32)imm8);
 #endif
+	RET_GOOD;
 }
 
 /* ADD AL, imm8 */
@@ -586,7 +648,7 @@ int op_0x04(){
 #ifdef SHOW_DEBUG
 	out_opinfo("ADD AL, %X\n", (uint32)imm8);
 #endif
-	return 0;
+	RET_GOOD;
 }
 
 /* ADD AX, imm16 */
@@ -599,7 +661,7 @@ int op_0x05(){
 #ifdef SHOW_DEBUG
 	out_opinfo("ADD AX, %X", (uint32)imm16);
 #endif
-	return 0;
+	RET_GOOD;
 }
 
 /* ADD r/m8, imm8 */
@@ -617,5 +679,180 @@ int op_0x80(){
 #ifdef SHOW_DEBUG
 	out_opinfo("ADD %s, %X\n", print_rm_val_8(OP_DS), (uint32)imm8);
 #endif
-	return 0;
+	RET_GOOD;
+}
+
+/* Various 0xff */
+int op_0xff(){
+	MOD_REG_RM(1);
+	uint8 op_ext=op_data.reg;
+	switch(op_ext){
+	case 6:
+		{
+			/* PUSH r/m16 */
+			uint16 rm16=read_rm_val_16(OP_DS);
+			stack_push(rm16);
+			IP+=2+disp_size;
+#ifdef SHOW_DEBUG
+			out_opinfo("PUSH %s\n", print_rm_val_8(OP_DS));
+#endif
+			RET_GOOD;
+		}
+	}
+	RET_GOOD;
+}
+
+/* PUSH+ r16 */
+int op_0x50(){
+	MOD_REG_RM(0);
+	uint8 r16=op_data.rm;
+	stack_push((uint16)read_reg(r16));
+	IP+=1;
+#ifdef SHOW_DEBUG
+	out_opinfo("PUSH %s\n", text_regs[r16]);
+#endif
+	RET_GOOD;
+}
+
+/* PUSH imm8 */
+int op_0x6a(){
+	uint8 imm8=RMEM8(R_IP+1);
+	stack_push((uint16)imm8);
+	IP+=2;
+#ifdef SHOW_DEBUG
+	out_opinfo("PUSH %X\n", (uint16)imm8);
+#endif
+	RET_GOOD;
+}
+
+/* PUSH imm16 */
+int op_0x68(){
+	uint16 imm16=RMEM16(R_IP+1);
+	stack_push(imm16);
+	IP+=3;
+#ifdef SHOW_DEBUG
+	out_opinfo("PUSH %X\n", imm16);
+#endif
+	RET_GOOD;
+}
+
+/* Various 0x8f */
+int op_0x8f(){
+	MOD_REG_RM(1);
+	uint8 op_ext=op_data.reg;
+	switch(op_ext){
+	case 6:
+	{
+			  /* POP r/m16 */
+			  write_rm_val_16(stack_pop(), OP_DS);
+			  IP+=2;
+#ifdef SHOW_DEBUG
+			  out_opinfo("POP %s\n", print_rm_val_8(OP_DS));
+#endif
+			  RET_GOOD;
+	}
+	}
+	RET_GOOD;
+}
+
+/* POP+ r16 */
+int op_0x58(){
+	MOD_REG_RM(0);
+	uint8 r16=op_data.rm;
+	write_reg(r16, stack_pop());
+	IP+=1;
+#ifdef SHOW_DEBUG
+	out_opinfo("POP %s\n", text_regs[r16]);
+#endif
+	RET_GOOD;
+}
+
+/* OUT imm8, AL */
+int op_0xe6(){
+	uint8 imm8=RMEM8(R_IP+1);
+	write_io_port(AL, (uint16)imm8);
+	IP+=2;
+#ifdef SHOW_DEBUG
+	out_opinfo("OUT %X, AL\n", imm8);
+#endif
+	RET_GOOD;
+}
+
+/* OUT imm8, AX */
+int op_0xe7(){
+	uint8 imm8=RMEM8(R_IP+1);
+	write_io_port(LO_BYTE(AX), imm8);
+	write_io_port(HI_BYTE(AX), imm8+1);
+	IP+=2;
+#ifdef SHOW_DEBUG
+	out_opinfo("OUT %X, AX\n", imm8);
+#endif
+	RET_GOOD;
+}
+
+/* OUT DX, AL */
+int op_0xee(){
+	write_io_port(AL, DX);
+#ifdef SHOW_DEBUG
+	out_opinfo("OUT DX, AL\n");
+#endif
+	RET_GOOD;
+}
+
+/* OUT DX, AX */
+int op_0xef(){
+	write_io_port(LO_BYTE(AX), DX);
+	write_io_port(HI_BYTE(AX), DX+1);
+#ifdef SHOW_DEBUG
+	out_opinfo("OUT DX, AX\n");
+#endif
+	RET_GOOD;
+}
+
+/* IN AL, imm8 */
+int op_0xe4(){
+	uint8 imm8=RMEM8(R_IP+1);
+	AL=read_io_port(imm8);
+	IP+=2;
+#ifdef SHOW_DEBUG
+	out_opinfo("IN AL, %X\n", imm8);
+#endif
+	RET_GOOD;
+}
+
+/* IN AX, imm8 */
+int op_0xe5(){
+	uint8 imm8=RMEM8(R_IP+1);
+	AX=0;
+	AX|=read_io_port(imm8+1);
+	AX<<=8;
+	AX|=read_io_port(imm8);
+	IP+=2;
+#ifdef SHOW_DEBUG
+	out_opinfo("IN AX, %X\n", imm8);
+#endif
+	RET_GOOD;
+}
+
+/* IN AL, DX */
+int op_0xec(){
+	AL=read_io_port(DX);
+	IP++;
+#ifdef SHOW_DEBUG
+	out_opinfo("IN AL, DX\n");
+#endif
+	RET_GOOD;
+}
+
+/* IN AX, DX */
+int op_0xed(){
+	AX=0;
+	AX|=read_io_port(DX+1);
+	AX<<=8;
+	AX|=read_io_port(DX);
+	IP++;
+#ifdef SHOW_DEBUG
+	out_opinfo("IN AX, DX\n");
+#endif
+	RET_GOOD;
 }

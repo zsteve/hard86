@@ -108,22 +108,22 @@
 #define op_0x4d op_unknown
 #define op_0x4e op_unknown
 #define op_0x4f op_unknown
-#define op_0x50 op_unknown
-#define op_0x51 op_unknown
-#define op_0x52 op_unknown
-#define op_0x53 op_unknown
-#define op_0x54 op_unknown
-#define op_0x55 op_unknown
-#define op_0x56 op_unknown
-#define op_0x57 op_unknown
-#define op_0x58 op_unknown
-#define op_0x59 op_unknown
-#define op_0x5a op_unknown
-#define op_0x5b op_unknown
-#define op_0x5c op_unknown
-#define op_0x5d op_unknown
-#define op_0x5e op_unknown
-#define op_0x5f op_unknown
+//#define op_0x50 op_unknown
+#define op_0x51 op_0x50
+#define op_0x52 op_0x50
+#define op_0x53 op_0x50
+#define op_0x54 op_0x50
+#define op_0x55 op_0x50
+#define op_0x56 op_0x50
+#define op_0x57 op_0x50
+//#define op_0x58 op_unknown
+#define op_0x59 op_0x58
+#define op_0x5a op_0x58
+#define op_0x5b op_0x58
+#define op_0x5c op_0x58
+#define op_0x5d op_0x58
+#define op_0x5e op_0x58
+#define op_0x5f op_0x58
 #define op_0x60 op_unknown
 #define op_0x61 op_unknown
 #define op_0x62 op_unknown
@@ -132,9 +132,9 @@
 #define op_0x65 op_unknown
 #define op_0x66 op_unknown
 #define op_0x67 op_unknown
-#define op_0x68 op_unknown
+//#define op_0x68 op_unknown
 #define op_0x69 op_unknown
-#define op_0x6a op_unknown
+//#define op_0x6a op_unknown
 #define op_0x6b op_unknown
 #define op_0x6c op_unknown
 #define op_0x6d op_unknown
@@ -171,7 +171,7 @@
 //#define op_0x8c op_unknown
 #define op_0x8d op_unknown
 //#define op_0x8e op_unknown
-#define op_0x8f op_unknown
+//#define op_0x8f op_unknown
 #define op_0x90 op_unknown
 #define op_0x91 op_unknown
 #define op_0x92 op_unknown
@@ -189,9 +189,9 @@
 #define op_0x9e op_unknown
 #define op_0x9f op_unknown
 //#define op_0xa0 op_unknown
-#define op_0xa1 op_unknown
-#define op_0xa2 op_unknown
-#define op_0xa3 op_unknown
+//#define op_0xa1 op_unknown
+//#define op_0xa2 op_unknown
+//#define op_0xa3 op_unknown
 #define op_0xa4 op_unknown
 #define op_0xa5 op_unknown
 #define op_0xa6 op_unknown
@@ -204,7 +204,7 @@
 #define op_0xad op_unknown
 #define op_0xae op_unknown
 #define op_0xaf op_unknown
-#define op_0xb0 op_unknown
+//#define op_0xb0 op_unknown
 #define op_0xb1 op_unknown
 #define op_0xb2 op_unknown
 #define op_0xb3 op_unknown
@@ -256,18 +256,18 @@
 #define op_0xe1 op_unknown
 #define op_0xe2 op_unknown
 #define op_0xe3 op_unknown
-#define op_0xe4 op_unknown
-#define op_0xe5 op_unknown
-#define op_0xe6 op_unknown
-#define op_0xe7 op_unknown
+//#define op_0xe4 op_unknown
+//#define op_0xe5 op_unknown
+//#define op_0xe6 op_unknown
+//#define op_0xe7 op_unknown
 #define op_0xe8 op_unknown
 #define op_0xe9 op_unknown
 #define op_0xea op_unknown
 //#define op_0xeb op_unknown
-#define op_0xec op_unknown
-#define op_0xed op_unknown
-#define op_0xee op_unknown
-#define op_0xef op_unknown
+//#define op_0xec op_unknown
+//#define op_0xed op_unknown
+//#define op_0xee op_unknown
+//#define op_0xef op_unknown
 #define op_0xf0 op_unknown
 #define op_0xf1 op_unknown
 #define op_0xf2 op_unknown
@@ -283,7 +283,7 @@
 #define op_0xfc op_unknown
 #define op_0xfd op_unknown
 #define op_0xfe op_unknown
-#define op_0xff op_unknown
+//#define op_0xff op_unknown
 
 /* system state structure */
 
@@ -475,10 +475,18 @@ void write_mem_16(uint16 val, uint32 addr);
 uint8 read_mem_8(uint32 addr);
 void write_mem_8(uint8 val, uint32 addr);
 
+void write_io_port(uint8 val, uint16 port);
+uint8 read_io_port(uint16 port);
+
+void system_load_mem(uint8* data, uint32 size);
+
 void write_reg(int reg, uint16 val);
 uint16 read_reg(int reg);
 
 void out_opinfo(char* str, ...);
+
+void stack_push(uint16 val);
+uint16 stack_pop();
 
 /* TODO */
 
