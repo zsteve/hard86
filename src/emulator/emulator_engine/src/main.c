@@ -10,6 +10,7 @@
 #include "../../../global/typedefs.h"
 #include "../../../system/multithreading/mutex/c/mutex.h"
 #include "emulator_engine_interface.h"
+#include "dasm/dasm.h"
 
 long fsize(FILE *stream)
 {
@@ -33,8 +34,13 @@ int main(){
 	mutex_unlock(mutex);	/* make sure it's unlocked */
 	system_init(mutex);
 	system_load_mem(data, size);
+
+	disassemble(100, 0);
 	system_execute();
+
 	system_destroy();
+
+	free(data);
 
 	_getch();
 	return 0;

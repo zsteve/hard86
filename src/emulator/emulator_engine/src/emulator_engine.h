@@ -28,10 +28,10 @@
 #define WRITE_DEBUG(msg)\
 	write_debug(__FILE__, __LINE__, msg)
 
-#define op_0x00 op_unknown
-#define op_0x01 op_unknown
-#define op_0x02 op_unknown
-#define op_0x03 op_unknown
+//#define op_0x00 op_unknown
+//#define op_0x01 op_unknown
+//#define op_0x02 op_unknown
+//#define op_0x03 op_unknown
 //#define op_0x04 op_unknown
 //#define op_0x05 op_unknown
 #define op_0x06 op_unknown
@@ -44,12 +44,12 @@
 #define op_0x0d op_unknown
 #define op_0x0e op_unknown
 #define op_0x0f op_unknown
-#define op_0x10 op_unknown
-#define op_0x11 op_unknown
-#define op_0x12 op_unknown
-#define op_0x13 op_unknown
-#define op_0x14 op_unknown
-#define op_0x15 op_unknown
+//#define op_0x10 op_unknown
+//#define op_0x11 op_unknown
+//#define op_0x12 op_unknown
+//#define op_0x13 op_unknown
+//#define op_0x14 op_unknown
+//#define op_0x15 op_unknown
 #define op_0x16 op_unknown
 #define op_0x17 op_unknown
 #define op_0x18 op_unknown
@@ -68,12 +68,12 @@
 #define op_0x25 op_unknown
 #define op_0x26 op_unknown
 #define op_0x27 op_unknown
-#define op_0x28 op_unknown
-#define op_0x29 op_unknown
-#define op_0x2a op_unknown
+//#define op_0x28 op_unknown
+//#define op_0x29 op_unknown
+//#define op_0x2a op_unknown
 #define op_0x2b op_unknown
-#define op_0x2c op_unknown
-#define op_0x2d op_unknown
+//#define op_0x2c op_unknown
+//#define op_0x2d op_unknown
 #define op_0x2e op_unknown
 #define op_0x2f op_unknown
 #define op_0x30 op_unknown
@@ -84,12 +84,12 @@
 #define op_0x35 op_unknown
 #define op_0x36 op_unknown
 #define op_0x37 op_unknown
-#define op_0x38 op_unknown
-#define op_0x39 op_unknown
-#define op_0x3a op_unknown
-#define op_0x3b op_unknown
-#define op_0x3c op_unknown
-#define op_0x3d op_unknown
+//#define op_0x38 op_unknown
+//#define op_0x39 op_unknown
+//#define op_0x3a op_unknown
+//#define op_0x3b op_unknown
+//#define op_0x3c op_unknown
+//#define op_0x3d op_unknown
 #define op_0x3e op_unknown
 #define op_0x3f op_unknown
 #define op_0x40 op_unknown
@@ -157,9 +157,9 @@
 #define op_0x7e op_unknown
 #define op_0x7f op_unknown
 //#define op_0x80 op_unknown
-#define op_0x81 op_unknown
+//#define op_0x81 op_unknown
 #define op_0x82 op_unknown
-#define op_0x83 op_unknown
+//#define op_0x83 op_unknown
 #define op_0x84 op_unknown
 #define op_0x85 op_unknown
 #define op_0x86 op_unknown
@@ -205,13 +205,13 @@
 #define op_0xae op_unknown
 #define op_0xaf op_unknown
 //#define op_0xb0 op_unknown
-#define op_0xb1 op_unknown
-#define op_0xb2 op_unknown
-#define op_0xb3 op_unknown
-#define op_0xb4 op_unknown
-#define op_0xb5 op_unknown
-#define op_0xb6 op_unknown
-#define op_0xb7 op_unknown
+#define op_0xb1 op_0xb0
+#define op_0xb2 op_0xb0
+#define op_0xb3 op_0xb0
+#define op_0xb4 op_0xb0
+#define op_0xb5 op_0xb0
+#define op_0xb6 op_0xb0
+#define op_0xb7 op_0xb0
 //#define op_0xb8 op_unknown
 #define op_0xb9 op_0xb8
 #define op_0xba op_0xb8
@@ -226,8 +226,8 @@
 #define op_0xc3 op_unknown
 #define op_0xc4 op_unknown
 #define op_0xc5 op_unknown
-#define op_0xc6 op_unknown
-#define op_0xc7 op_unknown
+//#define op_0xc6 op_unknown
+//#define op_0xc7 op_unknown
 #define op_0xc8 op_unknown
 #define op_0xc9 op_unknown
 #define op_0xca op_unknown
@@ -460,9 +460,9 @@ typedef struct{
 /*	converts a REG value (in mod reg r/m) to a
 	emulator internal value (defined above)
 	for use with 8-bit registers.
-	For example, TO_BYTE_REG(0) -> 14 (AH)
+	For example, BREG(0) -> 14 (AH)
 */
-#define TO_BYTE_REG(reg) reg+14
+#define BREG(reg) reg+14
 
 #define TEXT_REG(reg) text_regs[reg]
 

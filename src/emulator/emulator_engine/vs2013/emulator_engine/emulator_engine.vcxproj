@@ -12,16 +12,20 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\system\multithreading\mutex\c\mutex.c" />
+    <ClCompile Include="..\..\src\dasm\dasm.c" />
     <ClCompile Include="..\..\src\emulator_engine.c" />
     <ClCompile Include="..\..\src\flags.c" />
+    <ClCompile Include="..\..\src\global.c" />
     <ClCompile Include="..\..\src\main.c" />
     <ClCompile Include="..\..\src\opcodes.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\system\multithreading\mutex\c\mutex.h" />
+    <ClInclude Include="..\..\src\dasm\dasm.h" />
     <ClInclude Include="..\..\src\emulator_engine.h" />
     <ClInclude Include="..\..\src\emulator_engine_interface.h" />
     <ClInclude Include="..\..\src\flags.h" />
+    <ClInclude Include="..\..\src\global.h" />
     <ClInclude Include="..\..\src\opcodes.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

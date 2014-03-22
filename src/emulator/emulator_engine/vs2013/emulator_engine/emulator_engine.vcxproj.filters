@@ -19,38 +19,56 @@
     <Filter Include="Dependencies\mutex">
       <UniqueIdentifier>{02a93f38-43fd-4325-a158-5ebbfa08421e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Emulator">
+      <UniqueIdentifier>{5705fd32-add3-4235-a6db-58562366827c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Emulator">
+      <UniqueIdentifier>{f3564553-0ce4-4970-9378-8e703bf919bb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\emulator_engine.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\main.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\opcodes.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\system\multithreading\mutex\c\mutex.c">
       <Filter>Dependencies\mutex</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\global.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\emulator_engine.c">
+      <Filter>Source Files\Emulator</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\flags.c">
+      <Filter>Source Files\Emulator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\opcodes.c">
+      <Filter>Source Files\Emulator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\dasm\dasm.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\emulator_engine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\emulator_engine_interface.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\opcodes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\system\multithreading\mutex\c\mutex.h">
       <Filter>Dependencies\mutex</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\global.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\emulator_engine.h">
+      <Filter>Header Files\Emulator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\emulator_engine_interface.h">
+      <Filter>Header Files\Emulator</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\flags.h">
+      <Filter>Header Files\Emulator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\opcodes.h">
+      <Filter>Header Files\Emulator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\dasm\dasm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

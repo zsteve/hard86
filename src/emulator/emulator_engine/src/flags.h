@@ -32,7 +32,17 @@ void set_of(int v);
 #define SETF_ADD_PROTO(name, type)\
 	void name(type a, type b);
 
-SETF_ADD_PROTO(setf_add8, uint8);
-SETF_ADD_PROTO(setf_add16, uint16);
+#define SETF_ADC_PROTO(name, type)\
+	void name(type a, type b, type c);
+
+#define SETF_SUB_PROTO(name, type)\
+	void name(type a, type b);
+
+SETF_ADD_PROTO(setf_add8, uint8)
+SETF_ADD_PROTO(setf_add16, uint16)
+SETF_ADC_PROTO(setf_adc8, uint8)
+SETF_ADC_PROTO(setf_adc16, uint16)
+SETF_SUB_PROTO(setf_sub8, uint8)
+SETF_SUB_PROTO(setf_sub16, uint16)
 
 #endif

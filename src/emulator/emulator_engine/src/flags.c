@@ -80,28 +80,51 @@ void set_zf(uint32 v){
 	FLAG_ZF=v ? 0 : 1;
 }
 
-void set_sf8(uint8 v){
-	FLAG_SF=(v&0x80) ? 1 : 0;
-}
-
-void set_sf16(uint16 v){
-	FLAG_SF=(v&0x8000) ? 1 : 0;
+void set_sf(uint32 v){
+	FLAG_SF=v;
 }
 
 void set_of(int v){
 	FLAG_OF=v ? 1 : 0;
 }
 
-#define SETF_ADD(name, type)\
-	void name(type a, type b){\
-	set_of(((uint16)a+b)>>8 ? 1 : 0); \
-	set_sf8(a); \
-	set_zf(a); \
-	set_pf(a); \
-	set_cf(a < (a-b) ? 1 : 0); \
-	}
+void setf_add16(uint16 a, uint16 b){
+	set_of(((uint32)a+b) >> 16 ? 1 : 0);
+	set_sf(((a+b) & 0x8000)>>15);
+	set_zf(a+b);
+	set_pf(a+b);
+	set_cf((uint32)a+b >> 16 ? 1 : 0);
+}
 
+void setf_add8(uint8 a, uint8 b){
+	set_of(((uint16)a+b) >> 8 ? 1 : 0);
+	set_sf(((a+b) & 0x80)>>7);
+	set_zf(a+b);
+	set_pf(a+b);
+	set_cf((uint16)a+b >> 8 ? 1 : 0);
+}
 
+void setf_adc16(uint16 a, uint16 b, uint16 c){
+	setf_add16(a, b+c);
+}
 
-SETF_ADD(setf_add8, uint8)
-SETF_ADD(setf_add16, uint16)
+void setf_adc8(uint8 a, uint8 b, uint8 c){
+	setf_add8(a, b+c);
+}
+
+/* a - b */
+void setf_sub16(uint16 a, uint16 b){
+	set_of(((uint32)a-b) >> 16 ? 1 : 0);
+	set_sf(((a-b) & 0x8000)>>15);
+	set_zf(a-b);
+	set_pf(a-b);
+	set_cf(a < b);
+}
+
+void setf_sub8(uint8 a, uint8 b){
+	set_of(((uint16)a-b) >> 8 ? 1 : 0);
+	set_sf(((a-b) & 0x80)>>7);
+	set_zf(a-b);
+	set_pf(a-b);
+	set_cf(a < b);
+}

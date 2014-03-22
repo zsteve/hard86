@@ -29,7 +29,7 @@ op_func op_table[256];
 /* textual representation of registers */
 char text_regs[22][6]={
 	"AX", "CX", "DX", "BX", "SP", "BP", "SI", "DI", "CS", "SS", "DS", "ES", "IP", "FLAGS",
-	"AH", "AL", "BH", "BL", "CH", "CL", "DH", "DL"};
+	"AL", "CL", "DL", "BL", "AH", "CH", "DH", "BH"};
 
 /* system state */
 sys_state_type sys_state;
@@ -53,10 +53,17 @@ MUTEX sys_mutex;
 	fclose(f);
 }
 
+void (*out_opinfo_ptr)(char* str, va_list* v)=0;
+
 void out_opinfo(char* str, ...){
 	va_list v;
 	va_start(v, str);
-	vprintf(str, v);
+	if(!out_opinfo_ptr){
+		vprintf(str, v);
+	}
+	else{
+		out_opinfo_ptr(str, &v);
+	}
 	va_end(v);
 }
 
@@ -333,18 +340,29 @@ void system_print_state(){
 	printf("O : %d\tD: %d\tI: %d\tT: %d\tS: %d\t Z: %d\tA: %d\t P: %d\tC: %d\n",
 		FLAG_OF, FLAG_DF, FLAG_IF, FLAG_TF, FLAG_SF, FLAG_ZF, FLAG_AF, FLAG_PF, FLAG_CF);
 	printf("----------------------------------------\n");
-	//_getch();
+	_getch();
 }
 
 int system_execute(){
 	while(1){
+		// call debugger PreInstructionExecute
+		mutex_lock(sys_mutex);
 		/* update r_ip */
 		R_IP=GET_ADDR(IP, CS);
+
+		if(read_mem_8(GET_ADDR(IP, CS))==0xcc){
+			/* int3 debug interrupt - hand control to debugger */
+			IP++;
+			continue;
+		}
+
 		process_instr_prefixes();
 
 		system_print_state();
 
 		(*op_table[read_mem_8(GET_ADDR(IP, CS))])();
+		mutex_unlock(sys_mutex);
+		// call debugger PostInstructionExecute
 	}
 	return 0;
 }
@@ -352,7 +370,7 @@ int system_execute(){
 static int op_unknown(){
 	WRITE_DEBUG("Error : Unknown opcode encountered");
 	printf("Unknown opcode\n");
-	abort();
+	IP++;
 	return 0;
 }
 
