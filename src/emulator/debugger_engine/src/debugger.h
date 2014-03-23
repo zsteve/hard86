@@ -6,10 +6,25 @@
 #ifndef DEBUGGER_H
 #define DEBUGGER_H
 
-#include "../../../system/multithreading/mutex/c/mutex.h"
+#include "vdev.h"
+#include "../../emulator_engine/src/emulator_engine_interface.h"
+#include "../../../system/multithreading/mutex/c/cmutex.h"
 
-void BreakPointHit(MUTEX sys_mutex);
-void PreInstructionExecute(MUTEX sys_mutex);
-void PostInstructionExecute(MUTEX sys_mutex);
+class Debugger{
+public:
+	Debugger(VDevList* vdevList)
+	{
+		m_vdevList=vdevList;
+	}
+
+	virtual ~Debugger(){}
+
+	static void BreakPointHit(MUTEX sysMutex, sys_state_ptr sysState);
+	static void PreInstructionExecute(MUTEX sysMutex, sys_state_ptr sysState);
+	static void PostInstructionExecute(MUTEX sysMutex, sys_state_ptr sysState);
+
+protected:
+	static VDevList* m_vdevList;
+};
 
 #endif

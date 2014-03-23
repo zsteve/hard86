@@ -8,9 +8,10 @@
 
 #include <vector>
 #include <utility>
+#include <iterator>
 
 #include "../../emulator_engine/src/emulator_engine_interface.h"
-#include "../../../system/multithreading/mutex/c/mutex.h"
+#include "../../../system/multithreading/mutex/c/cmutex.h"
 
 using namespace std;
 
@@ -51,6 +52,9 @@ protected:
  */
 class VDevList{
 public:
+
+	typedef pair<int, VDev> VDevPair;
+
 	VDevList();
 	virtual ~VDevList();
 	
@@ -58,9 +62,26 @@ public:
 	int Remove(int vdevID);
 	
 	// iterator class
-	class iterator{
-		
+	class iterator : \
+		public std::iterator<random_access_iterator_tag, pair<int, VDev>, int>
+	{
+	protected:
+		vector<VDevPair>::iterator m_it;
+	public:
+		iterator(vector<VDevPair>::iterator it){ m_it=it; }
+		iterator(const iterator& it){ m_it=it.m_it; }
+		iterator& operator++(){ ++m_it; return *this; }
+		iterator& operator--(){ --m_it; return *this; }
+		bool operator==(const iterator& rhs){ return m_it==rhs.m_it; }
+		bool operator!=(const iterator& rhs){ return !(*this==rhs); }
+		VDevPair& operator*(){ return *m_it; }
 	};
+
+	iterator begin(){return iterator(m_vdevList.begin());}
+	iterator end(){ return iterator(m_vdevList.end()); }
+	bool empty(){
+		return m_vdevList.empty();
+	}
 private:
 protected:
 	/*	virtual devices are stored as a vector
@@ -68,7 +89,7 @@ protected:
 		and VDev is the device
 	*/
 	vector<pair<int, VDev> > m_vdevList;
-	
+
 	int lastID=0;
 };
 #endif

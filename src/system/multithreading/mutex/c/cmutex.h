@@ -1,11 +1,11 @@
 /**
  * @file C mutex functions
- * C mutex functions for hard86
+ * C MUTEX functions for hard86
  * Stephen Zhang, 2014
  */
 
-#ifndef mutex_C_H
-#define mutex_C_H
+#ifndef MUTEX_C_H
+#define MUTEX_C_H
 
 #ifdef __cplusplus
 extern "C"{

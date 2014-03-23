@@ -16,7 +16,7 @@
 
 #include "debugger.h"
 #include "../../emulator_engine/src/emulator_engine_interface.h"
-#include "../../../system/multithreading/mutex/c/mutex.h"
+#include "../../../system/multithreading/mutex/c/cmutex.h"
 
 using namespace std;
 

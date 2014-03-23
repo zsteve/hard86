@@ -1,6 +1,6 @@
 /**
- * @file C++ mutex functions
- * C++ mutex functions for hard86
+ * @file C++ MUTEX functions
+ * C++ MUTEX functions for hard86
  * Stephen Zhang, 2014
  */
 
@@ -12,22 +12,26 @@
 class Mutex{
 public:
 	Mutex();
+	Mutex(const Mutex& src);
+	Mutex(void* hMutex);
+
 	virtual ~Mutex();
 
     /**
-     * Locks mutex, blocking if necessary
+     * Locks MUTEX, blocking if necessary
      */
 	void Lock();
 	/**
-	 * Attempts to lock mutex. Does not block.
+	 * Attempts to lock MUTEX. Does not block.
 	 * @return true if locking succeeded, false if locking failed
 	 */
 	bool TryLock();
 	/**
-	 * Unlocks mutex
+	 * Unlocks MUTEX
 	 */
 	void Unlock();
 
+	void* GetHandle(){ return m_hMutex; }
 private:
 protected:
 	HANDLE m_hMutex;

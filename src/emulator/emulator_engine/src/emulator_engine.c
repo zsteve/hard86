@@ -25,8 +25,7 @@
 #include "../../../system/datastruct/clist/clist.h"
 
 /* system multithreading */
-#include "../../../system/multithreading/event/c/event.h"
-#include "../../../system/multithreading/mutex/c/mutex.h"
+#include "../../../system/multithreading/mutex/c/cmutex.h"
 #include "../../../system/multithreading/thread/c/thread.h"
 
 /* forward declaration of op_table */
@@ -42,11 +41,11 @@ sys_state_type sys_state;
 
 op_data_type op_data;
 
-/* system mutex */
+/* system MUTEX */
 MUTEX sys_mutex;
-void(*breakpoint_hit_callback)(MUTEX);
-void(*pre_execute_callback)(MUTEX);
-void(*post_execute_callback)(MUTEX);
+DBGCALLBACK breakpoint_hit_callback;
+DBGCALLBACK pre_execute_callback;
+DBGCALLBACK post_execute_callback;
 
 #define SET_RESERVED_FLAGS(state)\
 	state.f_bits.reserved_1=state.f_bits.reserved_4=1;\
@@ -304,7 +303,7 @@ int system_init(MUTEX sys_mutex_,
 				DBGCALLBACK pre_ex_func,
 				DBGCALLBACK post_ex_func){
 
-	sys_mutex=sys_mutex_;	/* system mutex */
+	sys_mutex=sys_mutex_;	/* system MUTEX */
 	breakpoint_hit_callback=bp_hit_func;
 	pre_execute_callback=pre_ex_func;
 	post_execute_callback=post_ex_func;
@@ -369,7 +368,7 @@ int system_execute(){
 	int halt_flag=0;
 
 	while(!halt_flag){
-		pre_execute_callback(sys_mutex);
+		pre_execute_callback(sys_mutex, &sys_state);
 		mutex_lock(sys_mutex);
 		/* update r_ip */
 		R_IP=GET_ADDR(IP, CS);
@@ -377,7 +376,7 @@ int system_execute(){
 		if(read_mem_8(GET_ADDR(IP, CS))==0xcc){
 			/* int3 debug interrupt - hand control to debugger */
 			IP++;
-			breakpoint_hit_callback(sys_mutex);
+			breakpoint_hit_callback(sys_mutex, &sys_state);
 			continue;
 		}
 
@@ -387,7 +386,7 @@ int system_execute(){
 
 		(*op_table[read_mem_8(GET_ADDR(IP, CS))])();
 		mutex_unlock(sys_mutex);
-		post_execute_callback(sys_mutex);
+		post_execute_callback(sys_mutex, &sys_state);
 	}
 	return 0;
 }

@@ -9,7 +9,7 @@
 #include "dasm.h"
 #include "../emulator_engine.h"
 #include "../emulator_engine_interface.h"
-#include "../../../../system/multithreading/mutex/c/mutex.h"
+#include "../../../../system/multithreading/mutex/c/cmutex.h"
 #include "../../../../global/defines.h"
 #include "../../../../global/typedefs.h"
 #include "../../../../system/datastruct/clist/clist.h"
@@ -38,7 +38,7 @@ void dasm_print_op(char* str, va_list* v){
 
 /**
 	disassembles system memory from given IP value
-	assumes system mutex is UNLOCKED.
+	assumes system MUTEX is UNLOCKED.
 	@param n_instr number of instructions to disassemble
 	@param initial_ip initial ip value
 **/

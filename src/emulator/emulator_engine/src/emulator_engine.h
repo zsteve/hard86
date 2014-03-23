@@ -20,7 +20,7 @@
 
 /* system multithreading */
 #include "../../../system/multithreading/event/c/event.h"
-#include "../../../system/multithreading/mutex/c/mutex.h"
+#include "../../../system/multithreading/mutex/c/cmutex.h"
 #include "../../../system/multithreading/thread/c/thread.h"
 
 /* macros */

@@ -77,7 +77,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\system\datastruct\clist\clist.c" />
-    <ClCompile Include="..\..\..\..\system\multithreading\mutex\c\mutex.c" />
+    <ClCompile Include="..\..\..\..\system\multithreading\mutex\cpp\mutex.cpp" />
+    <ClCompile Include="..\..\..\..\system\multithreading\mutex\c\cmutex.c" />
     <ClCompile Include="..\..\..\emulator_engine\src\dasm\dasm.c" />
     <ClCompile Include="..\..\..\emulator_engine\src\emulator_engine.c" />
     <ClCompile Include="..\..\..\emulator_engine\src\flags.c" />
@@ -89,7 +90,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\system\datastruct\clist\clist.h" />
-    <ClInclude Include="..\..\..\..\system\multithreading\mutex\c\mutex.h" />
+    <ClInclude Include="..\..\..\..\system\multithreading\mutex\cpp\mutex.h" />
+    <ClInclude Include="..\..\..\..\system\multithreading\mutex\c\cmutex.h" />
     <ClInclude Include="..\..\..\emulator_engine\src\dasm\dasm.h" />
     <ClInclude Include="..\..\..\emulator_engine\src\emulator_engine.h" />
     <ClInclude Include="..\..\..\emulator_engine\src\emulator_engine_interface.h" />

@@ -1,6 +1,6 @@
 /**
- * @file C++ mutex functions
- * C++ mutex functions for hard86
+ * @file C++ MUTEX functions
+ * C++ MUTEX functions for hard86
  * Stephen Zhang, 2014
  */
 
@@ -9,12 +9,20 @@
 
 /*
 	quick note :
-	when mutex is signaled -> free
+	when MUTEX is signaled -> free
 	when object is not signaled -> owned
 */
 
 Mutex::Mutex(){
 	m_hMutex=CreateMutex(NULL, FALSE, NULL);
+}
+
+Mutex::Mutex(const Mutex& src){
+	m_hMutex=src.m_hMutex;
+}
+
+Mutex::Mutex(void* hMutex){
+	m_hMutex=hMutex;
 }
 
 Mutex::~Mutex(){

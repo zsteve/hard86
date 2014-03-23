@@ -24,17 +24,8 @@ extern "C"{
 
 /* system multithreading */
 #include "../../../system/multithreading/event/c/event.h"
-#include "../../../system/multithreading/mutex/c/mutex.h"
+#include "../../../system/multithreading/mutex/c/cmutex.h"
 #include "../../../system/multithreading/thread/c/thread.h"
-
-typedef void(*DBGCALLBACK)(MUTEX);
-
-int system_init(MUTEX sys_mutex_,
-				DBGCALLBACK bp_hit_func,
-				DBGCALLBACK pre_ex_func,
-				DBGCALLBACK pos_ex_func);
-int system_destroy();
-int system_execute();
 
 typedef struct{
 	/* system memory */
@@ -103,6 +94,15 @@ typedef struct{
 	};
 
 }sys_state_type, *sys_state_ptr;
+
+typedef void(*DBGCALLBACK)(MUTEX, sys_state_ptr);
+
+int system_init(MUTEX sys_mutex_,
+				DBGCALLBACK bp_hit_func,
+				DBGCALLBACK pre_ex_func,
+				DBGCALLBACK pos_ex_func);
+int system_destroy();
+int system_execute();
 
 sys_state_ptr get_system_state();
 

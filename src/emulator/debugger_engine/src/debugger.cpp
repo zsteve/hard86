@@ -17,15 +17,17 @@
 #include "debugger.h"
 #include "../../emulator_engine/src/emulator_engine_interface.h"
 
-#include "../../../system/multithreading/mutex/c/mutex.h"
+#include "../../../system/multithreading/mutex/c/cmutex.h"
 
 using namespace std;
 
+VDevList* Debugger::m_vdevList;
+
 /**
  * callback function for breakpoints
- * @param sys_mutex system mutex
+ * @param sysMutex system MUTEX
  */
-void BreakPointHit(MUTEX sys_mutex){
+void Debugger::BreakPointHit(MUTEX sysMutex, sys_state_ptr sysState){
 	cout << "Breakpoint Hit" << endl;
 	sys_state_ptr sys_state=get_system_state();
 	cout << "Press any key to continue..." << endl;
@@ -34,18 +36,25 @@ void BreakPointHit(MUTEX sys_mutex){
 
 /**
  * callback function before instruction executes
- * @param sys_mutex system mutex
+ * @param sysMutex system MUTEX
  */
-void PreInstructionExecute(MUTEX sys_mutex){
+void Debugger::PreInstructionExecute(MUTEX sysMutex, sys_state_ptr sysState){
 	cout << "PreInstructionExecute" << endl;
 	sys_state_ptr sys_state=get_system_state();
 }
 
 /**
  * callback function after instruction executes
- * @param sys_mutex system mutex
+ * @param sysMutex system MUTEX
  */
-void PostInstructionExecute(MUTEX sys_mutex){
+void Debugger::PostInstructionExecute(MUTEX sysMutex, sys_state_ptr sysState){
 	cout << "PostInstructionExecute" << endl;
 	sys_state_ptr sys_state=get_system_state();
+	/* update virtual devices */
+	if(!m_vdevList->empty()){
+		VDevList::iterator it=m_vdevList->begin();
+		for(it; it!=m_vdevList->end(); ++it){
+			(*it).second.AcceptEmulationMutex(sysMutex, sysState);
+		}
+	}
 }
