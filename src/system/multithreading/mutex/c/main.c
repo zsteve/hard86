@@ -44,7 +44,7 @@ DWORD WINAPI PrintLine2(LPVOID param)
 
 int main()
 {
-    MUTEX myMutex;
+/*    MUTEX myMutex;
     THREAD myThread1, myThread2;
     myMutex=mutex_create();
     thread_create(&PrintLine1, (LPVOID)myMutex, &myThread1);
@@ -53,5 +53,6 @@ int main()
     thread_start(&myThread2);
     _getch();
     mutex_close(myMutex);
+	*/
     return 0;
 }
