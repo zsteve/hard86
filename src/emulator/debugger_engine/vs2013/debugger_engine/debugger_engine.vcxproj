@@ -10,30 +10,10 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\..\..\system\datastruct\clist\clist.c" />
-    <ClCompile Include="..\..\..\..\system\multithreading\mutex\c\mutex.c" />
-    <ClCompile Include="..\..\src\dasm\dasm.c" />
-    <ClCompile Include="..\..\src\emulator_engine.c" />
-    <ClCompile Include="..\..\src\flags.c" />
-    <ClCompile Include="..\..\src\global.c" />
-    <ClCompile Include="..\..\src\main.c" />
-    <ClCompile Include="..\..\src\opcodes.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\..\..\system\datastruct\clist\clist.h" />
-    <ClInclude Include="..\..\..\..\system\multithreading\mutex\c\mutex.h" />
-    <ClInclude Include="..\..\src\dasm\dasm.h" />
-    <ClInclude Include="..\..\src\emulator_engine.h" />
-    <ClInclude Include="..\..\src\emulator_engine_interface.h" />
-    <ClInclude Include="..\..\src\flags.h" />
-    <ClInclude Include="..\..\src\global.h" />
-    <ClInclude Include="..\..\src\opcodes.h" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{80765C0E-6A95-4E31-84F7-A88FD38AA815}</ProjectGuid>
+    <ProjectGuid>{87136826-7925-4E43-87B5-7035B165706F}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>emulator_engine</RootNamespace>
+    <RootNamespace>debugger_engine</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -61,8 +41,6 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IntDir>$(Configuration)\</IntDir>
-    <OutDir>$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -97,6 +75,30 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\system\datastruct\clist\clist.c" />
+    <ClCompile Include="..\..\..\..\system\multithreading\mutex\c\mutex.c" />
+    <ClCompile Include="..\..\..\emulator_engine\src\dasm\dasm.c" />
+    <ClCompile Include="..\..\..\emulator_engine\src\emulator_engine.c" />
+    <ClCompile Include="..\..\..\emulator_engine\src\flags.c" />
+    <ClCompile Include="..\..\..\emulator_engine\src\global.c" />
+    <ClCompile Include="..\..\..\emulator_engine\src\opcodes.c" />
+    <ClCompile Include="..\..\src\debugger.cpp" />
+    <ClCompile Include="..\..\src\main.cpp" />
+    <ClCompile Include="..\..\src\vdev.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\system\datastruct\clist\clist.h" />
+    <ClInclude Include="..\..\..\..\system\multithreading\mutex\c\mutex.h" />
+    <ClInclude Include="..\..\..\emulator_engine\src\dasm\dasm.h" />
+    <ClInclude Include="..\..\..\emulator_engine\src\emulator_engine.h" />
+    <ClInclude Include="..\..\..\emulator_engine\src\emulator_engine_interface.h" />
+    <ClInclude Include="..\..\..\emulator_engine\src\flags.h" />
+    <ClInclude Include="..\..\..\emulator_engine\src\global.h" />
+    <ClInclude Include="..\..\..\emulator_engine\src\opcodes.h" />
+    <ClInclude Include="..\..\src\debugger.h" />
+    <ClInclude Include="..\..\src\vdev.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

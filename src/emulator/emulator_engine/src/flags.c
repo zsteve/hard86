@@ -5,6 +5,7 @@
 */
 
 #include "flags.h"
+#include "emulator_engine_interface.h"
 #include "emulator_engine.h"
 
 extern sys_state_type sys_state;

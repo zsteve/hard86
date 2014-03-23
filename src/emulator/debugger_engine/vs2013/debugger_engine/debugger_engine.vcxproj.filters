@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\emulator_engine">
+      <UniqueIdentifier>{9b7ed212-d6b3-424c-b4a8-4f831403e126}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\emulator_engine">
+      <UniqueIdentifier>{fca026fd-fde5-49ca-8dc2-5e6bf8a237f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\emulator_engine\Emulator">
+      <UniqueIdentifier>{a0f54ae6-cc03-4b50-aab3-63b54e190951}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\emulator_engine\Emulator">
+      <UniqueIdentifier>{ed7348f7-d4d7-4464-83dd-7355471ef54f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="mutex">
+      <UniqueIdentifier>{13e72ffd-c9bc-4376-86cd-d8bc6db89789}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="clist">
+      <UniqueIdentifier>{ab7c7625-6158-414d-80c2-6d301c950657}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\debugger_engine">
+      <UniqueIdentifier>{106e4217-b531-46c3-bac5-91f745f6fca5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\debugger_engine">
+      <UniqueIdentifier>{09c438e4-eb7e-4412-8514-79989805024a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\emulator_engine\src\emulator_engine.c">
+      <Filter>Source Files\emulator_engine\Emulator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\emulator_engine\src\flags.c">
+      <Filter>Source Files\emulator_engine\Emulator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\emulator_engine\src\opcodes.c">
+      <Filter>Source Files\emulator_engine\Emulator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\emulator_engine\src\dasm\dasm.c">
+      <Filter>Source Files\emulator_engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\emulator_engine\src\global.c">
+      <Filter>Source Files\emulator_engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\system\multithreading\mutex\c\mutex.c">
+      <Filter>mutex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\system\datastruct\clist\clist.c">
+      <Filter>clist</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\debugger.cpp">
+      <Filter>Source Files\debugger_engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\main.cpp">
+      <Filter>Source Files\debugger_engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vdev.cpp">
+      <Filter>mutex</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\emulator_engine\src\emulator_engine.h">
+      <Filter>Header Files\emulator_engine\Emulator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\emulator_engine\src\emulator_engine_interface.h">
+      <Filter>Header Files\emulator_engine\Emulator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\emulator_engine\src\flags.h">
+      <Filter>Header Files\emulator_engine\Emulator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\emulator_engine\src\opcodes.h">
+      <Filter>Header Files\emulator_engine\Emulator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\emulator_engine\src\dasm\dasm.h">
+      <Filter>Header Files\emulator_engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\emulator_engine\src\global.h">
+      <Filter>Header Files\emulator_engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\system\multithreading\mutex\c\mutex.h">
+      <Filter>mutex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\system\datastruct\clist\clist.h">
+      <Filter>clist</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\debugger.h">
+      <Filter>Header Files\debugger_engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vdev.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

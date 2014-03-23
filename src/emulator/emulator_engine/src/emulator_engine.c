@@ -13,10 +13,16 @@
 #include <varargs.h>
 
 #include "emulator_engine.h"
+#include "emulator_engine_interface.h"
 #include "opcodes.h"
 #include "flags.h"
 #include "../../../global/defines.h"
 #include "../../../global/typedefs.h"
+
+#include "dasm/dasm.h"
+
+/* data structures */
+#include "../../../system/datastruct/clist/clist.h"
 
 /* system multithreading */
 #include "../../../system/multithreading/event/c/event.h"
@@ -38,6 +44,9 @@ op_data_type op_data;
 
 /* system mutex */
 MUTEX sys_mutex;
+void(*breakpoint_hit_callback)(MUTEX);
+void(*pre_execute_callback)(MUTEX);
+void(*post_execute_callback)(MUTEX);
 
 #define SET_RESERVED_FLAGS(state)\
 	state.f_bits.reserved_1=state.f_bits.reserved_4=1;\
@@ -290,9 +299,15 @@ void system_load_mem(uint8* data, uint32 size){
  * allocates sys_state structure
  * @param mem_size size of system memory
  */
-int system_init(MUTEX sys_mutex_){
+int system_init(MUTEX sys_mutex_,
+				DBGCALLBACK bp_hit_func,
+				DBGCALLBACK pre_ex_func,
+				DBGCALLBACK post_ex_func){
 
 	sys_mutex=sys_mutex_;	/* system mutex */
+	breakpoint_hit_callback=bp_hit_func;
+	pre_execute_callback=pre_ex_func;
+	post_execute_callback=post_ex_func;
 
 	memset(&sys_state, 0, sizeof(sys_state));
 
@@ -330,6 +345,10 @@ int system_destroy(){
 	return 0;
 }
 
+sys_state_ptr get_system_state(){
+	return &sys_state;
+}
+
 void system_print_state(){
 	printf("----------------------------------------\n");
 	printf("AX: %X\tBX: %X\tCX: %X\tDX: %X\n"\
@@ -340,12 +359,17 @@ void system_print_state(){
 	printf("O : %d\tD: %d\tI: %d\tT: %d\tS: %d\t Z: %d\tA: %d\t P: %d\tC: %d\n",
 		FLAG_OF, FLAG_DF, FLAG_IF, FLAG_TF, FLAG_SF, FLAG_ZF, FLAG_AF, FLAG_PF, FLAG_CF);
 	printf("----------------------------------------\n");
+
 	_getch();
 }
 
 int system_execute(){
-	while(1){
-		// call debugger PreInstructionExecute
+	clist dasm_list;
+	int i;
+	int halt_flag=0;
+
+	while(!halt_flag){
+		pre_execute_callback(sys_mutex);
 		mutex_lock(sys_mutex);
 		/* update r_ip */
 		R_IP=GET_ADDR(IP, CS);
@@ -353,6 +377,7 @@ int system_execute(){
 		if(read_mem_8(GET_ADDR(IP, CS))==0xcc){
 			/* int3 debug interrupt - hand control to debugger */
 			IP++;
+			breakpoint_hit_callback(sys_mutex);
 			continue;
 		}
 
@@ -362,14 +387,14 @@ int system_execute(){
 
 		(*op_table[read_mem_8(GET_ADDR(IP, CS))])();
 		mutex_unlock(sys_mutex);
-		// call debugger PostInstructionExecute
+		post_execute_callback(sys_mutex);
 	}
 	return 0;
 }
 
 static int op_unknown(){
 	WRITE_DEBUG("Error : Unknown opcode encountered");
-	printf("Unknown opcode\n");
+	printf("Error : Unknown opcode\n");
 	IP++;
 	return 0;
 }

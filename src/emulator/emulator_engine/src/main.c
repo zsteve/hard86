@@ -35,7 +35,6 @@ int main(){
 	system_init(mutex);
 	system_load_mem(data, size);
 
-	disassemble(100, 0);
 	system_execute();
 
 	system_destroy();

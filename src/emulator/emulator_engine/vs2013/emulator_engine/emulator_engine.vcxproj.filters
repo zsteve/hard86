@@ -25,6 +25,9 @@
     <Filter Include="Header Files\Emulator">
       <UniqueIdentifier>{f3564553-0ce4-4970-9378-8e703bf919bb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Dependencies\clist">
+      <UniqueIdentifier>{3f475f20-a39b-4a38-a110-bc1fbf3fc962}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\main.c">
@@ -48,6 +51,9 @@
     <ClCompile Include="..\..\src\dasm\dasm.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\system\datastruct\clist\clist.c">
+      <Filter>Dependencies\clist</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\system\multithreading\mutex\c\mutex.h">
@@ -67,6 +73,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\opcodes.h">
       <Filter>Header Files\Emulator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\system\datastruct\clist\clist.h">
+      <Filter>Dependencies\clist</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\dasm\dasm.h">
       <Filter>Header Files</Filter>

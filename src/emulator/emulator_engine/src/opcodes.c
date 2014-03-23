@@ -738,8 +738,9 @@ int op_0xb0(){
 
 /* Various (?) */
 int op_0xc6(){
+	uint8 op_ext;
 	MOD_REG_RM(1);
-	uint8 op_ext=M_REG;
+	op_ext=M_REG;
 	switch(op_ext){
 	case 0:
 		/* MOV r/m8, imm8 */
@@ -760,8 +761,9 @@ int op_0xc6(){
 
 /* Various 0xc7 */
 int op_0xc7(){
+	uint8 op_ext;
 	MOD_REG_RM(1);
-	uint8 op_ext=M_REG;
+	op_ext=M_REG;
 	switch(op_ext){
 	case 0:
 		/* MOV r/m16, imm16 */
@@ -846,8 +848,9 @@ int op_0x05(){
 
 /* various 0x80 */
 int op_0x80(){
+	uint8 op_ext;
 	MOD_REG_RM(1);
-	uint8 op_ext=M_REG;
+	op_ext=M_REG;
 	switch(op_ext){
 	case 0:
 		{
@@ -913,8 +916,9 @@ int op_0x80(){
 
 /* Various 0x81 */
 int op_0x81(){
+	uint8 op_ext;
 	MOD_REG_RM(1);
-	uint8 op_ext=M_REG;
+	op_ext=M_REG;
 	switch(op_ext){
 	case 0:
 		{
@@ -984,8 +988,9 @@ int op_0x81(){
 
 /* Various 0x83 */
 int op_0x83(){
+	uint8 op_ext;
 	MOD_REG_RM(1);
-	uint8 op_ext=M_REG;
+	op_ext=M_REG;
 	switch(op_ext){
 	case 0:
 		{
@@ -1057,8 +1062,8 @@ int op_0x83(){
 
 /* ADD r/m8, r8 */
 int op_0x00(){
-	MOD_REG_RM(1);
 	uint8 rm8, r8;
+	MOD_REG_RM(1);
 	rm8=read_rm_val_8(OP_DS);
 	r8=RREG8(M_REG);
 	if(execute_flag)
@@ -1091,8 +1096,8 @@ int op_0x01(){
 
 /* ADD r8, r/m8 */
 int op_0x02(){
-	MOD_REG_RM(1);
 	uint8 r8, rm8;
+	MOD_REG_RM(1);
 	rm8=read_rm_val_8(OP_DS);
 	r8=RREG8(M_REG);
 	if(execute_flag)
@@ -1107,8 +1112,8 @@ int op_0x02(){
 
 /* ADD r16, r/m16 */
 int op_0x03(){
-	MOD_REG_RM(1);
 	uint16 r16, rm16;
+	MOD_REG_RM(1);
 	rm16=read_rm_val_16(OP_DS);
 	r16=RREG16(M_REG);
 	if(execute_flag)
@@ -1148,8 +1153,8 @@ int op_0x15(){
 
 /* ADC rm8, r8 */
 int op_0x10(){
-	MOD_REG_RM(1);
 	uint8 rm8, r8;
+	MOD_REG_RM(1);
 	rm8=read_rm_val_8(OP_DS);
 	r8=RREG8(M_REG);
 	if(execute_flag)
@@ -1164,9 +1169,8 @@ int op_0x10(){
 
 /* ADC rm16, r16 */
 int op_0x11(){
-	MOD_REG_RM(1);
 	uint16 rm16, r16;
-
+	MOD_REG_RM(1);
 	rm16=read_rm_val_16(OP_DS);
 	r16=RREG16(M_REG);
 	if(execute_flag)
@@ -1180,8 +1184,8 @@ int op_0x11(){
 
 /* ADC r8, rm8 */
 int op_0x12(){
-	MOD_REG_RM(1);
 	uint8 r8, rm8;
+	MOD_REG_RM(1);
 
 	r8=RREG8(M_REG);
 	rm8=read_rm_val_8(OP_DS);
@@ -1198,8 +1202,8 @@ int op_0x12(){
 
 /* ADC r16, rm16 */
 int op_0x13(){
-	MOD_REG_RM(1);
 	uint16 r16, rm16;
+	MOD_REG_RM(1);
 
 	rm16=read_rm_val_16(OP_DS);
 	r16=RREG16(M_REG);
@@ -1216,8 +1220,9 @@ int op_0x13(){
 
 /* Various 0xff */
 int op_0xff(){
+	uint8 op_ext;
 	MOD_REG_RM(1);
-	uint8 op_ext=M_REG;
+	op_ext=M_REG;
 	switch(op_ext){
 	case 6:
 		{
@@ -1237,8 +1242,9 @@ int op_0xff(){
 
 /* PUSH+ r16 */
 int op_0x50(){
+	uint16 r16;
 	MOD_REG_RM(0);
-	uint8 r16=op_data.rm;
+	r16=M_RM;
 	if(execute_flag)
 		stack_push((uint16)RREG16(r16));
 #ifdef SHOW_DEBUG
@@ -1274,8 +1280,9 @@ int op_0x68(){
 
 /* Various 0x8f */
 int op_0x8f(){
+	uint8 op_ext;
 	MOD_REG_RM(1);
-	uint8 op_ext=M_REG;
+	op_ext=M_REG;
 	switch(op_ext){
 	case 6:
 	{
@@ -1295,11 +1302,10 @@ int op_0x8f(){
 /* POP+ r16 */
 int op_0x58(){
 	MOD_REG_RM(0);
-	uint8 r16=op_data.rm;
 	if(execute_flag)
-		WREG16(r16, stack_pop());
+		WREG16(M_RM, stack_pop());
 #ifdef SHOW_DEBUG
-	out_opinfo("POP %s\n", text_regs[r16]);
+	out_opinfo("POP %s\n", text_regs[M_RM]);
 #endif
 	INC_IP(0);
 	RET_GOOD;
@@ -1437,9 +1443,10 @@ int op_0x2d(){
 
 /* SUB rm8, r8 */
 int op_0x28(){
+	uint8 rm8, r8;
 	MOD_REG_RM(1);
-	uint8 rm8=read_rm_val_8(OP_DS);
-	uint8 r8=RREG8(M_REG);
+	rm8=read_rm_val_8(OP_DS);
+	r8=RREG8(M_REG);
 	if(execute_flag)
 		write_rm_val_8(sub_8(rm8, r8), OP_DS);
 
@@ -1452,9 +1459,10 @@ int op_0x28(){
 
 /* SUB rm16, r16 */
 int op_0x29(){
+	uint16 rm16, r16;
 	MOD_REG_RM(1);
-	uint16 rm16=read_rm_val_16(OP_DS);
-	uint16 r16=RREG16(M_REG);
+	rm16=read_rm_val_16(OP_DS);
+	r16=RREG16(M_REG);
 	if(execute_flag)
 		write_rm_val_16(sub_16(rm16, r16), OP_DS);
 
@@ -1467,9 +1475,10 @@ int op_0x29(){
 
 /* SUB r16, rm16 */
 int op_0x2a(){
+	uint16 r16, rm16;
 	MOD_REG_RM(1);
-	uint16 r16=RREG16(M_REG);
-	uint16 rm16=read_rm_val_16(OP_DS);
+	r16=RREG16(M_REG);
+	rm16=read_rm_val_16(OP_DS);
 	if(execute_flag)
 		WREG16(M_REG, sub_16(r16, rm16));
 
@@ -1506,9 +1515,10 @@ int op_0x3d(){
 
 /* CMP rm8, r8 */
 int op_0x38(){
+	uint8 rm8, r8;
 	MOD_REG_RM(1);
-	uint8 rm8=read_rm_val_8(OP_DS);
-	uint8 r8=RREG8(M_REG);
+	rm8=read_rm_val_8(OP_DS);
+	r8=RREG8(M_REG);
 	if(execute_flag)
 		cmp_8(rm8, r8);
 
@@ -1521,9 +1531,10 @@ int op_0x38(){
 
 /* CMP rm16, r16 */
 int op_0x39(){
+	uint16 rm16, r16;
 	MOD_REG_RM(1);
-	uint16 rm16=read_rm_val_16(OP_DS);
-	uint16 r16=RREG16(M_REG);
+	rm16=read_rm_val_16(OP_DS);
+	r16=RREG16(M_REG);
 	if(execute_flag)
 		cmp_16(rm16, r16);
 
@@ -1536,9 +1547,10 @@ int op_0x39(){
 
 /* CMP r8, rm8 */
 int op_0x3a(){
+	uint8 r8, rm8;
 	MOD_REG_RM(1);
-	uint8 rm8=read_rm_val_8(OP_DS);
-	uint8 r8=RREG8(M_REG);
+	rm8=read_rm_val_8(OP_DS);
+	r8=RREG8(M_REG);
 
 	if(execute_flag)
 		cmp_8(r8, rm8);
@@ -1551,9 +1563,10 @@ int op_0x3a(){
 
 /* CMP r16, rm16 */
 int op_0x3b(){
+	uint16 r16, rm16;
 	MOD_REG_RM(1);
-	uint16 rm16=read_rm_val_16(OP_DS);
-	uint16 r16=RREG16(M_REG);
+	rm16=read_rm_val_16(OP_DS);
+	r16=RREG16(M_REG);
 	if(execute_flag)
 		cmp_16(r16, rm16);
 #ifdef SHOW_DEBUG
