@@ -85,6 +85,7 @@
     <ClCompile Include="..\..\..\emulator_engine\src\global.c" />
     <ClCompile Include="..\..\..\emulator_engine\src\opcodes.c" />
     <ClCompile Include="..\..\src\debugger.cpp" />
+    <ClCompile Include="..\..\src\device_test\device_test.cpp" />
     <ClCompile Include="..\..\src\main.cpp" />
     <ClCompile Include="..\..\src\vdev.cpp" />
   </ItemGroup>
@@ -99,6 +100,7 @@
     <ClInclude Include="..\..\..\emulator_engine\src\global.h" />
     <ClInclude Include="..\..\..\emulator_engine\src\opcodes.h" />
     <ClInclude Include="..\..\src\debugger.h" />
+    <ClInclude Include="..\..\src\device_test\device_test.h" />
     <ClInclude Include="..\..\src\vdev.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

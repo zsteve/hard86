@@ -9,7 +9,12 @@
 #include "../../../global/typedefs.h"
 #include "../../../system/multithreading/mutex/cpp/mutex.h"
 
+#include "device_test/device_test.h"
+
 using namespace std;
+
+using namespace nsDebugger;
+using namespace nsVDev;
 
 long fsize(FILE *stream)
 {
@@ -23,8 +28,14 @@ long fsize(FILE *stream)
 
 int main(){
 	Mutex sysMutex;
-	VDevList vdevList;
-	Debugger dbg(&vdevList);
+	VDevList* vdevList=VDevList::GetInstance();
+	VDev testDev(nsDeviceTest::VirtualDevice_Initialize,
+		nsDeviceTest::VirtualDevice_Terminate,
+		nsDeviceTest::VirtualDevice_AcceptEmulationMutex,
+		(void*)22, (void*)24);
+	vdevList->Add(testDev);
+	Debugger::Init(vdevList);
+	Debugger* dbg=Debugger::GetInstance();
 	FILE* in_file=fopen("test/test.com", "r");
 	int size=fsize(in_file);
 	uint8* data=(uint8*)malloc(size);

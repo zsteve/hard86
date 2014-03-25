@@ -40,6 +40,9 @@
     <Filter Include="mutex">
       <UniqueIdentifier>{da118f56-7965-44bf-89c2-38310b2607ed}</UniqueIdentifier>
     </Filter>
+    <Filter Include="device_test">
+      <UniqueIdentifier>{ee7ad64e-453a-4704-b2bf-3bcdc261a398}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\emulator_engine\src\emulator_engine.c">
@@ -75,6 +78,9 @@
     <ClCompile Include="..\..\..\..\system\multithreading\mutex\c\cmutex.c">
       <Filter>cmutex</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\device_test\device_test.cpp">
+      <Filter>device_test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\emulator_engine\src\emulator_engine.h">
@@ -109,6 +115,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\system\multithreading\mutex\c\cmutex.h">
       <Filter>cmutex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\device_test\device_test.h">
+      <Filter>device_test</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
