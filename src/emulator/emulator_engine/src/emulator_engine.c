@@ -68,6 +68,7 @@ void out_opinfo(char* str, ...){
 	va_start(v, str);
 	if(!out_opinfo_ptr){
 		vprintf(str, v);
+		printf("\n");
 	}
 	else{
 		out_opinfo_ptr(str, &v);
@@ -311,11 +312,17 @@ int system_init(MUTEX sys_mutex_,
 	memset(&sys_state, 0, sizeof(sys_state));
 
 	sys_state.mem_size=MEM_SIZE;
-	sys_state.mem=(uint8*)malloc(MEM_SIZE);
+	if(!(sys_state.mem=(uint8*)malloc(MEM_SIZE))){
+		printf("Error : failed to allocate sys_state.mem\n");
+		abort();
+	}
 
 	memset(sys_state.mem, 0, MEM_SIZE);
 	
-	sys_state.io_bus=(uint8*)malloc(IO_BUS_SIZE);
+	if(!(sys_state.io_bus=(uint8*)malloc(IO_BUS_SIZE))){
+		printf("Error : failed to allocate sys_state.io_bus\n");
+		abort();
+	}
 	
 	memset(sys_state.io_bus, 0, IO_BUS_SIZE);
 
@@ -376,6 +383,7 @@ int system_execute(){
 		if(read_mem_8(GET_ADDR(IP, CS))==0xcc){
 			/* int3 debug interrupt - hand control to debugger */
 			IP++;
+			mutex_unlock(sys_mutex);
 			breakpoint_hit_callback(sys_mutex, &sys_state);
 			continue;
 		}

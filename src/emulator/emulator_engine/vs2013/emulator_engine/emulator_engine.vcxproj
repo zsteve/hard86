@@ -13,6 +13,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\..\system\datastruct\clist\clist.c" />
     <ClCompile Include="..\..\..\..\system\multithreading\mutex\c\mutex.c" />
+    <ClCompile Include="..\..\src\cpp_interface\emulator_cpp.cpp" />
     <ClCompile Include="..\..\src\dasm\dasm.c" />
     <ClCompile Include="..\..\src\emulator_engine.c" />
     <ClCompile Include="..\..\src\flags.c" />
@@ -23,6 +24,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\..\system\datastruct\clist\clist.h" />
     <ClInclude Include="..\..\..\..\system\multithreading\mutex\c\mutex.h" />
+    <ClInclude Include="..\..\src\cpp_interface\emulator_cpp.h" />
     <ClInclude Include="..\..\src\dasm\dasm.h" />
     <ClInclude Include="..\..\src\emulator_engine.h" />
     <ClInclude Include="..\..\src\emulator_engine_interface.h" />

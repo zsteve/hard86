@@ -34,7 +34,7 @@ void clist_pop_front(clist* c);
 void* clist_getcurr(clist* c);
 void clist_begin(clist* c);
 void clist_end(clist* c);
-void clist_next(clist* c);
+int clist_next(clist* c);
 void clist_prev(clist* c);
 void clist_destroy(clist* c);
 

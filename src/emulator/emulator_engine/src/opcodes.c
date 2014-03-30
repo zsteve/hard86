@@ -544,30 +544,30 @@ void process_instr_prefixes(){
 /* JMP rel8 */
 int op_0xeb(){
 	int8 rel8=(int8)RRELIP8(1);	/* signed */
+#ifdef SHOW_DEBUG
+	out_opinfo("JMP %X", (IP+2+rel8));
+#endif
 	if(execute_flag){
 		SET_IP_REL(rel8+2);
 	}
 	else{
 		INC_IP(1);
 	}
-#ifdef SHOW_DEBUG
-	out_opinfo("JMP %X\n", IP);
-#endif
 	RET_GOOD;
 }
 
 /* JMP rel16 */
 int op_0xe9(){
 	int16 rel16=(int16)RRELIP16(1);
+#ifdef SHOW_DEBUG
+	out_opinfo("JMP %X", (IP+3+rel16));
+#endif
 	if(execute_flag){
 		SET_IP_REL(rel16+2);
 	}
 	else{
 		INC_IP(2);
 	}
-#ifdef SHOW_DEBUG
-	out_opinfo("JMP %X\n", IP);
-#endif
 	RET_GOOD;
 }
 
@@ -583,7 +583,7 @@ int op_0xb8(){
 		WREG16(M_RM, imm16);
 
 #ifdef SHOW_DEBUG
-	out_opinfo("MOV %s, %X\n", text_regs[M_RM], (uint32)imm16);
+	out_opinfo("MOV %s, %X", text_regs[M_RM], (uint32)imm16);
 #endif
 	INC_IP(2);
 	RET_GOOD;
@@ -596,7 +596,7 @@ int op_0x88(){
 		write_rm_val_8(RREG8(M_REG), OP_DS);
 
 #ifdef SHOW_DEBUG
-	out_opinfo("MOV %s, %s\n", print_rm_val_8(OP_DS), text_regs[BREG(M_REG)]);
+	out_opinfo("MOV %s, %s", print_rm_val_8(OP_DS), text_regs[BREG(M_REG)]);
 #endif
 	INC_IP(1+disp_size);
 	RET_GOOD;
@@ -609,7 +609,7 @@ int op_0x89(){
 		write_rm_val_16(RREG16(M_REG), OP_DS);
 	
 #ifdef SHOW_DEBUG
-	out_opinfo("MOV %s, %s\n", print_rm_val_16(OP_DS), text_regs[M_REG]);
+	out_opinfo("MOV %s, %s", print_rm_val_16(OP_DS), text_regs[M_REG]);
 #endif
 	INC_IP(1+disp_size);
 	RET_GOOD;
@@ -624,7 +624,7 @@ int op_0x8a(){
 		WREG8(M_REG, rm8);
 
 #ifdef SHOW_DEBUG
-	out_opinfo("MOV %s, %s\n", text_regs[BREG(M_REG)], print_rm_val_8(OP_DS));
+	out_opinfo("MOV %s, %s", text_regs[BREG(M_REG)], print_rm_val_8(OP_DS));
 #endif
 	INC_IP(disp_size);
 	RET_GOOD;
@@ -639,7 +639,7 @@ int op_0x8b(){
 		WREG16(M_REG, rm16);
 
 #ifdef SHOW_DEBUG
-	out_opinfo("MOV %s, %s\n", text_regs[(M_REG)], print_rm_val_16(OP_DS));
+	out_opinfo("MOV %s, %s", text_regs[(M_REG)], print_rm_val_16(OP_DS));
 #endif
 	INC_IP(disp_size+1);
 	RET_GOOD;
@@ -654,7 +654,7 @@ int op_0x8c(){
 		write_rm_val_16(sreg, OP_DS);
 
 #ifdef SHOW_DEBUG
-	out_opinfo("MOV %s, %s\n", print_rm_val_16(OP_DS), text_regs[M_REG]);
+	out_opinfo("MOV %s, %s", print_rm_val_16(OP_DS), text_regs[M_REG]);
 #endif
 	INC_IP(disp_size+1);
 	RET_GOOD;
@@ -669,7 +669,7 @@ int op_0x8e(){
 		WREG16(M_REG, rm16);
 
 #ifdef SHOW_DEBUG
-	out_opinfo("MOV %s, %s\n", text_regs[M_REG], print_rm_val_16(OP_DS));
+	out_opinfo("MOV %s, %s", text_regs[M_REG], print_rm_val_16(OP_DS));
 #endif
 	INC_IP(disp_size+1);
 	RET_GOOD;
@@ -681,7 +681,7 @@ int op_0xa0(){
 	if(execute_flag)
 		AL=SRMEM8(moffs8, OP_DS);
 #ifdef SHOW_DEBUG
-	out_opinfo("MOV AL, [%X]\n", (uint32)moffs8);
+	out_opinfo("MOV AL, [%X]", (uint32)moffs8);
 #endif
 	INC_IP(2);
 	RET_GOOD;
@@ -693,7 +693,7 @@ int op_0xa1(){
 	if(execute_flag)
 		AX=SRMEM16(moffs16, OP_DS);
 #ifdef SHOW_DEBUG
-	out_opinfo("MOV AL, [%X]\n", (uint32)moffs16);
+	out_opinfo("MOV AL, [%X]", (uint32)moffs16);
 #endif
 	INC_IP(2);
 	RET_GOOD;
@@ -705,7 +705,7 @@ int op_0xa2(){
 	if(execute_flag)
 		SWMEM8(AL, moffs8, OP_DS);
 #ifdef SHOW_DEBUG
-	out_opinfo("MOV [%X], AL\n", (uint32)moffs8);
+	out_opinfo("MOV [%X], AL", (uint32)moffs8);
 #endif
 	INC_IP(2);
 	RET_GOOD;
@@ -717,7 +717,7 @@ int op_0xa3(){
 	if(execute_flag)
 		SWMEM16(AX, moffs16, OP_DS);
 #ifdef SHOW_DEBUG
-	out_opinfo("MOV [%X], AX\n", (uint32)moffs16);
+	out_opinfo("MOV [%X], AX", (uint32)moffs16);
 #endif
 	INC_IP(2);
 	RET_GOOD;
@@ -730,7 +730,7 @@ int op_0xb0(){
 	if(execute_flag)
 		WREG8((M_RM), imm8);
 #ifdef SHOW_DEBUG
-	out_opinfo("MOV %s, %X\n", text_regs[BREG(M_RM)], (uint32)imm8);
+	out_opinfo("MOV %s, %X", text_regs[BREG(M_RM)], (uint32)imm8);
 #endif
 	INC_IP(1);
 	RET_GOOD;
@@ -750,7 +750,7 @@ int op_0xc6(){
 				write_rm_val_8(imm8, OP_DS);
 
 #ifdef SHOW_DEBUG
-			out_opinfo("MOV %s, %X\n", print_rm_val_8(OP_DS), (uint32)imm8);
+			out_opinfo("MOV %s, %X", print_rm_val_8(OP_DS), (uint32)imm8);
 #endif
 			INC_IP(2+disp_size);
 			RET_GOOD;
@@ -773,7 +773,7 @@ int op_0xc7(){
 				 write_rm_val_16(imm16, OP_DS);
 
 #ifdef SHOW_DEBUG
-			  out_opinfo("MOV %s, %X\n", print_rm_val_16(OP_DS), (uint32)imm16);
+			  out_opinfo("MOV %s, %X", print_rm_val_16(OP_DS), (uint32)imm16);
 #endif
 			  INC_IP(3+disp_size);
 			  RET_GOOD;
@@ -827,7 +827,7 @@ int op_0x04(){
 		AL=add_8(AL, imm8);
 
 #ifdef SHOW_DEBUG
-	out_opinfo("ADD AL, %X\n", (uint32)imm8);
+	out_opinfo("ADD AL, %X", (uint32)imm8);
 #endif
 	INC_IP(1);
 	RET_GOOD;
@@ -840,7 +840,7 @@ int op_0x05(){
 		AX=add_16(AX, imm16);
 
 #ifdef SHOW_DEBUG
-	out_opinfo("ADD AX, %X\n", (uint32)imm16);
+	out_opinfo("ADD AX, %X", (uint32)imm16);
 #endif
 	INC_IP(2);
 	RET_GOOD;
@@ -862,7 +862,7 @@ int op_0x80(){
 				  write_rm_val_8(add_8(rm8, imm8), OP_DS);
 
 #ifdef SHOW_DEBUG
-			  out_opinfo("ADD %s, %X\n", print_rm_val_8(OP_DS), (uint32)imm8);
+			  out_opinfo("ADD %s, %X", print_rm_val_8(OP_DS), (uint32)imm8);
 #endif
 			  INC_IP(2+disp_size);
 			  RET_GOOD;
@@ -877,7 +877,7 @@ int op_0x80(){
 				write_rm_val_8(adc_8(rm8, imm8), OP_DS);
 
 #ifdef SHOW_DEBUG
-			out_opinfo("ADC %s, %X\n", print_rm_val_8(OP_DS), (uint32)imm8);
+			out_opinfo("ADC %s, %X", print_rm_val_8(OP_DS), (uint32)imm8);
 #endif
 			INC_IP(2+disp_size);
 			RET_GOOD;
@@ -891,7 +891,7 @@ int op_0x80(){
 			if(execute_flag)
 				write_rm_val_8(sub_8(rm8, imm8), OP_DS);
 #ifdef SHOW_DEBUG
-			out_opinfo("SUB %s, %X\n", print_rm_val_8(OP_DS), (uint32)imm8);
+			out_opinfo("SUB %s, %X", print_rm_val_8(OP_DS), (uint32)imm8);
 #endif
 			INC_IP(2+disp_size);
 			RET_GOOD;
@@ -905,7 +905,7 @@ int op_0x80(){
 			  if(execute_flag)
 				  cmp_8(rm8, imm8);
 #ifdef SHOW_DEBUG
-			  out_opinfo("CMP %s, %X\n", print_rm_val_8(OP_DS), (uint32)imm8);
+			  out_opinfo("CMP %s, %X", print_rm_val_8(OP_DS), (uint32)imm8);
 #endif
 			  INC_IP(2+disp_size);
 			  RET_GOOD;
@@ -930,7 +930,7 @@ int op_0x81(){
 				write_rm_val_16(add_16(rm16, imm16), OP_DS);
 
 #ifdef SHOW_DEBUG
-	out_opinfo("ADD %s, %X\n", print_rm_val_16(OP_DS), (uint32)imm16);
+	out_opinfo("ADD %s, %X", print_rm_val_16(OP_DS), (uint32)imm16);
 #endif
 			INC_IP(3+disp_size);
 			RET_GOOD;
@@ -946,7 +946,7 @@ int op_0x81(){
 				write_rm_val_16(adc_16(rm16, imm16), OP_DS);
 
 #ifdef SHOW_DEBUG
-			out_opinfo("ADC %s, %X\n", print_rm_val_16(OP_DS), (uint32)imm16);
+			out_opinfo("ADC %s, %X", print_rm_val_16(OP_DS), (uint32)imm16);
 #endif
 			INC_IP(3+disp_size);
 			RET_GOOD;
@@ -962,7 +962,7 @@ int op_0x81(){
 				 write_rm_val_16(sub_16(rm16, imm16), OP_DS);
 
 #ifdef SHOW_DEBUG
-			  out_opinfo("SUB %s, %X\n", print_rm_val_16(OP_DS), (uint32)imm16);
+			  out_opinfo("SUB %s, %X", print_rm_val_16(OP_DS), (uint32)imm16);
 #endif
 			  INC_IP(3+disp_size);
 			  RET_GOOD;
@@ -977,7 +977,7 @@ int op_0x81(){
 				  cmp_16(rm16, imm16);
 
 #ifdef SHOW_DEBUG
-			  out_opinfo("CMP %s, %X\n", print_rm_val_16(OP_DS), (uint32)imm16);
+			  out_opinfo("CMP %s, %X", print_rm_val_16(OP_DS), (uint32)imm16);
 #endif
 			  INC_IP(3+disp_size);
 			  RET_GOOD;
@@ -1003,7 +1003,7 @@ int op_0x83(){
 				write_rm_val_16(add_16(rm16, imm8), OP_DS);
 			  
 #ifdef SHOW_DEBUG
-			out_opinfo("ADD %s, %X\n", print_rm_val_16(OP_DS), (uint32)imm8);
+			out_opinfo("ADD %s, %X", print_rm_val_16(OP_DS), (uint32)imm8);
 #endif
 			INC_IP(2+disp_size);
 			RET_GOOD;
@@ -1019,7 +1019,7 @@ int op_0x83(){
 				write_rm_val_16(adc_16(rm16, imm8), OP_DS);
 
 #ifdef SHOW_DEBUG
-			out_opinfo("ADC %s, %X\n", print_rm_val_16(OP_DS), (uint32)imm8);
+			out_opinfo("ADC %s, %X", print_rm_val_16(OP_DS), (uint32)imm8);
 #endif
 			INC_IP(2+disp_size);
 			RET_GOOD;
@@ -1035,7 +1035,7 @@ int op_0x83(){
 				write_rm_val_16(sub_16(rm16, signext8(imm8)), OP_DS);
 
 #ifdef SHOW_DEBUG
-			out_opinfo("SUB %s, %X\n", print_rm_val_16(OP_DS), (uint32)imm8);
+			out_opinfo("SUB %s, %X", print_rm_val_16(OP_DS), (uint32)imm8);
 #endif
 			INC_IP(2+disp_size);
 			RET_GOOD;
@@ -1051,7 +1051,7 @@ int op_0x83(){
 				cmp_16(rm16, signext8(imm8));
 
 #ifdef SHOW_DEBUG
-			  out_opinfo("CMP %s, %X\n", print_rm_val_16(OP_DS), (uint32)imm8);
+			  out_opinfo("CMP %s, %X", print_rm_val_16(OP_DS), (uint32)imm8);
 #endif
 			  INC_IP(2+disp_size);
 			  RET_GOOD;
@@ -1070,7 +1070,7 @@ int op_0x00(){
 		write_rm_val_8(add_8(rm8, r8), OP_DS);
 
 #ifdef SHOW_DEBUG
-	out_opinfo("ADD %s, %s\n", print_rm_val_8(OP_DS), text_regs[BREG(M_REG)]);
+	out_opinfo("ADD %s, %s", print_rm_val_8(OP_DS), text_regs[BREG(M_REG)]);
 #endif
 	INC_IP(1+disp_size);
 	RET_GOOD;
@@ -1088,7 +1088,7 @@ int op_0x01(){
 		write_rm_val_16(add_16(rm16, r16), OP_DS);
 
 #ifdef SHOW_DEBUG
-	out_opinfo("ADD %s, %s\n", print_rm_val_16(OP_DS), text_regs[M_REG]);
+	out_opinfo("ADD %s, %s", print_rm_val_16(OP_DS), text_regs[M_REG]);
 #endif
 	INC_IP(1+disp_size);
 	RET_GOOD;
@@ -1104,7 +1104,7 @@ int op_0x02(){
 		WREG8((M_REG), add_8(r8, rm8));
 
 #ifdef SHOW_DEBUG
-	out_opinfo("ADD %s, %s\n", print_rm_val_8(OP_DS), text_regs[BREG(M_REG)]);
+	out_opinfo("ADD %s, %s", print_rm_val_8(OP_DS), text_regs[BREG(M_REG)]);
 #endif
 	INC_IP(0+disp_size);
 	RET_GOOD;
@@ -1120,7 +1120,7 @@ int op_0x03(){
 		WREG16(M_REG, add_16(r16, rm16));
 
 #ifdef SHOW_DEBUG
-	out_opinfo("ADD %s, %s\n", print_rm_val_8(OP_DS), text_regs[M_REG]);
+	out_opinfo("ADD %s, %s", print_rm_val_16(OP_DS), text_regs[M_REG]);
 #endif
 	INC_IP(0+disp_size);
 	RET_GOOD;
@@ -1132,7 +1132,7 @@ int op_0x14(){
 	if(execute_flag)
 		AL=adc_8(AL, imm8);
 #ifdef SHOW_DEBUG
-	out_opinfo("ADC AL, %X\n", (uint32)imm8);
+	out_opinfo("ADC AL, %X", (uint32)imm8);
 #endif
 	INC_IP(1);
 	RET_GOOD;
@@ -1145,7 +1145,7 @@ int op_0x15(){
 		AX=adc_16(AX, imm16);
 
 #ifdef SHOW_DEBUG
-	out_opinfo("ADD AX, %X\n", (uint32)imm16);
+	out_opinfo("ADD AX, %X", (uint32)imm16);
 #endif
 	INC_IP(2);
 	RET_GOOD;
@@ -1161,7 +1161,7 @@ int op_0x10(){
 		write_rm_val_8(adc_8(rm8, r8), OP_DS);
 
 #ifdef SHOW_DEBUG
-	out_opinfo("ADC %s, %s\n", print_rm_val_8(OP_DS), text_regs[BREG(M_REG)]);
+	out_opinfo("ADC %s, %s", print_rm_val_8(OP_DS), text_regs[BREG(M_REG)]);
 #endif
 	INC_IP(1+disp_size);
 	RET_GOOD;
@@ -1176,7 +1176,7 @@ int op_0x11(){
 	if(execute_flag)
 		write_rm_val_16(adc_16(rm16, r16), OP_DS);
 #ifdef SHOW_DEBUG
-	out_opinfo("ADD %s, %s\n", print_rm_val_16(OP_DS), text_regs[(op_data.reg)]);
+	out_opinfo("ADD %s, %s", print_rm_val_16(OP_DS), text_regs[(op_data.reg)]);
 #endif
 	INC_IP(1+disp_size);
 	RET_GOOD;
@@ -1194,7 +1194,7 @@ int op_0x12(){
 		WREG8((M_REG), adc_8(r8, rm8));
 
 #ifdef SHOW_DEBUG
-	out_opinfo("ADC %s, %X\n", text_regs[BREG(M_REG)], (uint32)rm8);
+	out_opinfo("ADC %s, %X", text_regs[BREG(M_REG)], (uint32)rm8);
 #endif
 	INC_IP(1+disp_size);
 	RET_GOOD;
@@ -1212,7 +1212,7 @@ int op_0x13(){
 		WREG16(M_REG, adc_16(r16, rm16));
 
 #ifdef SHOW_DEBUG
-	out_opinfo("ADC %s, %s\n", print_rm_val_8(OP_DS), text_regs[op_data.reg]);
+	out_opinfo("ADC %s, %s", print_rm_val_8(OP_DS), text_regs[op_data.reg]);
 #endif
 	INC_IP(1+disp_size);
 	RET_GOOD;
@@ -1231,7 +1231,7 @@ int op_0xff(){
 			if(execute_flag)
 				stack_push(rm16);
 #ifdef SHOW_DEBUG
-			out_opinfo("PUSH %s\n", print_rm_val_8(OP_DS));
+			out_opinfo("PUSH %s", print_rm_val_8(OP_DS));
 #endif
 			INC_IP(1+disp_size);
 			RET_GOOD;
@@ -1248,7 +1248,7 @@ int op_0x50(){
 	if(execute_flag)
 		stack_push((uint16)RREG16(r16));
 #ifdef SHOW_DEBUG
-	out_opinfo("PUSH %s\n", text_regs[r16]);
+	out_opinfo("PUSH %s", text_regs[r16]);
 #endif
 	INC_IP(0);
 	RET_GOOD;
@@ -1260,7 +1260,7 @@ int op_0x6a(){
 	if(execute_flag)
 		stack_push((uint16)imm8);
 #ifdef SHOW_DEBUG
-	out_opinfo("PUSH %X\n", (uint16)imm8);
+	out_opinfo("PUSH %X", (uint16)imm8);
 #endif
 	INC_IP(1);
 	RET_GOOD;
@@ -1272,7 +1272,7 @@ int op_0x68(){
 	if(execute_flag)
 		stack_push(imm16);
 #ifdef SHOW_DEBUG
-	out_opinfo("PUSH %X\n", imm16);
+	out_opinfo("PUSH %X", imm16);
 #endif
 	INC_IP(2);
 	RET_GOOD;
@@ -1290,7 +1290,7 @@ int op_0x8f(){
 			  if(execute_flag)
 				 write_rm_val_16(stack_pop(), OP_DS);
 #ifdef SHOW_DEBUG
-			  out_opinfo("POP %s\n", print_rm_val_8(OP_DS));
+			  out_opinfo("POP %s", print_rm_val_8(OP_DS));
 #endif
 			  INC_IP(1+disp_size);
 			  RET_GOOD;
@@ -1305,7 +1305,7 @@ int op_0x58(){
 	if(execute_flag)
 		WREG16(M_RM, stack_pop());
 #ifdef SHOW_DEBUG
-	out_opinfo("POP %s\n", text_regs[M_RM]);
+	out_opinfo("POP %s", text_regs[M_RM]);
 #endif
 	INC_IP(0);
 	RET_GOOD;
@@ -1317,7 +1317,7 @@ int op_0xe6(){
 	if(execute_flag)
 		write_io_port(AL, (uint16)imm8);
 #ifdef SHOW_DEBUG
-	out_opinfo("OUT %X, AL\n", imm8);
+	out_opinfo("OUT %X, AL", imm8);
 #endif
 	INC_IP(1);
 	RET_GOOD;
@@ -1331,7 +1331,7 @@ int op_0xe7(){
 		write_io_port(HI_BYTE(AX), imm8+1);
 	}
 #ifdef SHOW_DEBUG
-	out_opinfo("OUT %X, AX\n", imm8);
+	out_opinfo("OUT %X, AX", imm8);
 #endif
 	INC_IP(1);
 	RET_GOOD;
@@ -1342,7 +1342,7 @@ int op_0xee(){
 	if(execute_flag)
 		write_io_port(AL, DX);
 #ifdef SHOW_DEBUG
-	out_opinfo("OUT DX, AL\n");
+	out_opinfo("OUT DX, AL");
 #endif
 	INC_IP(0);
 	RET_GOOD;
@@ -1355,7 +1355,7 @@ int op_0xef(){
 		write_io_port(HI_BYTE(AX), DX+1);
 	}
 #ifdef SHOW_DEBUG
-	out_opinfo("OUT DX, AX\n");
+	out_opinfo("OUT DX, AX");
 #endif
 	INC_IP(0);
 	RET_GOOD;
@@ -1367,7 +1367,7 @@ int op_0xe4(){
 	if(execute_flag)
 		AL=read_io_port(imm8);
 #ifdef SHOW_DEBUG
-	out_opinfo("IN AL, %X\n", imm8);
+	out_opinfo("IN AL, %X", imm8);
 #endif
 	INC_IP(1);
 	RET_GOOD;
@@ -1383,7 +1383,7 @@ int op_0xe5(){
 		AX|=read_io_port(imm8);
 	}
 #ifdef SHOW_DEBUG
-	out_opinfo("IN AX, %X\n", imm8);
+	out_opinfo("IN AX, %X", imm8);
 #endif
 	INC_IP(1);
 	RET_GOOD;
@@ -1394,7 +1394,7 @@ int op_0xec(){
 	if(execute_flag)
 		AL=read_io_port(DX);
 #ifdef SHOW_DEBUG
-	out_opinfo("IN AL, DX\n");
+	out_opinfo("IN AL, DX");
 #endif
 	INC_IP(0);
 	RET_GOOD;
@@ -1409,7 +1409,7 @@ int op_0xed(){
 		AX|=read_io_port(DX);
 	}
 #ifdef SHOW_DEBUG
-	out_opinfo("IN AX, DX\n");
+	out_opinfo("IN AX, DX");
 #endif
 	INC_IP(0);
 	RET_GOOD;
@@ -1422,7 +1422,7 @@ int op_0x2c(){
 		AL=sub_8(AL, imm8);
 
 #ifdef SHOW_DEBUG
-	out_opinfo("SUB AL, %X\n", (uint32)imm8);
+	out_opinfo("SUB AL, %X", (uint32)imm8);
 #endif
 	INC_IP(1);
 	RET_GOOD;
@@ -1435,7 +1435,7 @@ int op_0x2d(){
 		AX=sub_16(AX, imm16);
 
 #ifdef SHOW_DEBUG
-	out_opinfo("SUB AX, %X\n", (uint32)imm16);
+	out_opinfo("SUB AX, %X", (uint32)imm16);
 #endif
 	INC_IP(2);
 	RET_GOOD;
@@ -1451,7 +1451,7 @@ int op_0x28(){
 		write_rm_val_8(sub_8(rm8, r8), OP_DS);
 
 #ifdef SHOW_DEBUG
-	out_opinfo("SUB %s, %s\n", print_rm_val_8(OP_DS), text_regs[BREG(M_REG)]);
+	out_opinfo("SUB %s, %s", print_rm_val_8(OP_DS), text_regs[BREG(M_REG)]);
 #endif
 	INC_IP(1+disp_size);
 	RET_GOOD;
@@ -1467,7 +1467,7 @@ int op_0x29(){
 		write_rm_val_16(sub_16(rm16, r16), OP_DS);
 
 #ifdef SHOW_DEBUG
-	out_opinfo("SUB %s, %s\n", print_rm_val_16(OP_DS), text_regs[M_REG]);
+	out_opinfo("SUB %s, %s", print_rm_val_16(OP_DS), text_regs[M_REG]);
 #endif
 	INC_IP(1+disp_size);
 	RET_GOOD;
@@ -1483,7 +1483,7 @@ int op_0x2a(){
 		WREG16(M_REG, sub_16(r16, rm16));
 
 #ifdef SHOW_DEBUG
-	out_opinfo("SUB %s, %s\n", text_regs[M_REG], print_rm_val_16(OP_DS));
+	out_opinfo("SUB %s, %s", text_regs[M_REG], print_rm_val_16(OP_DS));
 #endif
 	INC_IP(1+disp_size);
 	RET_GOOD;
@@ -1495,7 +1495,7 @@ int op_0x3c(){
 	if(execute_flag)
 		cmp_8(AL, imm8);
 #ifdef SHOW_DEBUG
-	out_opinfo("CMP AL, %X\n", (uint32)imm8);
+	out_opinfo("CMP AL, %X", (uint32)imm8);
 #endif
 	INC_IP(1);
 	RET_GOOD;
@@ -1507,7 +1507,7 @@ int op_0x3d(){
 	if(execute_flag)
 		cmp_16(AX, imm16);
 #ifdef SHOW_DEBUG
-	out_opinfo("CMP AX, %X\n", (uint32)imm16);
+	out_opinfo("CMP AX, %X", (uint32)imm16);
 #endif
 	INC_IP(2);
 	RET_GOOD;
@@ -1523,7 +1523,7 @@ int op_0x38(){
 		cmp_8(rm8, r8);
 
 #ifdef SHOW_DEBUG
-	out_opinfo("CMP %s, %s\n", print_rm_val_8(OP_DS), text_regs[BREG(M_REG)]);
+	out_opinfo("CMP %s, %s", print_rm_val_8(OP_DS), text_regs[BREG(M_REG)]);
 #endif
 	INC_IP(1+disp_size);
 	RET_GOOD;
@@ -1539,7 +1539,7 @@ int op_0x39(){
 		cmp_16(rm16, r16);
 
 #ifdef SHOW_DEBUG
-	out_opinfo("CMP %s, %s\n", print_rm_val_16(OP_DS), text_regs[(M_REG)]);
+	out_opinfo("CMP %s, %s", print_rm_val_16(OP_DS), text_regs[(M_REG)]);
 #endif
 	INC_IP(1+disp_size);
 	RET_GOOD;
@@ -1555,7 +1555,7 @@ int op_0x3a(){
 	if(execute_flag)
 		cmp_8(r8, rm8);
 #ifdef SHOW_DEBUG
-	out_opinfo("CMP %s, %s\n", print_rm_val_8(OP_DS), text_regs[BREG(M_REG)]);
+	out_opinfo("CMP %s, %s", print_rm_val_8(OP_DS), text_regs[BREG(M_REG)]);
 #endif
 	INC_IP(1+disp_size);
 	RET_GOOD;
@@ -1570,7 +1570,7 @@ int op_0x3b(){
 	if(execute_flag)
 		cmp_16(r16, rm16);
 #ifdef SHOW_DEBUG
-	out_opinfo("CMP %s, %s\n", print_rm_val_16(OP_DS), text_regs[(M_REG)]);
+	out_opinfo("CMP %s, %s", print_rm_val_16(OP_DS), text_regs[(M_REG)]);
 #endif
 	INC_IP(1+disp_size);
 	RET_GOOD;

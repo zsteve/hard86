@@ -28,12 +28,18 @@ static clist dasm_list={ 0, 0, 0 };
 
 void dasm_print_op(char* str, va_list* v){
 	static char dasm_out[80];
-	char* dasm_list_out;
+
+	dasm_list_entry* e=(dasm_list_entry*)malloc(sizeof(dasm_list_entry));
+
 	vsprintf(dasm_out, str, *v);
 	/* must be freed upon list destroy */
-	dasm_list_out=(char*)malloc(sizeof(char)*(strlen(dasm_out)+1));
-	strcpy(dasm_list_out, dasm_out);
-	clist_push_back(&dasm_list, dasm_list_out);
+	e->line=(char*)malloc(sizeof(char)*(strlen(dasm_out)+1));
+	strcpy(e->line, dasm_out);
+
+	e->seg=CS;
+	e->addr=IP;
+
+	clist_push_back(&dasm_list, (void*)e);
 }
 
 /**
@@ -46,15 +52,19 @@ clist dasm_disassemble(int n_instr, uint16 initial_ip, uint16 initial_cs){
 	sys_state_type tmp_sys_state;
 	op_data_type tmp_op_data;
 	clist ret_list;
+
 	int i=0;
 
 	mutex_lock(sys_mutex);
+
+	execute_flag=0;
 
 	tmp_sys_state=sys_state;
 	tmp_op_data=op_data;
 
 	/* redirect output */
 	out_opinfo_ptr=&dasm_print_op;
+
 
 	/* clear list */
 	clist_destroy(&dasm_list);
@@ -74,6 +84,8 @@ clist dasm_disassemble(int n_instr, uint16 initial_ip, uint16 initial_cs){
 
 	sys_state=tmp_sys_state;
 	op_data=tmp_op_data;
+
+	execute_flag=1;
 
 	mutex_unlock(sys_mutex);
 

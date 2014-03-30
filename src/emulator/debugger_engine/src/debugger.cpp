@@ -90,4 +90,60 @@ namespace nsDebugger{
 		}
 	}
 
+	/**
+	 * @return true if already existing (overwritten)
+	 * @return false if not already existing
+	 */
+	bool Debugger::AddBreakpoint(uint32 addr){
+		bool exists=m_bpList.Exists(addr);
+		m_bpList[addr]=BreakpointList::Breakpoint(addr);
+		return exists;
+	}
+
+	/**
+	 * @return true for success
+	 * @return false for failure
+	 */
+	bool Debugger::RemoveBreakpoint(uint32 addr){
+		if(!m_bpList.Exists(addr)) return false;
+		m_bpList.erase(addr);
+		return true;
+	}
+
+	bool Debugger::ActivateBreakpoint(uint32 addr){
+		if(!m_bpList.Exists(addr)) return false;
+		m_bpList[addr].Activate();
+		return true;
+	}
+
+	bool Debugger::DeactivateBreakpoint(uint32 addr){
+		if(!m_bpList.Exists(addr)) return false;
+		m_bpList[addr].Deactivate();
+		return true;
+	}
+
+	bool Debugger::BreakpointExists(uint32 addr){
+		return m_bpList.Exists(addr);
+	}
+
+	void Debugger::ClearBreakpoints(){
+		m_bpList.clear();
+	}
+
+	bool Debugger::HasBreakpoints(){
+		return !m_bpList.empty();
+	}
+
+
+	BreakpointList::BreakpointList(){
+
+	}
+
+	BreakpointList::BreakpointList(const BreakpointList& src){
+		m_bpMap =src.m_bpMap;
+	}
+
+	BreakpointList::~BreakpointList(){
+
+	}
 }

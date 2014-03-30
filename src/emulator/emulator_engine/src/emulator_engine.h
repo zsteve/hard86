@@ -402,23 +402,7 @@ typedef int (*op_func)();
 
 void write_debug(char* file, int line, char* str);
 
-uint16 read_mem_16(uint32 addr);
-void write_mem_16(uint16 val, uint32 addr);
-uint8 read_mem_8(uint32 addr);
-void write_mem_8(uint8 val, uint32 addr);
-
-void write_io_port(uint8 val, uint16 port);
-uint8 read_io_port(uint16 port);
-
-void system_load_mem(uint8* data, uint32 size);
-
-void write_reg(int reg, uint16 val);
-uint16 read_reg(int reg);
-
 void out_opinfo(char* str, ...);
-
-void stack_push(uint16 val);
-uint16 stack_pop();
 
 /* TODO */
 

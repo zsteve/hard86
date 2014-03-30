@@ -4,6 +4,7 @@
 
 #include "../../emulator_engine/src/emulator_engine_interface.h"
 #include "../../emulator_engine/src/dasm/dasm.h"
+#include "../../emulator_engine/src/dasm/dasm_process.h"
 #include "../../../system/datastruct/clist/clist.h"
 #include "../../../global/defines.h"
 #include "../../../global/typedefs.h"
@@ -15,6 +16,11 @@ using namespace std;
 
 using namespace nsDebugger;
 using namespace nsVDev;
+using namespace nsDasmProcess;
+
+extern "C"{
+	extern sys_state_type sys_state;
+}
 
 long fsize(FILE *stream)
 {
@@ -43,8 +49,21 @@ int main(){
 	fclose(in_file);
 
 	sysMutex.Unlock();
+
 	system_init(sysMutex.GetHandle(), &Debugger::BreakPointHit, &Debugger::PreInstructionExecute, &Debugger::PostInstructionExecute);
 	system_load_mem(data, size);
+
+	clist c_dasm_list;
+	DasmList::ProcessDisassembly(c_dasm_list=dasm_disassemble(100, sys_state.ip, sys_state.cs));
+	clist_destroy(&c_dasm_list);
+
+	dbg->AddBreakpoint(GET_ADDR(0x100, 0x700));
+	dbg->ActivateBreakpoint(GET_ADDR(0x100, 0x700));
+
+	BreakpointList::iterator it=dbg->BreakpointBegin();
+	cout << hex << it->first << endl;
+	it++;
+
 	system_execute();
 
 	system_destroy();

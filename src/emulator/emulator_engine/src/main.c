@@ -8,7 +8,7 @@
 #include <conio.h>
 
 #include "../../../global/typedefs.h"
-#include "../../../system/multithreading/mutex/c/mutex.h"
+#include "../../../system/multithreading/mutex/c/cmutex.h"
 #include "emulator_engine_interface.h"
 #include "dasm/dasm.h"
 

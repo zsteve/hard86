@@ -54,6 +54,9 @@
     <ClCompile Include="..\..\..\..\system\datastruct\clist\clist.c">
       <Filter>Dependencies\clist</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\cpp_interface\emulator_cpp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\system\multithreading\mutex\c\mutex.h">
@@ -78,6 +81,9 @@
       <Filter>Dependencies\clist</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\dasm\dasm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\cpp_interface\emulator_cpp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

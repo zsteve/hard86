@@ -24,6 +24,9 @@ static void join(clist_node* a, clist_node* b){
 
 void clist_push_back(clist* c, void* data){
 	clist_node* e=(clist_node*)malloc(sizeof(clist_node));
+	if(!e){
+		abort();
+	}
 	e->data=data;
 	e->prev=0;
 	e->next=0;
@@ -38,6 +41,9 @@ void clist_push_back(clist* c, void* data){
 
 void clist_push_front(clist* c, void* data){
 	clist_node* e=(clist_node*)malloc(sizeof(clist_node));
+	if(!e){
+		abort();
+	}
 	e->data=data;
 	e->prev=0;
 	e->next=0;
@@ -76,10 +82,12 @@ void clist_end(clist* c){
 	c->curr=c->end;
 }
 
-void clist_next(clist* c){
+int clist_next(clist* c){
 	if(c->curr->next){
 		c->curr=c->curr->next;
+		return 0;
 	}
+	return -1;
 }
 
 void clist_prev(clist* c){
