@@ -1,5 +1,5 @@
 /**
-* @file disassembly processing functions
+* @file C++ disassembly interface and processing functions
 * Stephen Zhang, 2014
 */
 
@@ -15,14 +15,28 @@
 #include <iterator>
 
 #include "dasm.h"
+#include "../../../symbols_loader/src/sym_loader.h"
+
 #include "../../../../global/defines.h"
 #include "../../../../global/typedefs.h"
 
 #include "../../../../system/datastruct/clist/clist.h"
 
-namespace nsDasmProcess{
+namespace nsDasm{
 
 	using namespace std;
+
+	using namespace nsSymLoader;
+
+	class DasmList;
+
+	class Disassembler{
+	public:
+		Disassembler(){}
+		~Disassembler(){}
+
+		DasmList Disassemble(int nInstructions, uint16 initIP, uint16 initCS, SymbolData& symData);
+	};
 
 	/**
 	 * one line of disassembled code
@@ -118,7 +132,8 @@ namespace nsDasmProcess{
 		
 		// helper functions
 
-		static uint32 ProcessDasmEntry(DasmLine* e);
+		static uint32 ProcessJump(DasmLine* e);
+		static uint32 ProcessSymbol(DasmLine* e, SymbolData& symData);
 		static iterator FindEntry(uint32 searchAddr, iterator searchFrom, iterator searchBegin, iterator searchEnd);
 
 		int* m_copyCount;
@@ -142,7 +157,7 @@ namespace nsDasmProcess{
 
 		// static 
 
-		static DasmList ProcessDisassembly(clist dasmList);
+		static DasmList ProcessDisassembly(clist dasmList, SymbolData& symData);
 
 	private:
 	};

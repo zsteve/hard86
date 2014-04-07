@@ -25,10 +25,10 @@ namespace nsDeviceTest{
 
 	int VirtualDevice_AcceptEmulationMutex(MUTEX sysMutex, sys_state_ptr sysState){
 		mutex_lock(sysMutex);
-		cout << "!-------------------------------------------------------" << endl;
+		cout << "[VDEVTEST]-------------------------------------------------------" << endl;
 		cout << "VirtualDeviceTest now owns sysMutex" << endl;
 		cout << "Test : LOBYTE of AX " << hex << (int)(sysState->ax[0]) << endl;
-		cout << "!-------------------------------------------------------" << endl;
+		cout << "[VDEVTEST]-------------------------------------------------------" << endl;
 		mutex_unlock(sysMutex);
 		return 0;
 	}

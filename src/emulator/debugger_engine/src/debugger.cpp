@@ -59,10 +59,7 @@ namespace nsDebugger{
 	 * @param sysMutex system MUTEX
 	 */
 	void Debugger::BreakPointHit(MUTEX sysMutex, sys_state_ptr sysState){
-		cout << "Breakpoint Hit" << endl;
-		sys_state_ptr sys_state=get_system_state();
-		cout << "Press any key to continue..." << endl;
-		_getch();
+
 	}
 
 	/**
@@ -70,8 +67,7 @@ namespace nsDebugger{
 	 * @param sysMutex system MUTEX
 	 */
 	void Debugger::PreInstructionExecute(MUTEX sysMutex, sys_state_ptr sysState){
-		cout << "PreInstructionExecute" << endl;
-		sys_state_ptr sys_state=get_system_state();
+
 	}
 
 	/**
@@ -79,7 +75,7 @@ namespace nsDebugger{
 	 * @param sysMutex system MUTEX
 	 */
 	void Debugger::PostInstructionExecute(MUTEX sysMutex, sys_state_ptr sysState){
-		cout << "PostInstructionExecute" << endl;
+
 		sys_state_ptr sys_state=get_system_state();
 		/* update virtual devices */
 		if(!m_vdevList->empty()){

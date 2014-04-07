@@ -89,16 +89,19 @@ void set_of(int v){
 	FLAG_OF=v ? 1 : 0;
 }
 
+#define HAS_OVERFLOW(n, a, bits)\
+	((uint32)n+a) >> bits ? 1 : 0
+
 void setf_add16(uint16 a, uint16 b){
-	set_of(((uint32)a+b) >> 16 ? 1 : 0);
-	set_sf(((a+b) & 0x8000)>>15);
+	set_of(HAS_OVERFLOW(a, b, 16));
+	set_sf(((a+b) & BIT_15)>>15);
 	set_zf(a+b);
 	set_pf(a+b);
 	set_cf((uint32)a+b >> 16 ? 1 : 0);
 }
 
 void setf_add8(uint8 a, uint8 b){
-	set_of(((uint16)a+b) >> 8 ? 1 : 0);
+	set_of(HAS_OVERFLOW(a, b, 8));
 	set_sf(((a+b) & 0x80)>>7);
 	set_zf(a+b);
 	set_pf(a+b);
@@ -115,17 +118,210 @@ void setf_adc8(uint8 a, uint8 b, uint8 c){
 
 /* a - b */
 void setf_sub16(uint16 a, uint16 b){
-	set_of(((uint32)a-b) >> 16 ? 1 : 0);
-	set_sf(((a-b) & 0x8000)>>15);
+	set_of(HAS_OVERFLOW(a, -b, 16));
+	set_sf(((a-b) & BIT_15)>>15);
 	set_zf(a-b);
 	set_pf(a-b);
 	set_cf(a < b);
 }
 
 void setf_sub8(uint8 a, uint8 b){
-	set_of(((uint16)a-b) >> 8 ? 1 : 0);
+	set_of(HAS_OVERFLOW(a, -b, 8));
 	set_sf(((a-b) & 0x80)>>7);
 	set_zf(a-b);
 	set_pf(a-b);
 	set_cf(a < b);
 }
+
+void setf_mul8(uint8 a, uint8 b){
+	uint16 res=a*b;
+	if(HI_BYTE(res)){
+		set_of(1);
+		set_cf(1);
+	}
+	else{
+		set_of(0);
+		set_cf(0);
+	}
+}
+
+void setf_mul16(uint16 a, uint16 b){
+	uint32 res=a*b;
+	if(HI_WORD(res)){
+		set_of(1);
+		set_cf(1);
+	}
+	else{
+		set_of(0);
+		set_cf(0);
+	}
+}
+
+void setf_imul8(uint8 a, uint8 b){
+	uint16 res=a*b;
+	if(HI_BYTE(res)){
+		set_of(1);
+		set_cf(1);
+	}
+	else{
+		set_of(0);
+		set_cf(0);
+	}
+}
+
+void setf_imul16(uint16 a, uint16 b){
+	uint32 res=a*b;
+	if(HI_WORD(res)){
+		set_of(1);
+		set_cf(1);
+	}
+	else{
+		set_of(0);
+		set_cf(0);
+	}
+}
+
+
+/* a++ */
+void setf_inc8(uint8 n){
+	set_of(HAS_OVERFLOW(n, 1, 8));
+	set_sf(((n+1) & 0x80)>>7);
+	set_zf(n+1);
+	set_pf(n+1);
+}
+
+void setf_inc16(uint16 n){
+	set_of(HAS_OVERFLOW(n, 1, 16));
+	set_sf(((n+1) & BIT_15)>>15);
+	set_zf(n+1);
+	set_pf(n+1);
+}
+
+/* a-- */
+void setf_dec8(uint8 n){
+	set_of(HAS_OVERFLOW(n, -1, 8));
+	set_sf(((n-1) & 0x80)>>7);
+	set_zf(n-1);
+	set_pf(n-1);
+}
+
+void setf_dec16(uint16 n){
+	set_of(HAS_OVERFLOW(n, -1, 16));
+	set_sf(((n-1) & BIT_15)>>15);
+	set_zf(n-1);
+	set_pf(n-1);
+}
+
+void setf_neg8(uint8 n){
+	set_of(HAS_OVERFLOW(0, -n, 8));
+	set_sf(((-n) & 0x80)>>7);
+	set_zf(-n);
+	set_pf(-n);
+	set_cf(0);
+}
+
+void setf_neg16(uint16 n){
+	set_of(HAS_OVERFLOW(0, -n, 16));
+	set_sf(((n-1) & BIT_15)>>15);
+	set_zf(n-1);
+	set_pf(n-1);
+	set_cf(0);
+}
+
+void setf_shl8(uint8 n, uint8 s){
+	if(s==1){
+		// 1 bit shift
+		if((((n<<1) & 0x80)>>8)==FLAG_CF){
+			set_of(0);
+		}
+		else{
+			set_of(1);
+		}
+	}
+	set_sf(((n<<s) & 0x80)>>7);
+	set_zf(n<<s);
+	set_pf(n<<s);
+	set_cf((((uint16)n) << s) >> 7);
+}
+
+void setf_shl16(uint16 n, uint16 s){
+	if(s==1){
+		// 1 bit shift
+		if((((n<<1) & BIT_15)>>8)==FLAG_CF){
+			set_of(0);
+		}
+		else{
+			set_of(1);
+		}
+	}
+	set_sf(((n<<s) & BIT_15)>>15);
+	set_zf(n<<s);
+	set_pf(n<<s);
+	set_cf((((uint32)n) << s) >> 15);
+}
+
+void setf_shr8(uint8 n, uint8 s){
+	set_of(n & BIT_7);
+	set_sf(((n >> s) & 0x80) >> 7);
+	set_zf(n>>s);
+	set_pf(n>>s);
+	set_cf((((uint16)n << 8)>>s) & BIT_7);
+}
+
+void setf_shr16(uint16 n, uint8 s){
+	set_of(n & BIT_15);
+	set_sf(((n >> s) & BIT_15) >> 15);
+	set_zf(n>>s);
+	set_pf(n>>s);
+	set_cf((((uint32)n << 16)>>s) & BIT_15);
+}
+
+void setf_and8(uint8 a, uint8 b){
+	set_of(0);
+	set_sf((a & b) & BIT_7);
+	set_zf(a&b);
+	set_pf(a&b);
+	set_cf(0);
+}
+
+void setf_and16(uint16 a, uint16 b){
+	set_of(0);
+	set_sf((a & b) & BIT_15);
+	set_zf(a&b);
+	set_pf(a&b);
+	set_cf(0);
+}
+
+void setf_or8(uint8 a, uint8 b){
+	set_of(0);
+	set_sf((a | b) & BIT_7);
+	set_zf(a|b);
+	set_pf(a|b);
+	set_cf(0);
+}
+
+void setf_or16(uint16 a, uint16 b){
+	set_of(0);
+	set_sf((a | b) & BIT_15);
+	set_zf(a|b);
+	set_pf(a|b);
+	set_cf(0);
+}
+
+void setf_xor8(uint8 a, uint8 b){
+	set_of(0);
+	set_sf((a ^ b) & BIT_7);
+	set_zf(a ^ b);
+	set_pf(a ^ b);
+	set_cf(0);
+}
+
+void setf_xor16(uint16 a, uint16 b){
+	set_of(0);
+	set_sf((a ^ b) & BIT_15);
+	set_zf(a ^ b);
+	set_pf(a ^ b);
+	set_cf(0);
+}
+
+#undef HAS_OVERFLOW

@@ -6,6 +6,8 @@
 #ifndef EMULATOR_CPP_H
 #define EMULATOR_CPP_H
 
+#include "../emulator_engine_interface.h"
+
 #include "../../../../global/typedefs.h"
 #include "../../../../global/defines.h"
 #include "../../../../system/datastruct/clist/clist.h"
@@ -13,6 +15,11 @@
 #include "../../../../system/multithreading/mutex/cpp/mutex.h"
 
 namespace nsEmulator{
+
+	enum Regs{
+		ax, cx, dx, bx, sp, bp, si, di, cs, ss, ds, es, ip, flags,
+		al, cl, dl, bl, ah, ch, dh, bh
+	};
 
 	/**
 	 * Singleton Emulator class
@@ -37,8 +44,6 @@ namespace nsEmulator{
 									uint32 sysMemSize);
 
 		static Emulator* GetInstance();
-
-		void Reset();
 
 		// Instance functions
 

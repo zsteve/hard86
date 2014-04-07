@@ -26,7 +26,7 @@ Mutex::Mutex(void* hMutex){
 }
 
 Mutex::~Mutex(){
-	CloseHandle(m_hMutex);
+
 }
 
 void Mutex::Lock(){

@@ -47,6 +47,16 @@ DBGCALLBACK breakpoint_hit_callback;
 DBGCALLBACK pre_execute_callback;
 DBGCALLBACK post_execute_callback;
 
+/* default register values */
+#define DEFAULT_CS 0x700
+#define DEFAULT_IP 0x100
+#define DEFAULT_SS 0x700
+#define DEFAULT_SP 0xFFFE
+#define DEFAULT_DS 0x700
+#define DEFAULT_ES 0x700
+
+static int halt_flag=0;
+
 #define SET_RESERVED_FLAGS(state)\
 	state.f_bits.reserved_1=state.f_bits.reserved_4=1;\
 	state.f_bits.reserved_2=state.f_bits.reserved_3=0;
@@ -269,6 +279,13 @@ uint16 stack_pop(){
 	return val;
 }
 
+int stack_empty(){
+	if(sys_state.sp==DEFAULT_SP){
+		return 1;
+	}
+	return 0;
+}
+
 /* I/O port access */
 
 /**
@@ -330,12 +347,13 @@ int system_init(MUTEX sys_mutex_,
 	SET_RESERVED_FLAGS(sys_state);
 
 	/* initialize registers, default value is 0 */
-	CS=0x700;
-	IP=0x100;
-	SS=0x700;
-	SP=0xFFFE;
-	DS=0x700;
-	ES=0x700;
+
+	CS=DEFAULT_CS;
+	IP=DEFAULT_IP;
+	SS=DEFAULT_SS;
+	SP=DEFAULT_SP;
+	DS=DEFAULT_DS;
+	ES=DEFAULT_ES;
 	sys_state.f_bits.IOPL=0x0;	/* no IO protection */
 	sys_state.f_bits.NT=0;		/* no nested tasks */
 
@@ -349,6 +367,10 @@ int system_destroy(){
 		free(sys_state.io_bus);
 
 	return 0;
+}
+
+void system_halt(){
+	halt_flag=1;
 }
 
 sys_state_ptr get_system_state(){
@@ -365,14 +387,13 @@ void system_print_state(){
 	printf("O : %d\tD: %d\tI: %d\tT: %d\tS: %d\t Z: %d\tA: %d\t P: %d\tC: %d\n",
 		FLAG_OF, FLAG_DF, FLAG_IF, FLAG_TF, FLAG_SF, FLAG_ZF, FLAG_AF, FLAG_PF, FLAG_CF);
 	printf("----------------------------------------\n");
-
-	_getch();
+	//getch();
 }
 
 int system_execute(){
 	clist dasm_list;
 	int i;
-	int halt_flag=0;
+	extern int halt_flag;
 
 	while(!halt_flag){
 		pre_execute_callback(sys_mutex, &sys_state);

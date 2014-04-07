@@ -32,9 +32,9 @@ extern sys_state_type sys_state;
 extern char text_regs[22][6];
 
 int execute_flag=1;	/*	execute flag :
-						if true, opcodes will actually be executed.
-						otherwise, only disassembly will be printed
-					*/
+	if true, opcodes will actually be executed.
+	otherwise, only disassembly will be printed
+	*/
 
 /* physical address memory access */
 
@@ -80,10 +80,14 @@ int execute_flag=1;	/*	execute flag :
 #define RRELIP16(v)\
 	read_mem_16(sys_state.r_ip+v)
 
-/* macro for returning "good" (nothing happened!) */
-#define RET_GOOD return 0
+/* text register accessing */
+#define TEXTREG8(v)\
+	text_regs[BREG(v)]
 
-static uint32 disp_size;	/* size of displacement, can be 0, 1 or 2 */
+#define TEXTREG16(v)\
+	text_regs[v]
+
+static uint8 disp_size;	/* size of displacement, can be 0, 1 or 2 */
 
 uint16 get_rm_disp_size(){
 	/* assumes you have mod-reg-rm */
@@ -106,7 +110,7 @@ uint16 get_rm_disp_size(){
 		return disp_size;
 		break;
 	}
-	RET_GOOD;
+	return 0;
 }
 
 uint8 read_rm_val_8(uint16 seg){
@@ -162,7 +166,7 @@ uint8 read_rm_val_8(uint16 seg){
 		return RREG8(op_data.rm);
 		break;
 	}
-	RET_GOOD;
+	return 0;
 }
 
 uint16 read_rm_val_16(uint16 seg){
@@ -218,7 +222,7 @@ uint16 read_rm_val_16(uint16 seg){
 		return RREG8(op_data.rm);
 		break;
 	}
-	RET_GOOD;
+	return 0;
 }
 
 
@@ -324,7 +328,7 @@ char* print_rm_val_8(uint16 seg){
 			strcat(rm_val_str, "BX");
 			break;
 		}
-		strcat(rm_val_str, "] , ");
+		strcat(rm_val_str, "] + ");
 		if(op_data.mod==1){
 			strcat(rm_val_str, itoa(disp8, disp_str, 16));
 		}
@@ -387,13 +391,13 @@ int write_rm_val_8(uint8 val, uint16 seg){
 		end:
 		addr=GET_ADDR(addr & 0xffff, seg);
 		write_mem_8(val, addr);
-		RET_GOOD;
+		return;
 	case 3:
 		/* register addressing */
 		write_reg(BREG(op_data.rm), val);
 		break;
 	}
-	RET_GOOD;
+	return;
 }
 
 int write_rm_val_16(uint16 val, uint16 seg){
@@ -444,13 +448,13 @@ int write_rm_val_16(uint16 val, uint16 seg){
 		end:
 		addr=GET_ADDR(addr&0xffff, seg);
 		write_mem_16(val, addr);
-		RET_GOOD;
+		return;
 	case 3:
 		/* register addressing */
 		write_reg((op_data.rm), val);
 		break;
 	}
-	RET_GOOD;
+	return;
 }
 
 static void set_def_segs(){
@@ -542,10 +546,10 @@ void process_instr_prefixes(){
 	IP+=val;
 
 /* JMP rel8 */
-int op_0xeb(){
+void op_0xeb(){
 	int8 rel8=(int8)RRELIP8(1);	/* signed */
 #ifdef SHOW_DEBUG
-	out_opinfo("JMP %X", (IP+2+rel8));
+	out_opinfo("JMP %x", (IP+2+rel8));
 #endif
 	if(execute_flag){
 		SET_IP_REL(rel8+2);
@@ -553,28 +557,277 @@ int op_0xeb(){
 	else{
 		INC_IP(1);
 	}
-	RET_GOOD;
+	return;
 }
 
 /* JMP rel16 */
-int op_0xe9(){
+void op_0xe9(){
 	int16 rel16=(int16)RRELIP16(1);
 #ifdef SHOW_DEBUG
-	out_opinfo("JMP %X", (IP+3+rel16));
+	out_opinfo("JMP %x", (IP+3+rel16));
 #endif
 	if(execute_flag){
-		SET_IP_REL(rel16+2);
+		SET_IP_REL(rel16+3);
 	}
 	else{
 		INC_IP(2);
 	}
-	RET_GOOD;
+	return;
+}
+
+void jcc_8(int8 rel, int cond){
+	if(cond){
+		SET_IP_REL(rel+2);
+	}
+	else{
+		INC_IP(1);
+	}
+}
+
+/* JE rel8 */
+void op_0x74(){
+	int rel8=(char)RRELIP8(1);
+#ifdef SHOW_DEBUG
+	out_opinfo("JE %x", (IP+2+rel8));
+#endif
+	if(execute_flag){
+		jcc_8(rel8, FLAG_ZF);
+	}
+	else{
+		INC_IP(1);
+	}
+	return;
+}
+
+/* JNE/JNZ rel8 */
+void op_0x75(){
+	int rel8=(char)RRELIP8(1);
+#ifdef SHOW_DEBUG
+	out_opinfo("JNE %x", (IP+2+rel8));
+#endif
+	if(execute_flag){
+		jcc_8(rel8, !FLAG_ZF);
+	}
+	else{
+		INC_IP(1);
+	}
+	return;
+}
+
+/* JLE/JG rel8 */
+void op_0x7e(){
+	int rel8=(char)RRELIP8(1);
+#ifdef SHOW_DEBUG
+	out_opinfo("JLE %x", (IP+2+rel8));
+#endif
+	if(execute_flag){
+		jcc_8(rel8, FLAG_ZF || (FLAG_SF!=FLAG_OF));
+	}
+	else{
+		INC_IP(1);
+	}
+	return;
+}
+
+/* JL/JGE rel8 */
+void op_0x7c(){
+	int rel8=(char)RRELIP8(1);
+#ifdef SHOW_DEBUG
+	out_opinfo("JLE %x", (IP+2+rel8));
+#endif
+	if(execute_flag){
+		jcc_8(rel8, FLAG_SF!=FLAG_OF);
+	}
+	else{
+		INC_IP(1);
+	}
+	return;
+}
+
+/* JB/JNAE rel8 */
+void op_0x72(){
+	int rel8=(char)RRELIP8(1);
+#ifdef SHOW_DEBUG
+	out_opinfo("JB %x", (IP+2+rel8));
+#endif
+	if(execute_flag){
+		jcc_8(rel8, FLAG_CF);
+	}
+	else{
+		INC_IP(1);
+	}
+	return;
+}
+
+/* JBE/JNA rel8 */
+void op_0x76(){
+	int rel8=(char)RRELIP8(1);
+#ifdef SHOW_DEBUG
+	out_opinfo("JBE %x", (IP+2+rel8));
+#endif
+	if(execute_flag){
+		jcc_8(rel8, FLAG_CF | FLAG_ZF);
+	}
+	else{
+		INC_IP(1);
+	}
+	return;
+}
+
+/* JP/JPE rel8 */
+void op_0x7a(){
+	int rel8=(char)RRELIP8(1);
+#ifdef SHOW_DEBUG
+	out_opinfo("JP %x", (IP+2+rel8));
+#endif
+	if(execute_flag){
+		jcc_8(rel8, FLAG_PF);
+	}
+	else{
+		INC_IP(1);
+	}
+	return;
+}
+
+/* JO rel8 */
+void op_0x70(){
+	int rel8=(char)RRELIP8(1);
+#ifdef SHOW_DEBUG
+	out_opinfo("JO %x", (IP+2+rel8));
+#endif
+	if(execute_flag){
+		jcc_8(rel8, FLAG_OF);
+	}
+	else{
+		INC_IP(1);
+	}
+	return;
+}
+
+/* JS rel8 */
+void op_0x78(){
+	int rel8=(char)RRELIP8(1);
+#ifdef SHOW_DEBUG
+	out_opinfo("JS %x", (IP+2+rel8));
+#endif
+	if(execute_flag){
+		jcc_8(rel8, FLAG_SF);
+	}
+	else{
+		INC_IP(1);
+	}
+	return;
+}
+
+/* JNL rel8 */
+void op_0x7d(){
+	int rel8=(char)RRELIP8(1);
+#ifdef SHOW_DEBUG
+	out_opinfo("JNL %x", (IP+2+rel8));
+#endif
+	if(execute_flag){
+		jcc_8(rel8, FLAG_SF==FLAG_OF);
+	}
+	else{
+		INC_IP(1);
+	}
+	return;
+}
+
+/* JNLE rel8 */
+void op_0x7f(){
+	int rel8=(char)RRELIP8(1);
+#ifdef SHOW_DEBUG
+	out_opinfo("JNLE %x", (IP+2+rel8));
+#endif
+	if(execute_flag){
+		jcc_8(rel8, !FLAG_ZF && FLAG_SF==FLAG_OF);
+	}
+	else{
+		INC_IP(1);
+	}
+	return;
+}
+
+/* JNB/JAE rel8 */
+void op_0x73(){
+	int rel8=(char)RRELIP8(1);
+#ifdef SHOW_DEBUG
+	out_opinfo("JNB %x", (IP+2+rel8));
+#endif
+	if(execute_flag){
+		jcc_8(rel8, !FLAG_CF);
+	}
+	else{
+		INC_IP(1);
+	}
+	return;
+}
+
+/* JNBE/JA rel8 */
+void op_0x77(){
+	int rel8=(char)RRELIP8(1);
+#ifdef SHOW_DEBUG
+	out_opinfo("JA %x", (IP+2+rel8));
+#endif
+	if(execute_flag){
+		jcc_8(rel8, !FLAG_CF && !FLAG_ZF);
+	}
+	else{
+		INC_IP(1);
+	}
+	return;
+}
+
+/* JNP/JPO rel8 */
+void op_0x7b(){
+	int rel8=(char)RRELIP8(1);
+#ifdef SHOW_DEBUG
+	out_opinfo("JNP %x", (IP+2+rel8));
+#endif
+	if(execute_flag){
+		jcc_8(rel8, !FLAG_PF);
+	}
+	else{
+		INC_IP(1);
+	}
+	return;
+}
+
+/* JNO rel8 */
+void op_0x71(){
+	int rel8=(char)RRELIP8(1);
+#ifdef SHOW_DEBUG
+	out_opinfo("Jcc %x", (IP+2+rel8));
+#endif
+	if(execute_flag){
+		jcc_8(rel8, !FLAG_OF);
+	}
+	else{
+		INC_IP(1);
+	}
+	return;
+}
+
+/* JNS rel8 */
+void op_0x79(){
+	int rel8=(char)RRELIP8(1);
+#ifdef SHOW_DEBUG
+	out_opinfo("JNS %x", (IP+2+rel8));
+#endif
+	if(execute_flag){
+		jcc_8(rel8, !FLAG_SF);
+	}
+	else{
+		INC_IP(1);
+	}
+	return;
 }
 
 /** MOV Instructions **/
 
 /* MOV+ r16, imm16 */
-int op_0xb8(){
+void op_0xb8(){
 	uint16 imm16;
 	MOD_REG_RM(0);
 	/* r16 is in lower 3 bits of instruction */
@@ -583,14 +836,14 @@ int op_0xb8(){
 		WREG16(M_RM, imm16);
 
 #ifdef SHOW_DEBUG
-	out_opinfo("MOV %s, %X", text_regs[M_RM], (uint32)imm16);
+	out_opinfo("MOV %s, %x", text_regs[M_RM], (uint32)imm16);
 #endif
 	INC_IP(2);
-	RET_GOOD;
+	return;
 }
 
 /* MOV r/m8, r8 */
-int op_0x88(){
+void op_0x88(){
 	MOD_REG_RM(1);
 	if(execute_flag)
 		write_rm_val_8(RREG8(M_REG), OP_DS);
@@ -599,11 +852,11 @@ int op_0x88(){
 	out_opinfo("MOV %s, %s", print_rm_val_8(OP_DS), text_regs[BREG(M_REG)]);
 #endif
 	INC_IP(1+disp_size);
-	RET_GOOD;
+	return;
 }
 
 /* MOV r/m16, r16 */
-int op_0x89(){
+void op_0x89(){
 	MOD_REG_RM(1);
 	if(execute_flag)
 		write_rm_val_16(RREG16(M_REG), OP_DS);
@@ -612,11 +865,11 @@ int op_0x89(){
 	out_opinfo("MOV %s, %s", print_rm_val_16(OP_DS), text_regs[M_REG]);
 #endif
 	INC_IP(1+disp_size);
-	RET_GOOD;
+	return;
 }
 
 /* MOV r8, r/m8 */
-int op_0x8a(){
+void op_0x8a(){
 	uint8 rm8;
 	MOD_REG_RM(1);
 	rm8=read_rm_val_8(OP_DS);
@@ -626,12 +879,12 @@ int op_0x8a(){
 #ifdef SHOW_DEBUG
 	out_opinfo("MOV %s, %s", text_regs[BREG(M_REG)], print_rm_val_8(OP_DS));
 #endif
-	INC_IP(disp_size);
-	RET_GOOD;
+	INC_IP(1+disp_size);
+	return;
 }
 
 /* MOV r16, r/m16 */
-int op_0x8b(){
+void op_0x8b(){
 	uint8 rm16;
 	MOD_REG_RM(1);
 	rm16=read_rm_val_16(OP_DS);
@@ -642,11 +895,11 @@ int op_0x8b(){
 	out_opinfo("MOV %s, %s", text_regs[(M_REG)], print_rm_val_16(OP_DS));
 #endif
 	INC_IP(disp_size+1);
-	RET_GOOD;
+	return;
 }
 
 /* MOV r/m16, Sreg */
-int op_0x8c(){
+void op_0x8c(){
 	uint16 sreg;
 	MOD_REG_RM(1);
 	sreg=RREG16(M_REG);
@@ -657,11 +910,11 @@ int op_0x8c(){
 	out_opinfo("MOV %s, %s", print_rm_val_16(OP_DS), text_regs[M_REG]);
 #endif
 	INC_IP(disp_size+1);
-	RET_GOOD;
+	return;
 }
 
 /* MOV Sreg, r/m16 */
-int op_0x8e(){
+void op_0x8e(){
 	uint16 rm16;
 	MOD_REG_RM(1);
 	rm16=read_rm_val_16(OP_DS);
@@ -672,72 +925,72 @@ int op_0x8e(){
 	out_opinfo("MOV %s, %s", text_regs[M_REG], print_rm_val_16(OP_DS));
 #endif
 	INC_IP(disp_size+1);
-	RET_GOOD;
+	return;
 }
 
 /* MOV al, moffs8 */
-int op_0xa0(){
+void op_0xa0(){
 	uint16 moffs8=RRELIP16(1);
 	if(execute_flag)
 		AL=SRMEM8(moffs8, OP_DS);
 #ifdef SHOW_DEBUG
-	out_opinfo("MOV AL, [%X]", (uint32)moffs8);
+	out_opinfo("MOV AL, [%x]", (uint32)moffs8);
 #endif
 	INC_IP(2);
-	RET_GOOD;
+	return;
 }
 
 /* MOV AX, moffs16 */
-int op_0xa1(){
+void op_0xa1(){
 	uint16 moffs16=RRELIP16(1);
 	if(execute_flag)
 		AX=SRMEM16(moffs16, OP_DS);
 #ifdef SHOW_DEBUG
-	out_opinfo("MOV AL, [%X]", (uint32)moffs16);
+	out_opinfo("MOV AL, [%x]", (uint32)moffs16);
 #endif
 	INC_IP(2);
-	RET_GOOD;
+	return;
 }
 
 /* MOV moffs8, AL */
-int op_0xa2(){
+void op_0xa2(){
 	uint16 moffs8=RRELIP16(1);
 	if(execute_flag)
 		SWMEM8(AL, moffs8, OP_DS);
 #ifdef SHOW_DEBUG
-	out_opinfo("MOV [%X], AL", (uint32)moffs8);
+	out_opinfo("MOV [%x], AL", (uint32)moffs8);
 #endif
 	INC_IP(2);
-	RET_GOOD;
+	return;
 }
 
 /* MOV moffs16, AX */
-int op_0xa3(){
+void op_0xa3(){
 	uint16 moffs16=RRELIP16(1);
 	if(execute_flag)
 		SWMEM16(AX, moffs16, OP_DS);
 #ifdef SHOW_DEBUG
-	out_opinfo("MOV [%X], AX", (uint32)moffs16);
+	out_opinfo("MOV [%x], AX", (uint32)moffs16);
 #endif
 	INC_IP(2);
-	RET_GOOD;
+	return;
 }
 
 /* MOV+ r8, imm8 */
-int op_0xb0(){
+void op_0xb0(){
 	uint8 imm8=RRELIP8(1);
 	MOD_REG_RM(0);
 	if(execute_flag)
 		WREG8((M_RM), imm8);
 #ifdef SHOW_DEBUG
-	out_opinfo("MOV %s, %X", text_regs[BREG(M_RM)], (uint32)imm8);
+	out_opinfo("MOV %s, %x", text_regs[BREG(M_RM)], (uint32)imm8);
 #endif
 	INC_IP(1);
-	RET_GOOD;
+	return;
 }
 
 /* Various (?) */
-int op_0xc6(){
+void op_0xc6(){
 	uint8 op_ext;
 	MOD_REG_RM(1);
 	op_ext=M_REG;
@@ -750,17 +1003,17 @@ int op_0xc6(){
 				write_rm_val_8(imm8, OP_DS);
 
 #ifdef SHOW_DEBUG
-			out_opinfo("MOV %s, %X", print_rm_val_8(OP_DS), (uint32)imm8);
+			out_opinfo("MOV %s, %x", print_rm_val_8(OP_DS), (uint32)imm8);
 #endif
 			INC_IP(2+disp_size);
-			RET_GOOD;
+			return;
 		}
 	}
-	RET_GOOD;
+	return;
 }
 
 /* Various 0xc7 */
-int op_0xc7(){
+void op_0xc7(){
 	uint8 op_ext;
 	MOD_REG_RM(1);
 	op_ext=M_REG;
@@ -773,13 +1026,13 @@ int op_0xc7(){
 				 write_rm_val_16(imm16, OP_DS);
 
 #ifdef SHOW_DEBUG
-			  out_opinfo("MOV %s, %X", print_rm_val_16(OP_DS), (uint32)imm16);
+			  out_opinfo("MOV %s, %x", print_rm_val_16(OP_DS), (uint32)imm16);
 #endif
 			  INC_IP(3+disp_size);
-			  RET_GOOD;
+			  return;
 	}
 	}
-	RET_GOOD;
+	return;
 }
 
 uint16 add_16(uint16 a, uint16 b){
@@ -820,52 +1073,179 @@ uint8 cmp_8(uint8 a, uint8 b){
 	return sub_8(a, b);
 }
 
+uint16 mul_8(uint8 a, uint8 b){
+	setf_mul8(a, b);
+	return (uint16)a*b;
+}
+
+uint32 mul_16(uint16 a, uint16 b){
+	setf_mul16(a, b);
+	return (uint32)a*b;
+}
+
+int16 imul_8(int8 a, int8 b){
+	setf_imul8(a, b);
+	return (int8)a*b;
+}
+
+int32 imul_16(int16 a, int16 b){
+	setf_imul16(a, b);
+	return (int16)a*b;
+}
+
+uint8 inc_8(uint8 n){
+	setf_inc8(n);
+	return n+1;
+}
+
+uint16 inc_16(uint16 n){
+	setf_inc16(n);
+	return n+1;
+}
+
+uint8 dec_8(uint8 n){
+	setf_dec8(n);
+	return n-1;
+}
+
+uint16 dec_16(uint16 n){
+	setf_dec16(n);
+	return n-1;
+}
+
+uint8 and_8(uint8 a, uint8 b){
+	setf_and8(a, b);
+	return a&b;
+}
+
+uint16 and_16(uint16 a, uint16 b){
+	setf_and16(a, b);
+	return a&b;
+}
+
+uint8 or_8(uint8 a, uint8 b){
+	setf_or8(a, b);
+	return a|b;
+}
+
+uint16 or_16(uint16 a, uint16 b){
+	setf_or16(a, b);
+	return a|b;
+}
+
+uint8 xor_8(uint8 a, uint8 b){
+	setf_xor8(a, b);
+	return a^b;
+}
+
+uint16 xor_16(uint16 a, uint16 b){
+	setf_xor16(a, b);
+	return a^b;
+}
+
+void call_near_rel(int16 disp){
+	stack_push(IP);
+	IP=IP+disp;
+}
+
+void call_near_abs(uint16 addr){
+	stack_push(IP);
+	IP=addr;
+}
+
+void call_far_abs(uint16 seg, uint16 addr){
+	stack_push(CS);
+	stack_push(IP);
+	CS=seg;
+	IP=addr;
+}
+
+void ret_near(uint16 pop_count){
+	int i=0;
+	while(i++<pop_count){
+		stack_pop();
+	}
+	if(stack_empty()){
+		// terminate
+		printf("#### TERMINATE CONDITION ENCOUNTERED : SP = BASE ####\n");
+		getch();
+		exit(0);
+	}
+	IP=stack_pop();
+}
+
+
+void ret_far(uint16 pop_count){
+	int i=0;
+	while(i++<pop_count){
+		stack_pop();
+	}
+	if(stack_empty()){
+		// terminate
+	}
+	CS=stack_pop();
+	IP=stack_pop();
+}
+
 /* ADD AL, imm8 */
-int op_0x04(){
+void op_0x04(){
 	uint8 imm8=RRELIP16(1);
 	if(execute_flag)
 		AL=add_8(AL, imm8);
 
 #ifdef SHOW_DEBUG
-	out_opinfo("ADD AL, %X", (uint32)imm8);
+	out_opinfo("ADD AL, %x", (uint32)imm8);
 #endif
 	INC_IP(1);
-	RET_GOOD;
+	return;
 }
 
 /* ADD AX, imm16 */
-int op_0x05(){
+void op_0x05(){
 	uint16 imm16=RRELIP16(1);
 	if(execute_flag)
 		AX=add_16(AX, imm16);
 
 #ifdef SHOW_DEBUG
-	out_opinfo("ADD AX, %X", (uint32)imm16);
+	out_opinfo("ADD AX, %x", (uint32)imm16);
 #endif
 	INC_IP(2);
-	RET_GOOD;
+	return;
 }
 
 /* various 0x80 */
-int op_0x80(){
+void op_0x80(){
 	uint8 op_ext;
 	MOD_REG_RM(1);
 	op_ext=M_REG;
 	switch(op_ext){
 	case 0:
 		{
-			  /* ADD r/m8, imm8 */
-			  uint8 imm8=RRELIP8(2+get_rm_disp_size());
-			  uint8 rm8;
-			  rm8=read_rm_val_8(OP_DS);
-			  if(execute_flag)
-				  write_rm_val_8(add_8(rm8, imm8), OP_DS);
+			/* ADD r/m8, imm8 */
+			uint8 imm8=RRELIP8(2+get_rm_disp_size());
+			uint8 rm8;
+			rm8=read_rm_val_8(OP_DS);
+			if(execute_flag)
+				write_rm_val_8(add_8(rm8, imm8), OP_DS);
 
 #ifdef SHOW_DEBUG
-			  out_opinfo("ADD %s, %X", print_rm_val_8(OP_DS), (uint32)imm8);
+			out_opinfo("ADD %s, %x", print_rm_val_8(OP_DS), (uint32)imm8);
 #endif
-			  INC_IP(2+disp_size);
-			  RET_GOOD;
+			INC_IP(2+disp_size);
+			return;
+		}
+	case 1:
+		{
+			/* OR rm8, imm8 */
+			uint8 rm8, imm8;
+			rm8=read_rm_val_8(OP_DS);
+			imm8=RRELIP8(2+disp_size);
+			write_rm_val_8(or_8(rm8, imm8), OP_DS);
+			#ifdef SHOW_DEBUG
+			out_opinfo("OR %s, %x", print_rm_val_8(OP_DS), (uint32)imm8);
+			#endif
+			INC_IP(2+disp_size);
+			return;
 		}
 	case 2:
 		{
@@ -877,10 +1257,23 @@ int op_0x80(){
 				write_rm_val_8(adc_8(rm8, imm8), OP_DS);
 
 #ifdef SHOW_DEBUG
-			out_opinfo("ADC %s, %X", print_rm_val_8(OP_DS), (uint32)imm8);
+			out_opinfo("ADC %s, %x", print_rm_val_8(OP_DS), (uint32)imm8);
 #endif
 			INC_IP(2+disp_size);
-			RET_GOOD;
+			return;
+		}
+	case 4:
+		{
+			/* AND rm8, imm8 */
+			uint8 rm8, imm8;
+			rm8=read_rm_val_8(OP_DS);
+			imm8=RRELIP8(1+disp_size);
+			write_rm_val_8(and_8(rm8, imm8), OP_DS);
+#ifdef SHOW_DEBUG
+			out_opinfo("AND %s, %x", print_rm_val_8(OP_DS), (uint32)imm8);
+#endif
+			INC_IP(2+disp_size);
+			return;
 		}
 	case 5:
 		{
@@ -891,31 +1284,44 @@ int op_0x80(){
 			if(execute_flag)
 				write_rm_val_8(sub_8(rm8, imm8), OP_DS);
 #ifdef SHOW_DEBUG
-			out_opinfo("SUB %s, %X", print_rm_val_8(OP_DS), (uint32)imm8);
+			out_opinfo("SUB %s, %x", print_rm_val_8(OP_DS), (uint32)imm8);
 #endif
 			INC_IP(2+disp_size);
-			RET_GOOD;
+			return;
+		}
+	case 6:
+		{
+			/* XOR rm8, imm8 */
+			uint8 rm8, imm8;
+			rm8=read_rm_val_8(OP_DS);
+			imm8=RRELIP8(2+disp_size);
+			write_rm_val_8(xor_8(rm8, imm8), OP_DS);
+#ifdef SHOW_DEBUG
+			out_opinfo("XOR %s, %x", print_rm_val_8(OP_DS), (uint32)imm8);
+#endif
+			INC_IP(2+disp_size);
+			return;
 		}
 	case 7:
-	{
-			  /* CMP rm8, imm8 */
-			  uint8 rm8, imm8;
-			  rm8=read_rm_val_8(OP_DS);
-			  imm8=RRELIP8(2+get_rm_disp_size());
-			  if(execute_flag)
-				  cmp_8(rm8, imm8);
+		{
+			/* CMP rm8, imm8 */
+			uint8 rm8, imm8;
+			rm8=read_rm_val_8(OP_DS);
+			imm8=RRELIP8(2+get_rm_disp_size());
+			if(execute_flag)
+				cmp_8(rm8, imm8);
 #ifdef SHOW_DEBUG
-			  out_opinfo("CMP %s, %X", print_rm_val_8(OP_DS), (uint32)imm8);
+			out_opinfo("CMP %s, %x", print_rm_val_8(OP_DS), (uint32)imm8);
 #endif
-			  INC_IP(2+disp_size);
-			  RET_GOOD;
+			INC_IP(2+disp_size);
+			return;
+		}
 	}
-	}
-	RET_GOOD;
+	return;
 }
 
 /* Various 0x81 */
-int op_0x81(){
+void op_0x81(){
 	uint8 op_ext;
 	MOD_REG_RM(1);
 	op_ext=M_REG;
@@ -930,10 +1336,23 @@ int op_0x81(){
 				write_rm_val_16(add_16(rm16, imm16), OP_DS);
 
 #ifdef SHOW_DEBUG
-	out_opinfo("ADD %s, %X", print_rm_val_16(OP_DS), (uint32)imm16);
+	out_opinfo("ADD %s, %x", print_rm_val_16(OP_DS), (uint32)imm16);
 #endif
 			INC_IP(3+disp_size);
-			RET_GOOD;
+			return;
+		}
+	case 1:
+		{
+			/* OR rm16, imm16 */
+			uint16 rm16, imm16;
+			rm16=read_rm_val_16(OP_DS);
+			imm16=RRELIP16(2+disp_size);
+			write_rm_val_16(or_16(rm16, imm16), OP_DS);
+#ifdef SHOW_DEBUG
+			out_opinfo("OR %s, %x", print_rm_val_16(OP_DS), (uint32)imm16);
+#endif
+			INC_IP(2+disp_size);
+			return;
 		}
 	case 2:
 		{
@@ -946,48 +1365,74 @@ int op_0x81(){
 				write_rm_val_16(adc_16(rm16, imm16), OP_DS);
 
 #ifdef SHOW_DEBUG
-			out_opinfo("ADC %s, %X", print_rm_val_16(OP_DS), (uint32)imm16);
+			out_opinfo("ADC %s, %x", print_rm_val_16(OP_DS), (uint32)imm16);
 #endif
 			INC_IP(3+disp_size);
-			RET_GOOD;
+			return;
+		}
+	case 4:
+		{
+			/* AND rm16, imm16 */
+			uint16 rm16, imm16;
+			rm16=read_rm_val_16(OP_DS);
+			imm16=RRELIP16(1+disp_size);
+			write_rm_val_16(and_8(rm16, imm16), OP_DS);
+	#ifdef SHOW_DEBUG
+			out_opinfo("AND %s, %x", print_rm_val_8(OP_DS), (uint32)imm16);
+	#endif
+			INC_IP(3+disp_size);
+			return;
 		}
 	case 5:
-	{
-			  /* SUB rm16, imm16 */
-			  uint16 rm16, imm16;
-			  rm16=read_rm_val_16(OP_DS);
-			  imm16=RRELIP16(2+disp_size);
+		{
+			/* SUB rm16, imm16 */
+			uint16 rm16, imm16;
+			rm16=read_rm_val_16(OP_DS);
+			imm16=RRELIP16(2+disp_size);
 
-			  if(execute_flag)
-				 write_rm_val_16(sub_16(rm16, imm16), OP_DS);
+			if(execute_flag)
+				write_rm_val_16(sub_16(rm16, imm16), OP_DS);
 
+	#ifdef SHOW_DEBUG
+			out_opinfo("SUB %s, %x", print_rm_val_16(OP_DS), (uint32)imm16);
+	#endif
+			INC_IP(3+disp_size);
+			return;
+		}
+	case 6:
+		{
+			/* XOR rm16, imm16 */
+			uint16 rm16, imm16;
+			rm16=read_rm_val_16(OP_DS);
+			imm16=RRELIP16(2+disp_size);
+			write_rm_val_16(xor_16(rm16, imm16), OP_DS);
 #ifdef SHOW_DEBUG
-			  out_opinfo("SUB %s, %X", print_rm_val_16(OP_DS), (uint32)imm16);
+			out_opinfo("XOR %s, %x", print_rm_val_16(OP_DS), (uint32)imm16);
 #endif
-			  INC_IP(3+disp_size);
-			  RET_GOOD;
-	}
+			INC_IP(2+disp_size);
+			return;
+		}
 	case 7:
-	{
-			  /* CMP rm16, imm16 */
-			  uint16 rm16, imm16;
-			  rm16=read_rm_val_16(OP_DS);
-			  imm16=RRELIP16(2+disp_size);
-			  if(execute_flag)
-				  cmp_16(rm16, imm16);
+		{
+			/* CMP rm16, imm16 */
+			uint16 rm16, imm16;
+			rm16=read_rm_val_16(OP_DS);
+			imm16=RRELIP16(2+disp_size);
+			if(execute_flag)
+				cmp_16(rm16, imm16);
 
-#ifdef SHOW_DEBUG
-			  out_opinfo("CMP %s, %X", print_rm_val_16(OP_DS), (uint32)imm16);
-#endif
-			  INC_IP(3+disp_size);
-			  RET_GOOD;
+		#ifdef SHOW_DEBUG
+			out_opinfo("CMP %s, %x", print_rm_val_16(OP_DS), (uint32)imm16);
+		#endif
+			INC_IP(3+disp_size);
+			return;
+		}
 	}
-	}
-	RET_GOOD;
+	return;
 }
 
 /* Various 0x83 */
-int op_0x83(){
+void op_0x83(){
 	uint8 op_ext;
 	MOD_REG_RM(1);
 	op_ext=M_REG;
@@ -1003,10 +1448,23 @@ int op_0x83(){
 				write_rm_val_16(add_16(rm16, imm8), OP_DS);
 			  
 #ifdef SHOW_DEBUG
-			out_opinfo("ADD %s, %X", print_rm_val_16(OP_DS), (uint32)imm8);
+			out_opinfo("ADD %s, %x", print_rm_val_16(OP_DS), (uint32)imm8);
 #endif
 			INC_IP(2+disp_size);
-			RET_GOOD;
+			return;
+		}
+	case 1:
+		{
+			/* OR rm16, imm8 */
+			uint16 rm16, imm8;
+			rm16=read_rm_val_16(OP_DS);
+			imm8=signext8(RRELIP8(2+disp_size));
+			write_rm_val_16(or_16(rm16, imm8), OP_DS);
+#ifdef SHOW_DEBUG
+			out_opinfo("OR %s, %x", print_rm_val_16(OP_DS), (uint32)imm8);
+#endif
+			INC_IP(1+disp_size);
+			return;
 		}
 	case 2:
 		{
@@ -1019,13 +1477,27 @@ int op_0x83(){
 				write_rm_val_16(adc_16(rm16, imm8), OP_DS);
 
 #ifdef SHOW_DEBUG
-			out_opinfo("ADC %s, %X", print_rm_val_16(OP_DS), (uint32)imm8);
+			out_opinfo("ADC %s, %x", print_rm_val_16(OP_DS), (uint32)imm8);
 #endif
 			INC_IP(2+disp_size);
-			RET_GOOD;
+			return;
+		}
+	case 4:
+		{
+			/* AND rm16, imm8 */
+			uint16 rm16;
+			uint16 imm8;
+			rm16=read_rm_val_16(OP_DS);
+			imm8=signext8(RRELIP8(1+disp_size));
+			write_rm_val_16(and_16(rm16, imm8), OP_DS);
+	#ifdef SHOW_DEBUG
+			out_opinfo("AND %s, %x", print_rm_val_16(OP_DS), (uint32)imm8);
+	#endif
+			INC_IP(2+disp_size);
+			return;
 		}
 	case 5:
-	{
+		{
 			/* SUB r/m16, imm8 */
 			uint16 rm16;
 			uint8 imm8;
@@ -1035,33 +1507,46 @@ int op_0x83(){
 				write_rm_val_16(sub_16(rm16, signext8(imm8)), OP_DS);
 
 #ifdef SHOW_DEBUG
-			out_opinfo("SUB %s, %X", print_rm_val_16(OP_DS), (uint32)imm8);
+			out_opinfo("SUB %s, %x", print_rm_val_16(OP_DS), (uint32)imm8);
 #endif
 			INC_IP(2+disp_size);
-			RET_GOOD;
-	}
-	case 7:
-	{
-			  /* CMP r/m16, imm8 */
-			  uint16 rm16;
-			  uint8 imm8;
-			  rm16=read_rm_val_16(OP_DS);
-			  imm8=RRELIP8(2+disp_size);
-			  if(execute_flag)
-				cmp_16(rm16, signext8(imm8));
-
+			return;
+		}
+	case 6:
+		{
+			/* XOR rm16, imm8 */
+			uint16 rm16, imm8;
+			rm16=read_rm_val_16(OP_DS);
+			imm8=signext8(RRELIP8(2+disp_size));
+			write_rm_val_16(xor_16(rm16, imm8), OP_DS);
 #ifdef SHOW_DEBUG
-			  out_opinfo("CMP %s, %X", print_rm_val_16(OP_DS), (uint32)imm8);
+			out_opinfo("XOR %s, %x", print_rm_val_16(OP_DS), (uint32)imm8);
 #endif
-			  INC_IP(2+disp_size);
-			  RET_GOOD;
+			INC_IP(2+disp_size);
+			return;
+		}
+	case 7:
+		{
+			/* CMP r/m16, imm8 */
+			uint16 rm16;
+			uint8 imm8;
+			rm16=read_rm_val_16(OP_DS);
+			imm8=RRELIP8(2+disp_size);
+			if(execute_flag)
+			cmp_16(rm16, signext8(imm8));
+
+	#ifdef SHOW_DEBUG
+			out_opinfo("CMP %s, %x", print_rm_val_16(OP_DS), (uint32)imm8);
+	#endif
+			INC_IP(2+disp_size);
+			return;
+		}
 	}
-	}
-	RET_GOOD;
+	return;
 }
 
 /* ADD r/m8, r8 */
-int op_0x00(){
+void op_0x00(){
 	uint8 rm8, r8;
 	MOD_REG_RM(1);
 	rm8=read_rm_val_8(OP_DS);
@@ -1073,11 +1558,11 @@ int op_0x00(){
 	out_opinfo("ADD %s, %s", print_rm_val_8(OP_DS), text_regs[BREG(M_REG)]);
 #endif
 	INC_IP(1+disp_size);
-	RET_GOOD;
+	return;
 }
 
 /* ADD r/m16, r16 */
-int op_0x01(){
+void op_0x01(){
 	uint16 rm16, r16;
 
 	MOD_REG_RM(1);
@@ -1091,11 +1576,11 @@ int op_0x01(){
 	out_opinfo("ADD %s, %s", print_rm_val_16(OP_DS), text_regs[M_REG]);
 #endif
 	INC_IP(1+disp_size);
-	RET_GOOD;
+	return;
 }
 
 /* ADD r8, r/m8 */
-int op_0x02(){
+void op_0x02(){
 	uint8 r8, rm8;
 	MOD_REG_RM(1);
 	rm8=read_rm_val_8(OP_DS);
@@ -1107,11 +1592,11 @@ int op_0x02(){
 	out_opinfo("ADD %s, %s", print_rm_val_8(OP_DS), text_regs[BREG(M_REG)]);
 #endif
 	INC_IP(0+disp_size);
-	RET_GOOD;
+	return;
 }
 
 /* ADD r16, r/m16 */
-int op_0x03(){
+void op_0x03(){
 	uint16 r16, rm16;
 	MOD_REG_RM(1);
 	rm16=read_rm_val_16(OP_DS);
@@ -1123,36 +1608,36 @@ int op_0x03(){
 	out_opinfo("ADD %s, %s", print_rm_val_16(OP_DS), text_regs[M_REG]);
 #endif
 	INC_IP(0+disp_size);
-	RET_GOOD;
+	return;
 }
 
 /* ADC AL, imm8 */
-int op_0x14(){
+void op_0x14(){
 	uint8 imm8=RRELIP8(1);
 	if(execute_flag)
 		AL=adc_8(AL, imm8);
 #ifdef SHOW_DEBUG
-	out_opinfo("ADC AL, %X", (uint32)imm8);
+	out_opinfo("ADC AL, %x", (uint32)imm8);
 #endif
 	INC_IP(1);
-	RET_GOOD;
+	return;
 }
 
 /* ADC AX, imm16 */
-int op_0x15(){
+void op_0x15(){
 	uint16 imm16=RRELIP16(1);
 	if(execute_flag)
 		AX=adc_16(AX, imm16);
 
 #ifdef SHOW_DEBUG
-	out_opinfo("ADD AX, %X", (uint32)imm16);
+	out_opinfo("ADD AX, %x", (uint32)imm16);
 #endif
 	INC_IP(2);
-	RET_GOOD;
+	return;
 }
 
 /* ADC rm8, r8 */
-int op_0x10(){
+void op_0x10(){
 	uint8 rm8, r8;
 	MOD_REG_RM(1);
 	rm8=read_rm_val_8(OP_DS);
@@ -1164,11 +1649,11 @@ int op_0x10(){
 	out_opinfo("ADC %s, %s", print_rm_val_8(OP_DS), text_regs[BREG(M_REG)]);
 #endif
 	INC_IP(1+disp_size);
-	RET_GOOD;
+	return;
 }
 
 /* ADC rm16, r16 */
-int op_0x11(){
+void op_0x11(){
 	uint16 rm16, r16;
 	MOD_REG_RM(1);
 	rm16=read_rm_val_16(OP_DS);
@@ -1179,11 +1664,11 @@ int op_0x11(){
 	out_opinfo("ADD %s, %s", print_rm_val_16(OP_DS), text_regs[(op_data.reg)]);
 #endif
 	INC_IP(1+disp_size);
-	RET_GOOD;
+	return;
 }
 
 /* ADC r8, rm8 */
-int op_0x12(){
+void op_0x12(){
 	uint8 r8, rm8;
 	MOD_REG_RM(1);
 
@@ -1194,14 +1679,14 @@ int op_0x12(){
 		WREG8((M_REG), adc_8(r8, rm8));
 
 #ifdef SHOW_DEBUG
-	out_opinfo("ADC %s, %X", text_regs[BREG(M_REG)], (uint32)rm8);
+	out_opinfo("ADC %s, %x", text_regs[BREG(M_REG)], (uint32)rm8);
 #endif
 	INC_IP(1+disp_size);
-	RET_GOOD;
+	return;
 }
 
 /* ADC r16, rm16 */
-int op_0x13(){
+void op_0x13(){
 	uint16 r16, rm16;
 	MOD_REG_RM(1);
 
@@ -1215,15 +1700,65 @@ int op_0x13(){
 	out_opinfo("ADC %s, %s", print_rm_val_8(OP_DS), text_regs[op_data.reg]);
 #endif
 	INC_IP(1+disp_size);
-	RET_GOOD;
+	return;
 }
 
 /* Various 0xff */
-int op_0xff(){
+void op_0xff(){
 	uint8 op_ext;
 	MOD_REG_RM(1);
 	op_ext=M_REG;
 	switch(op_ext){
+	case 0:
+		{
+				/* INC rm16 */
+				uint16 rm16=read_rm_val_16(OP_DS);
+				write_rm_val_16(inc_16(rm16), OP_DS);
+#ifdef SHOW_DEBUG
+				out_opinfo("INC %s", print_rm_val_16(OP_DS));
+#endif
+				INC_IP(1+disp_size);
+				return;
+		}
+	case 1:
+		{
+			/* DEC rm16 */
+			uint16 rm16=read_rm_val_16(OP_DS);
+			write_rm_val_16(dec_16(rm16), OP_DS);
+#ifdef SHOW_DEBUG
+			out_opinfo("DEC %s", print_rm_val_16(OP_DS));
+#endif
+			INC_IP(1+disp_size);
+			return;
+		}
+	case 2:
+		{
+			/* CALL rm16 */
+			uint16 rm16=read_rm_val_16(OP_DS);
+#ifdef SHOW_DEBUG
+			out_opinfo("CALL %s", print_rm_val_16(OP_DS));
+#endif
+			INC_IP(1+disp_size);
+			if(execute_flag){
+				call_near_abs(rm16, 2+disp_size);
+			}
+			return;
+		}
+	case 3:
+		{
+			/* CALL m16:16 */
+			uint16 m16, offs16;
+			m16=RMEM16(RRELIP16(1));
+			offs16=RMEM16(RRELIP16(1)+2);
+			INC_IP(2);
+#ifdef SHOW_DEBUG
+			out_opinfo("CALL [%x]", RRELIP16(1));
+#endif
+			if(execute_flag){
+				call_far_abs(m16, offs16);
+			}
+			return;
+		}
 	case 6:
 		{
 			/* PUSH r/m16 */
@@ -1234,14 +1769,14 @@ int op_0xff(){
 			out_opinfo("PUSH %s", print_rm_val_8(OP_DS));
 #endif
 			INC_IP(1+disp_size);
-			RET_GOOD;
+			return;
 		}
 	}
-	RET_GOOD;
+	return;
 }
 
 /* PUSH+ r16 */
-int op_0x50(){
+void op_0x50(){
 	uint16 r16;
 	MOD_REG_RM(0);
 	r16=M_RM;
@@ -1251,35 +1786,35 @@ int op_0x50(){
 	out_opinfo("PUSH %s", text_regs[r16]);
 #endif
 	INC_IP(0);
-	RET_GOOD;
+	return;
 }
 
 /* PUSH imm8 */
-int op_0x6a(){
+void op_0x6a(){
 	uint8 imm8=RRELIP8(1);
 	if(execute_flag)
 		stack_push((uint16)imm8);
 #ifdef SHOW_DEBUG
-	out_opinfo("PUSH %X", (uint16)imm8);
+	out_opinfo("PUSH %x", (uint16)imm8);
 #endif
 	INC_IP(1);
-	RET_GOOD;
+	return;
 }
 
 /* PUSH imm16 */
-int op_0x68(){
+void op_0x68(){
 	uint16 imm16=RRELIP16(1);
 	if(execute_flag)
 		stack_push(imm16);
 #ifdef SHOW_DEBUG
-	out_opinfo("PUSH %X", imm16);
+	out_opinfo("PUSH %x", imm16);
 #endif
 	INC_IP(2);
-	RET_GOOD;
+	return;
 }
 
 /* Various 0x8f */
-int op_0x8f(){
+void op_0x8f(){
 	uint8 op_ext;
 	MOD_REG_RM(1);
 	op_ext=M_REG;
@@ -1293,14 +1828,14 @@ int op_0x8f(){
 			  out_opinfo("POP %s", print_rm_val_8(OP_DS));
 #endif
 			  INC_IP(1+disp_size);
-			  RET_GOOD;
+			  return;
 	}
 	}
-	RET_GOOD;
+	return;
 }
 
 /* POP+ r16 */
-int op_0x58(){
+void op_0x58(){
 	MOD_REG_RM(0);
 	if(execute_flag)
 		WREG16(M_RM, stack_pop());
@@ -1308,48 +1843,48 @@ int op_0x58(){
 	out_opinfo("POP %s", text_regs[M_RM]);
 #endif
 	INC_IP(0);
-	RET_GOOD;
+	return;
 }
 
 /* OUT imm8, AL */
-int op_0xe6(){
+void op_0xe6(){
 	uint8 imm8=RRELIP8(1);
 	if(execute_flag)
 		write_io_port(AL, (uint16)imm8);
 #ifdef SHOW_DEBUG
-	out_opinfo("OUT %X, AL", imm8);
+	out_opinfo("OUT %x, AL", imm8);
 #endif
 	INC_IP(1);
-	RET_GOOD;
+	return;
 }
 
 /* OUT imm8, AX */
-int op_0xe7(){
+void op_0xe7(){
 	uint8 imm8=RRELIP8(1);
 	if(execute_flag){
 		write_io_port(LO_BYTE(AX), imm8);
 		write_io_port(HI_BYTE(AX), imm8+1);
 	}
 #ifdef SHOW_DEBUG
-	out_opinfo("OUT %X, AX", imm8);
+	out_opinfo("OUT %x, AX", imm8);
 #endif
 	INC_IP(1);
-	RET_GOOD;
+	return;
 }
 
 /* OUT DX, AL */
-int op_0xee(){
+void op_0xee(){
 	if(execute_flag)
 		write_io_port(AL, DX);
 #ifdef SHOW_DEBUG
 	out_opinfo("OUT DX, AL");
 #endif
 	INC_IP(0);
-	RET_GOOD;
+	return;
 }
 
 /* OUT DX, AX */
-int op_0xef(){
+void op_0xef(){
 	if(execute_flag){
 		write_io_port(LO_BYTE(AX), DX);
 		write_io_port(HI_BYTE(AX), DX+1);
@@ -1358,23 +1893,23 @@ int op_0xef(){
 	out_opinfo("OUT DX, AX");
 #endif
 	INC_IP(0);
-	RET_GOOD;
+	return;
 }
 
 /* IN AL, imm8 */
-int op_0xe4(){
+void op_0xe4(){
 	uint8 imm8=RRELIP8(1);
 	if(execute_flag)
 		AL=read_io_port(imm8);
 #ifdef SHOW_DEBUG
-	out_opinfo("IN AL, %X", imm8);
+	out_opinfo("IN AL, %x", imm8);
 #endif
 	INC_IP(1);
-	RET_GOOD;
+	return;
 }
 
 /* IN AX, imm8 */
-int op_0xe5(){
+void op_0xe5(){
 	uint8 imm8=RRELIP8(1);
 	if(execute_flag){
 		AX=0;
@@ -1383,25 +1918,25 @@ int op_0xe5(){
 		AX|=read_io_port(imm8);
 	}
 #ifdef SHOW_DEBUG
-	out_opinfo("IN AX, %X", imm8);
+	out_opinfo("IN AX, %x", imm8);
 #endif
 	INC_IP(1);
-	RET_GOOD;
+	return;
 }
 
 /* IN AL, DX */
-int op_0xec(){
+void op_0xec(){
 	if(execute_flag)
 		AL=read_io_port(DX);
 #ifdef SHOW_DEBUG
 	out_opinfo("IN AL, DX");
 #endif
 	INC_IP(0);
-	RET_GOOD;
+	return;
 }
 
 /* IN AX, DX */
-int op_0xed(){
+void op_0xed(){
 	if(execute_flag){
 		AX=0;
 		AX|=read_io_port(DX+1);
@@ -1412,37 +1947,37 @@ int op_0xed(){
 	out_opinfo("IN AX, DX");
 #endif
 	INC_IP(0);
-	RET_GOOD;
+	return;
 }
 
 /* SUB AL, imm8 */
-int op_0x2c(){
+void op_0x2c(){
 	uint8 imm8=RRELIP8(1);
 	if(execute_flag)
 		AL=sub_8(AL, imm8);
 
 #ifdef SHOW_DEBUG
-	out_opinfo("SUB AL, %X", (uint32)imm8);
+	out_opinfo("SUB AL, %x", (uint32)imm8);
 #endif
 	INC_IP(1);
-	RET_GOOD;
+	return;
 }
 
 /* SUB AX, imm16 */
-int op_0x2d(){
+void op_0x2d(){
 	uint16 imm16=RRELIP16(1);
 	if(execute_flag)
 		AX=sub_16(AX, imm16);
 
 #ifdef SHOW_DEBUG
-	out_opinfo("SUB AX, %X", (uint32)imm16);
+	out_opinfo("SUB AX, %x", (uint32)imm16);
 #endif
 	INC_IP(2);
-	RET_GOOD;
+	return;
 }
 
 /* SUB rm8, r8 */
-int op_0x28(){
+void op_0x28(){
 	uint8 rm8, r8;
 	MOD_REG_RM(1);
 	rm8=read_rm_val_8(OP_DS);
@@ -1454,11 +1989,11 @@ int op_0x28(){
 	out_opinfo("SUB %s, %s", print_rm_val_8(OP_DS), text_regs[BREG(M_REG)]);
 #endif
 	INC_IP(1+disp_size);
-	RET_GOOD;
+	return;
 }
 
 /* SUB rm16, r16 */
-int op_0x29(){
+void op_0x29(){
 	uint16 rm16, r16;
 	MOD_REG_RM(1);
 	rm16=read_rm_val_16(OP_DS);
@@ -1470,11 +2005,11 @@ int op_0x29(){
 	out_opinfo("SUB %s, %s", print_rm_val_16(OP_DS), text_regs[M_REG]);
 #endif
 	INC_IP(1+disp_size);
-	RET_GOOD;
+	return;
 }
 
 /* SUB r16, rm16 */
-int op_0x2a(){
+void op_0x2a(){
 	uint16 r16, rm16;
 	MOD_REG_RM(1);
 	r16=RREG16(M_REG);
@@ -1486,35 +2021,35 @@ int op_0x2a(){
 	out_opinfo("SUB %s, %s", text_regs[M_REG], print_rm_val_16(OP_DS));
 #endif
 	INC_IP(1+disp_size);
-	RET_GOOD;
+	return;
 }
 
 /* CMP AL, imm8 */
-int op_0x3c(){
+void op_0x3c(){
 	uint8 imm8=RRELIP8(1);
 	if(execute_flag)
 		cmp_8(AL, imm8);
 #ifdef SHOW_DEBUG
-	out_opinfo("CMP AL, %X", (uint32)imm8);
+	out_opinfo("CMP AL, %x", (uint32)imm8);
 #endif
 	INC_IP(1);
-	RET_GOOD;
+	return;
 }
 
 /* CMP AX, imm16 */
-int op_0x3d(){
+void op_0x3d(){
 	uint16 imm16=RRELIP16(1);
 	if(execute_flag)
 		cmp_16(AX, imm16);
 #ifdef SHOW_DEBUG
-	out_opinfo("CMP AX, %X", (uint32)imm16);
+	out_opinfo("CMP AX, %x", (uint32)imm16);
 #endif
 	INC_IP(2);
-	RET_GOOD;
+	return;
 }
 
 /* CMP rm8, r8 */
-int op_0x38(){
+void op_0x38(){
 	uint8 rm8, r8;
 	MOD_REG_RM(1);
 	rm8=read_rm_val_8(OP_DS);
@@ -1526,11 +2061,11 @@ int op_0x38(){
 	out_opinfo("CMP %s, %s", print_rm_val_8(OP_DS), text_regs[BREG(M_REG)]);
 #endif
 	INC_IP(1+disp_size);
-	RET_GOOD;
+	return;
 }
 
 /* CMP rm16, r16 */
-int op_0x39(){
+void op_0x39(){
 	uint16 rm16, r16;
 	MOD_REG_RM(1);
 	rm16=read_rm_val_16(OP_DS);
@@ -1542,11 +2077,11 @@ int op_0x39(){
 	out_opinfo("CMP %s, %s", print_rm_val_16(OP_DS), text_regs[(M_REG)]);
 #endif
 	INC_IP(1+disp_size);
-	RET_GOOD;
+	return;
 }
 
 /* CMP r8, rm8 */
-int op_0x3a(){
+void op_0x3a(){
 	uint8 r8, rm8;
 	MOD_REG_RM(1);
 	rm8=read_rm_val_8(OP_DS);
@@ -1558,11 +2093,11 @@ int op_0x3a(){
 	out_opinfo("CMP %s, %s", print_rm_val_8(OP_DS), text_regs[BREG(M_REG)]);
 #endif
 	INC_IP(1+disp_size);
-	RET_GOOD;
+	return;
 }
 
 /* CMP r16, rm16 */
-int op_0x3b(){
+void op_0x3b(){
 	uint16 r16, rm16;
 	MOD_REG_RM(1);
 	rm16=read_rm_val_16(OP_DS);
@@ -1573,5 +2108,769 @@ int op_0x3b(){
 	out_opinfo("CMP %s, %s", print_rm_val_16(OP_DS), text_regs[(M_REG)]);
 #endif
 	INC_IP(1+disp_size);
-	RET_GOOD;
+	return;
+}
+
+/* various 0xFE */
+void op_0xfe(){
+	uint8 op_ext;
+	MOD_REG_RM(1);
+	op_ext=M_REG;
+	switch(op_ext){
+	case 0:
+		{
+			/* INC rm8 */
+			uint8 rm8=read_rm_val_8(OP_DS);
+			write_rm_val_8(inc_8(rm8), OP_DS);
+	#ifdef SHOW_DEBUG
+			out_opinfo("INC %s", print_rm_val_8(OP_DS));
+	#endif
+			INC_IP(1+disp_size);
+		return;
+		}
+	case 1:
+		{
+			/* DEC rm8 */
+			uint8 rm8=read_rm_val_8(OP_DS);
+			write_rm_val_8(dec_8(rm8), OP_DS);
+	#ifdef SHOW_DEBUG
+			out_opinfo("DEC %s", print_rm_val_8(OP_DS));
+	#endif
+			INC_IP(1+disp_size);
+			return;
+		}
+	}
+	return;
+}
+
+/* INC r16 */
+void op_0x40(){
+	MOD_REG_RM(0);
+	WREG16(M_RM, inc_16(RREG16(M_RM)));
+#ifdef SHOW_DEBUG
+	out_opinfo("INC %s", text_regs[M_RM]);
+#endif
+	INC_IP(0);
+	return;
+}
+
+/* DEC r16 */
+void op_0x48(){
+	MOD_REG_RM(0);
+	WREG16(M_RM, dec_16(RREG16(M_RM)));
+
+#ifdef SHOW_DEBUG
+	out_opinfo("DEC %s", text_regs[M_RM]);
+#endif
+	INC_IP(0);
+	return;
+}
+
+uint8 neg_8(uint8 a){
+	setf_neg8(a);
+	return -a;
+}
+
+uint16 neg_16(uint16 a){
+	setf_neg16(a);
+	return -a;
+}
+
+uint8 not_8(uint8 a){
+	return ~a;
+}
+
+uint16 not_16(uint16 a){
+	return ~a;
+}
+
+/* various 0xf6 */
+void op_0xf6(){
+	uint8 op_ext;
+	MOD_REG_RM(1);
+	op_ext=M_REG;
+	switch(op_ext){
+	case 2:
+	{
+		/* NOT rm8 */
+		uint8 rm8=read_rm_val_8(OP_DS);
+		write_rm_val_8(not_8(rm8), OP_DS);
+#ifdef SHOW_DEBUG
+		out_opinfo("NOT %s", print_rm_val_8(OP_DS));
+#endif
+		INC_IP(1+disp_size);
+		return;
+	}
+	case 3:
+	{
+		/* NEG rm8 */
+		uint8 rm8=read_rm_val_8(OP_DS);
+		write_rm_val_8(neg_8(rm8), OP_DS);
+#ifdef SHOW_DEBUG
+		out_opinfo("NEG %s", print_rm_val_8(OP_DS));
+#endif
+		INC_IP(1+disp_size);
+		return;
+	}
+	case 4:
+		{
+			/* MUL rm8 */
+			uint8 rm8=read_rm_val_8(OP_DS);
+			AX=mul_8(AL, rm8);
+	#ifdef SHOW_DEBUG
+			out_opinfo("MUL %s", print_rm_val_8(OP_DS));
+	#endif
+			INC_IP(1+disp_size);
+			return;
+		}
+	case 5:
+		{
+			/* IMUL rm8 */
+			int8 rm8=read_rm_val_8(OP_DS);
+			AX=imul_8(AL, rm8);
+	#ifdef SHOW_DEBUG
+			out_opinfo("IMUL %s", print_rm_val_8(OP_DS));
+	#endif
+			INC_IP(1+disp_size);
+			return;
+		}
+	case 6:
+		{
+			/* DIV rm8 */
+			if(execute_flag){
+				uint8 rm8=read_rm_val_8(OP_DS);
+				AH=AX % rm8;
+				AL=AX / rm8;
+			}
+#ifdef SHOW_DEBUG
+			out_opinfo("DIV %s", print_rm_val_8(OP_DS));
+#endif
+			INC_IP(1+disp_size);
+			return;
+		}
+	case 7:
+		{
+			/* IDIV rm8 */
+			if(execute_flag){
+				int8 rm8=read_rm_val_8(OP_DS);
+				AH=AX % rm8;
+				AL=AX / rm8;
+			}
+#ifdef SHOW_DEBUG
+			out_opinfo("IDIV %s", print_rm_val_8(OP_DS));
+#endif
+			INC_IP(1+disp_size);
+			return;
+		}
+	}
+	return;
+}
+
+/* various 0xf7 */
+void op_0xf7(){
+	uint8 op_ext;
+	MOD_REG_RM(1);
+	op_ext=M_REG;
+	switch(op_ext){
+	case 2:
+		{
+			/* NOT rm16 */
+			uint8 rm16=read_rm_val_16(OP_DS);
+			write_rm_val_16(not_16(rm16), OP_DS);
+#ifdef SHOW_DEBUG
+			out_opinfo("NOT %s", print_rm_val_16(OP_DS));
+#endif
+			INC_IP(1+disp_size);
+			return;
+		}
+	case 3:
+		{
+			/* NEG rm16 */
+			uint8 rm16=read_rm_val_16(OP_DS);
+			write_rm_val_16(neg_16(rm16), OP_DS);
+#ifdef SHOW_DEBUG
+			out_opinfo("NEG %s", print_rm_val_16(OP_DS));
+#endif
+			INC_IP(1+disp_size);
+			return;
+		}
+	case 4:
+		{
+			/* MUL rm16 */
+			uint16 rm16=read_rm_val_16(OP_DS);
+			uint32 res=mul_16(AX, rm16);
+			DX=HI_WORD(res);
+			AX=LO_WORD(res);
+#ifdef SHOW_DEBUG
+			out_opinfo("MUL %s", print_rm_val_16(OP_DS));
+#endif
+			INC_IP(1+disp_size);
+			return;
+		}
+	case 5:
+		{
+			/* IMUL rm16 */
+			int16 rm16=read_rm_val_16(OP_DS);
+			int32 res=imul_16(AX, rm16);
+			DX=HI_WORD(res);
+			AX=LO_WORD(res);
+#ifdef SHOW_DEBUG
+			out_opinfo("IMUL %s", print_rm_val_16(OP_DS));
+#endif
+			INC_IP(1+disp_size);
+			return;
+		}
+	case 6:
+		{
+			/* DIV rm16 */
+			if(execute_flag){
+				uint16 rm16=read_rm_val_16(OP_DS);
+				uint32 v=DWORD_B(DX, AX);
+				AX=v / rm16;
+				DX=v % rm16;
+			}
+#ifdef SHOW_DEBUG
+			out_opinfo("DIV %s", print_rm_val_16(OP_DS));
+#endif
+			INC_IP(1+disp_size);
+			return;
+		}
+	case 7:
+		{
+			/* IDIV rm16 */
+			if(execute_flag){
+				int16 rm16=read_rm_val_16(OP_DS);
+				int32 v=signext16(DWORD_B(DX, AX));
+				AX=v / rm16;
+				DX=v % rm16;
+			}
+#ifdef SHOW_DEBUG
+			out_opinfo("IDIV %s", print_rm_val_16(OP_DS));
+#endif
+			INC_IP(1+disp_size);
+			return;
+		}
+	}
+	return;
+}
+
+uint8 shl_8(uint8 a, uint8 s){
+	setf_shl8(a, s);
+	return a<<s;
+}
+
+uint16 shl_16(uint16 a, uint8 s){
+	setf_shl16(a, s);
+	return a<<s;
+}
+
+uint8 shr_8(uint8 n, uint8 s){
+	setf_shl8(n, s);
+	return n>>s;
+}
+
+uint16 shr_16(uint16 n, uint8 s){
+	setf_shr16(n, s);
+	return n>>s;
+}
+
+void op_0xd0(){
+	uint8 op_ext;
+	MOD_REG_RM(1);
+	op_ext=M_REG;
+	switch(op_ext){
+	case 4:
+		{
+			/* SAL rm8, 1 */
+			uint8 rm8;
+			rm8=read_rm_val_8(OP_DS);
+			write_rm_val_8(shl_8(rm8, 1), OP_DS);
+#ifdef SHOW_DEBUG
+			out_opinfo("SHL %s, 1", print_rm_val_8(OP_DS));
+#endif
+			INC_IP(1+disp_size);
+			return;
+		}
+	case 5:
+		{
+			/* SHR rm8, 1 */
+			  uint8 rm8;
+			  rm8=read_rm_val_8(OP_DS);
+			  write_rm_val_8(shr_8(rm8, 1), OP_DS);
+#ifdef SHOW_DEBUG
+			  out_opinfo("SHR %s, 1", print_rm_val_8(OP_DS));
+#endif
+			  INC_IP(1+disp_size);
+			  return;
+		}
+
+	}
+	return;
+}
+
+void op_0xd2(){
+	uint8 op_ext;
+	MOD_REG_RM(1);
+	op_ext=M_REG;
+	switch(op_ext){
+	case 4:
+	{
+			  /* SAL rm8, CL */
+			  uint8 rm8;
+			  rm8=read_rm_val_8(OP_DS);
+			  write_rm_val_8(shl_8(rm8, CL), OP_DS);
+#ifdef SHOW_DEBUG
+			  out_opinfo("SHL %s, CL", print_rm_val_8(OP_DS));
+#endif
+			  INC_IP(1+disp_size);
+			  return;
+	}
+	case 5:
+	{
+		{
+			/* SHR rm8, CL */
+			uint8 rm8;
+			rm8=read_rm_val_8(OP_DS);
+			write_rm_val_8(shr_8(rm8, CL), OP_DS);
+#ifdef SHOW_DEBUG
+			out_opinfo("SHR %s, 1", print_rm_val_8(OP_DS));
+#endif
+			INC_IP(1+disp_size);
+			return;
+		}
+	}
+	}
+	return;
+}
+
+void op_0xd1(){
+	uint8 op_ext;
+	MOD_REG_RM(1);
+	op_ext=M_REG;
+	switch(op_ext){
+	case 4:
+		{
+			/* SHL rm16, 1 */
+			uint16 rm16;
+			rm16=read_rm_val_16(OP_DS);
+			write_rm_val_8(shl_16(rm16, 1), OP_DS);
+#ifdef SHOW_DEBUG
+			out_opinfo("SHL %s, 1", print_rm_val_16(OP_DS));
+#endif
+			INC_IP(1+disp_size);
+			return;
+		}
+	case 5:
+		{
+			/* SHR rm16, 1 */
+			uint16 rm16;
+			rm16=read_rm_val_16(OP_DS);
+			write_rm_val_8(shr_16(rm16, 1), OP_DS);
+#ifdef SHOW_DEBUG
+			out_opinfo("SHR %s, 1", print_rm_val_16(OP_DS));
+#endif
+			INC_IP(1+disp_size);
+			return;
+		}
+	}
+	return;
+}
+
+void op_0xd3(){
+	uint8 op_ext;
+	MOD_REG_RM(1);
+	op_ext=M_REG;
+	switch(op_ext){
+	case 4:
+		{
+			/* SHL rm16, CL */
+			uint16 rm16;
+			rm16=read_rm_val_16(OP_DS);
+			write_rm_val_8(shl_16(rm16, CL), OP_DS);
+
+		#ifdef SHOW_DEBUG
+			out_opinfo("SHL %s, CL", print_rm_val_16(OP_DS));
+		#endif
+			INC_IP(1+disp_size);
+			return;
+		}
+	case 5:
+		{
+			/* SHR rm16, CL */
+			uint16 rm16;
+			rm16=read_rm_val_16(OP_DS);
+			write_rm_val_8(shr_16(rm16, CL), OP_DS);
+
+#ifdef SHOW_DEBUG
+			out_opinfo("SHR %s, CL", print_rm_val_16(OP_DS));
+#endif
+			INC_IP(1+disp_size);
+			return;
+		}
+	}
+	return;
+}
+
+void op_0xc0(){
+	uint8 op_ext;
+	MOD_REG_RM(1);
+	op_ext=M_REG;
+	switch(op_ext){
+	case 4:
+		{
+			/* SHL rm8, imm8 */
+			uint8 rm8, imm8;
+			rm8=read_rm_val_8(OP_DS);
+			imm8=RRELIP8(2+disp_size);
+			write_rm_val_8(shl_8(rm8, imm8), OP_DS);
+	#ifdef SHOW_DEBUG
+			out_opinfo("SHL %s, %X", print_rm_val_8(OP_DS), imm8);
+	#endif
+			INC_IP(2+disp_size);
+			return;
+	}
+	case 5:
+		{
+			/* SHR rm8, imm8 */
+			uint8 rm8, imm8;
+			rm8=read_rm_val_8(OP_DS);
+			imm8=RRELIP8(2+disp_size);
+			write_rm_val_8(shr_8(rm8, imm8), OP_DS);
+	#ifdef SHOW_DEBUG
+			out_opinfo("SHR %s, %X", print_rm_val_8(OP_DS), imm8);
+	#endif
+			INC_IP(2+disp_size);
+			return;
+		}
+	}
+	return;
+}
+
+void op_0xc1(){
+	uint8 op_ext;
+	MOD_REG_RM(1);
+	op_ext=M_REG;
+	switch(op_ext){
+	case 4:
+		{
+			/* SHL rm16, imm8 */
+			uint16 rm16;
+			uint8 imm8;
+			rm16=read_rm_val_16(OP_DS);
+			imm8=RRELIP8(2+disp_size);
+			write_rm_val_16(shl_16(rm16, imm8), OP_DS);
+#ifdef SHOW_DEBUG
+			out_opinfo("SHL %s, %X", print_rm_val_16(OP_DS), imm8);
+#endif
+			INC_IP(2+disp_size);
+			return;
+		}
+	case 5:
+		{
+			/* SHR rm16, imm8 */
+			uint16 rm16;
+			uint8 imm8;
+			rm16=read_rm_val_16(OP_DS);
+			imm8=RRELIP8(2+disp_size);
+			write_rm_val_16(shr_16(rm16, imm8), OP_DS);
+#ifdef SHOW_DEBUG
+			out_opinfo("SHR %s, %X", print_rm_val_16(OP_DS), imm8);
+#endif
+			INC_IP(2+disp_size);
+			return;
+		}
+	}
+	return;
+}
+
+/* AND AL, imm8 */
+void op_0x24(){
+	uint8 imm8=RRELIP8(1);
+	AL=and_8(AL, imm8);
+#ifdef SHOW_DEBUG
+	out_opinfo("AND AL, %x", imm8);
+#endif
+	INC_IP(1);
+	return;
+}
+
+/* AND AX, imm16 */
+void op_0x25(){
+	uint16 imm16=RRELIP16(1);
+	AX=and_16(AX, imm16);
+#ifdef SHOW_DEBUG
+	out_opinfo("AND AX, %x", imm16);
+#endif
+	INC_IP(2);
+	return;
+}
+
+/* AND rm8, r8 */
+void op_0x20(){
+	MOD_REG_RM(1);
+	uint8 rm8;
+	rm8=read_rm_val_8(OP_DS);
+	write_rm_val_8(and_8(rm8, RREG8(M_REG)), OP_DS);
+#ifdef SHOW_DEBUG
+	out_opinfo("AND %s, %s", print_rm_val_8(OP_DS), text_regs[BREG(M_REG)]);
+#endif
+	INC_IP(1+disp_size);
+	return;
+}
+
+/* AND rm16, r16 */
+void op_0x21(){
+	MOD_REG_RM(1);
+	uint16 rm16;
+	rm16=read_rm_val_16(OP_DS);
+	write_rm_val_16(and_16(rm16, RREG16(M_REG)), OP_DS);
+#ifdef SHOW_DEBUG
+	out_opinfo("AND %s, %s", print_rm_val_16(OP_DS), text_regs[M_REG]);
+#endif
+	INC_IP(1+disp_size);
+	return;
+}
+
+/* AND r8, rm8 */
+void op_0x22(){
+	MOD_REG_RM(1);
+	uint8 rm8;
+	rm8=read_rm_val_8(OP_DS);
+	WREG8(M_REG, and_8(RREG8(M_REG), rm8));
+#ifdef SHOW_DEBUG
+	out_opinfo("AND %s, %s", text_regs[BREG(M_REG)], print_rm_val_8(OP_DS));
+#endif
+	INC_IP(1+disp_size);
+	return;
+}
+
+/* AND r16, rm16 */
+void op_0x23(){
+	MOD_REG_RM(1);
+	uint16 rm16;
+	rm16=read_rm_val_16(OP_DS);
+	WREG16(M_REG, and_16(RREG16(M_REG), rm16));
+#ifdef SHOW_DEBUG
+	out_opinfo("AND %s, %s", text_regs[M_REG], print_rm_val_8(OP_DS));
+#endif
+	INC_IP(1+disp_size);
+	return;
+}
+
+/* OR AL, imm8 */
+void op_0x0c(){
+	uint8 imm8=RRELIP8(1);
+	AL=or_8(AL, imm8);
+#ifdef SHOW_DEBUG
+	out_opinfo("OR AL, %x", imm8);
+#endif
+	INC_IP(1);
+}
+
+/* OR AX, imm16 */
+void op_0x0d(){
+	uint16 imm16=RRELIP16(1);
+	AX=or_16(AX, imm16);
+#ifdef SHOW_DEBUG
+	out_opinfo("OR AX, %x", imm16);
+#endif
+	INC_IP(2);
+}
+
+/* OR rm8, r8 */
+void op_0x08(){
+	uint8 rm8;
+	MOD_REG_RM(1);
+	rm8=read_rm_val_8(OP_DS);
+	write_rm_val_8(or_8(RREG8(M_REG), rm8), OP_DS);
+#ifdef SHOW_DEBUG
+	out_opinfo("OR %s, %s", print_rm_val_8(OP_DS), TEXTREG8(M_REG));
+#endif
+	INC_IP(1+disp_size);
+}
+
+/* OR rm16, r16 */
+void op_0x09(){
+	uint16 rm16;
+	MOD_REG_RM(1);
+	rm16=read_rm_val_16(OP_DS);
+	write_rm_val_16(or_16(RREG8(M_REG), rm16), OP_DS);
+#ifdef SHOW_DEBUG
+	out_opinfo("OR %s, %s", print_rm_val_16(OP_DS), TEXTREG16(M_REG));
+#endif
+	INC_IP(1+disp_size);
+}
+
+/* OR r8, rm8 */
+void op_0x0a(){
+	uint8 rm8;
+	MOD_REG_RM(1);
+	rm8=read_rm_val_8(OP_DS);
+	write_rm_val_8(or_8(RREG8(M_REG), rm8), OP_DS);
+#ifdef SHOW_DEBUG
+	out_opinfo("OR %s, %s", TEXTREG8(M_REG), print_rm_val_8(OP_DS));
+#endif
+	INC_IP(1+disp_size);
+}
+
+/* OR r16, rm16 */
+void op_0x0b(){
+	uint16 rm16;
+	MOD_REG_RM(1);
+	rm16=read_rm_val_16(OP_DS);
+	write_rm_val_16(or_16(RREG16(M_REG), rm16), OP_DS);
+#ifdef SHOW_DEBUG
+	out_opinfo("OR %s, %s", TEXTREG16(M_REG), print_rm_val_16(OP_DS));
+#endif
+	INC_IP(1+disp_size);
+}
+
+/* XOR AL, imm8 */
+void op_0x34(){
+	uint8 imm8=RRELIP8(1);
+	AL=xor_8(AL, imm8);
+#ifdef SHOW_DEBUG
+	out_opinfo("XOR AL, %x", imm8);
+#endif
+	INC_IP(1);
+}
+
+/* XOR AX, imm16 */
+void op_0x35(){
+	uint16 imm16=RRELIP16(1);
+	AX=xor_16(AX, imm16);
+#ifdef SHOW_DEBUG
+	out_opinfo("XOR AX, %x", imm16);
+#endif
+	INC_IP(2);
+}
+
+/* XOR rm8, r8 */
+void op_0x30(){
+	uint8 rm8;
+	MOD_REG_RM(1);
+	rm8=read_rm_val_8(OP_DS);
+	write_rm_val_8(or_8(RREG8(M_REG), rm8), OP_DS);
+#ifdef SHOW_DEBUG
+	out_opinfo("XOR %s, %s", print_rm_val_8(OP_DS), TEXTREG8(M_REG));
+#endif
+	INC_IP(1+disp_size);
+}
+
+/* XOR rm16, r16 */
+void op_0x31(){
+	uint16 rm16;
+	MOD_REG_RM(1);
+	rm16=read_rm_val_16(OP_DS);
+	write_rm_val_16(or_16(RREG8(M_REG), rm16), OP_DS);
+#ifdef SHOW_DEBUG
+	out_opinfo("XOR %s, %s", print_rm_val_16(OP_DS), TEXTREG16(M_REG));
+#endif
+	INC_IP(1+disp_size);
+}
+
+/* XOR r8, rm8 */
+void op_0x32(){
+	uint8 rm8;
+	MOD_REG_RM(1);
+	rm8=read_rm_val_8(OP_DS);
+	write_rm_val_8(xor_8(RREG8(M_REG), rm8), OP_DS);
+#ifdef SHOW_DEBUG
+	out_opinfo("XOR %s, %s", TEXTREG8(M_REG), print_rm_val_8(OP_DS));
+#endif
+	INC_IP(1+disp_size);
+}
+
+/* XOR r16, rm16 */
+void op_0x33(){
+	uint16 rm16;
+	MOD_REG_RM(1);
+	rm16=read_rm_val_16(OP_DS);
+	write_rm_val_16(xor_16(RREG16(M_REG), rm16), OP_DS);
+#ifdef SHOW_DEBUG
+	out_opinfo("XOR %s, %s", TEXTREG16(M_REG), print_rm_val_16(OP_DS));
+#endif
+	INC_IP(1+disp_size);
+}
+
+/* CALL rel16 */
+void op_0xe8(){
+	int16 rel16;
+	rel16=RRELIP16(1);
+#ifdef SHOW_DEBUG
+	out_opinfo("CALL %x", IP+3+rel16);
+#endif
+	INC_IP(2);
+	if(execute_flag){
+		call_near_rel(rel16, 3);
+	}
+}
+
+/* CALL ptr16:16 */
+void op_0x9a(){
+	uint16 ptr16, offs16;
+	ptr16=RRELIP16(1);
+	offs16=RRELIP16(3);
+
+#ifdef SHOW_DEBUG
+	out_opinfo("CALL %x:%x", ptr16, offs16);
+#endif
+	INC_IP(4);
+	if(execute_flag){
+		call_far_abs(ptr16, offs16, 5);
+	}
+}
+
+/* RET */
+void op_0xc3(){
+#ifdef SHOW_DEBUG
+	out_opinfo("RET");
+#endif
+	if(execute_flag){
+		ret_near(0);
+	}
+	else{
+		INC_IP(0);
+	}
+}
+
+/* RETF */
+void op_0xcb(){
+#ifdef SHOW_DEBUG
+	out_opinfo("RETF");
+#endif
+	if(execute_flag){
+		ret_far(0);
+	}
+	else{
+		INC_IP(0);
+	}
+}
+
+/* RET imm16 */
+void op_0xc2(){
+	uint16 imm16=RRELIP16(1);
+#ifdef SHOW_DEBUG
+	out_opinfo("RET %x", imm16);
+#endif
+	if(execute_flag){
+		ret_near(imm16);
+	}
+	else{
+		INC_IP(2);
+	}
+}
+
+/* RETF imm16 */
+void op_0xca(){
+	uint16 imm16=RRELIP16(1);
+#ifdef SHOW_DEBUG
+	out_opinfo("RETF %x", imm16);
+#endif
+	if(execute_flag){
+		ret_far(imm16);
+	}
+	else{
+		INC_IP(2);
+	}
 }

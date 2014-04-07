@@ -104,6 +104,8 @@ int system_init(MUTEX sys_mutex_,
 int system_destroy();
 int system_execute();
 
+void system_halt();
+
 sys_state_ptr get_system_state();
 
 uint16 read_mem_16(uint32 addr);
@@ -121,6 +123,7 @@ uint16 read_reg(int reg);
 
 void stack_push(uint16 val);
 uint16 stack_pop();
+int stack_empty();
 
 #ifdef __cplusplus
 }

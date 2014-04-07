@@ -43,6 +43,12 @@
     <Filter Include="device_test">
       <UniqueIdentifier>{ee7ad64e-453a-4704-b2bf-3bcdc261a398}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\sym_loader">
+      <UniqueIdentifier>{e9066905-5b8b-4c37-8c6d-e752e03e7cc2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\sym_loader">
+      <UniqueIdentifier>{5725ee82-09b3-4185-81eb-b4955ba28300}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\emulator_engine\src\emulator_engine.c">
@@ -81,11 +87,14 @@
     <ClCompile Include="..\..\src\device_test\device_test.cpp">
       <Filter>device_test</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\emulator_engine\src\dasm\dasm_process.cpp">
-      <Filter>Source Files\emulator_engine</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\emulator_engine\src\cpp_interface\emulator_cpp.cpp">
       <Filter>Source Files\emulator_engine\Emulator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\emulator_engine\src\dasm\dasm_cpp.cpp">
+      <Filter>Source Files\emulator_engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\symbols_loader\src\sym_loader.cpp">
+      <Filter>Source Files\sym_loader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -125,11 +134,14 @@
     <ClInclude Include="..\..\src\device_test\device_test.h">
       <Filter>device_test</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\emulator_engine\src\dasm\dasm_process.h">
-      <Filter>Header Files\emulator_engine</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\emulator_engine\src\cpp_interface\emulator_cpp.h">
       <Filter>Header Files\emulator_engine\Emulator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\emulator_engine\src\dasm\dasm_cpp.h">
+      <Filter>Header Files\emulator_engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\symbols_loader\src\sym_loader.h">
+      <Filter>Header Files\sym_loader</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

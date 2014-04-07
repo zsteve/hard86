@@ -6,6 +6,7 @@ extern "C"{
 #endif
 
 unsigned short signext8(unsigned char a);
+unsigned long signext16(unsigned short a);
 
 #ifdef __cplusplus
 }

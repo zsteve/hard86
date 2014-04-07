@@ -29,20 +29,38 @@ void set_sf8(uint8 v);
 void set_sf16(uint16 v);
 void set_of(int v);
 
-#define SETF_ADD_PROTO(name, type)\
+#define SETF_2OP_PROTO(name, type)\
 	void name(type a, type b);
 
-#define SETF_ADC_PROTO(name, type)\
+#define SETF_3OP_PROTO(name, type)\
 	void name(type a, type b, type c);
 
-#define SETF_SUB_PROTO(name, type)\
-	void name(type a, type b);
+#define SETF_1OP_PROTO(name, type)\
+	void name(type a);
 
-SETF_ADD_PROTO(setf_add8, uint8)
-SETF_ADD_PROTO(setf_add16, uint16)
-SETF_ADC_PROTO(setf_adc8, uint8)
-SETF_ADC_PROTO(setf_adc16, uint16)
-SETF_SUB_PROTO(setf_sub8, uint8)
-SETF_SUB_PROTO(setf_sub16, uint16)
+SETF_2OP_PROTO(setf_add8, uint8)
+SETF_2OP_PROTO(setf_add16, uint16)
+SETF_3OP_PROTO(setf_adc8, uint8)
+SETF_3OP_PROTO(setf_adc16, uint16)
+SETF_2OP_PROTO(setf_sub8, uint8)
+SETF_2OP_PROTO(setf_sub16, uint16)
+SETF_1OP_PROTO(setf_inc8, uint8)
+SETF_1OP_PROTO(setf_inc16, uint16)
+SETF_1OP_PROTO(setf_dec8, uint8)
+SETF_1OP_PROTO(setf_dec16, uint16)
+SETF_1OP_PROTO(setf_neg8, uint8);
+SETF_1OP_PROTO(setf_neg16, uint16);
+SETF_2OP_PROTO(setf_shl8, uint8);
+SETF_2OP_PROTO(setf_shl16, uint16);
+SETF_2OP_PROTO(setf_shr8, uint8);
+SETF_2OP_PROTO(setf_shr16, uint16);
+SETF_2OP_PROTO(setf_and8, uint8);
+SETF_2OP_PROTO(setf_and16, uint16);
+SETF_2OP_PROTO(setf_or8, uint8);
+SETF_2OP_PROTO(setf_or16, uint16);
+SETF_2OP_PROTO(setf_xor8, uint8);
+SETF_2OP_PROTO(setf_xor16, uint16);
+SETF_2OP_PROTO(setf_mul8, uint8);
+SETF_2OP_PROTO(setf_mul16, uint16);
 
 #endif

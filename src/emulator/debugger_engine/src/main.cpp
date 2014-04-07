@@ -2,10 +2,9 @@
 
 #include "debugger.h"
 
-#include "../../emulator_engine/src/emulator_engine_interface.h"
-#include "../../emulator_engine/src/dasm/dasm.h"
-#include "../../emulator_engine/src/dasm/dasm_process.h"
-#include "../../../system/datastruct/clist/clist.h"
+#include "../../emulator_engine/src/cpp_interface/emulator_cpp.h"
+#include "../../emulator_engine/src/dasm/dasm_cpp.h"
+#include "../../symbols_loader/src/sym_loader.h"
 #include "../../../global/defines.h"
 #include "../../../global/typedefs.h"
 #include "../../../system/multithreading/mutex/cpp/mutex.h"
@@ -16,11 +15,9 @@ using namespace std;
 
 using namespace nsDebugger;
 using namespace nsVDev;
-using namespace nsDasmProcess;
-
-extern "C"{
-	extern sys_state_type sys_state;
-}
+using namespace nsDasm;
+using namespace nsEmulator;
+using namespace nsSymLoader;
 
 long fsize(FILE *stream)
 {
@@ -48,25 +45,40 @@ int main(){
 	fread(data, 1, size, in_file);
 	fclose(in_file);
 
+	// load FAS symbols file
+	uint8* fas_data;
+	int fas_size;
+	{
+		FILE* fas_file=fopen("test/test.fas", "r");
+		fas_size=fsize(fas_file);
+		fas_data=(uint8*)malloc(fas_size);
+		fread(fas_data, 1, fas_size, fas_file);
+		fclose(fas_file);
+	}
+
+	SymbolData symbolData(fas_data, fas_size);
+
 	sysMutex.Unlock();
 
-	system_init(sysMutex.GetHandle(), &Debugger::BreakPointHit, &Debugger::PreInstructionExecute, &Debugger::PostInstructionExecute);
-	system_load_mem(data, size);
+	Emulator& emulator=*Emulator::GetInstance(sysMutex,
+		Debugger::BreakPointHit,
+		Debugger::PreInstructionExecute,
+		Debugger::PostInstructionExecute,
+		data,
+		size);
 
-	clist c_dasm_list;
-	DasmList::ProcessDisassembly(c_dasm_list=dasm_disassemble(100, sys_state.ip, sys_state.cs));
-	clist_destroy(&c_dasm_list);
 
-	dbg->AddBreakpoint(GET_ADDR(0x100, 0x700));
-	dbg->ActivateBreakpoint(GET_ADDR(0x100, 0x700));
+	Disassembler dasm;
+	DasmList l=dasm.Disassemble(100, emulator.ReadReg(Regs::ip), emulator.ReadReg(Regs::cs), symbolData);
+	for(DasmList::iterator it=l.begin();
+		it!=l.end();
+		++it){
+		cout << "DASM :: " << hex << it->GetAddr() << " : " << it->GetLine() << endl;
+	}
 
-	BreakpointList::iterator it=dbg->BreakpointBegin();
-	cout << hex << it->first << endl;
-	it++;
+	emulator.Execute();
 
-	system_execute();
-
-	system_destroy();
+	emulator.Reset();
 
 	free(data);
 

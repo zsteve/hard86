@@ -1,15 +1,23 @@
 /**
-* @file disassembly processing functions
+* @file C++ disassembly interface and processing functions
 * Stephen Zhang, 2014
 */
 
-#include "dasm_process.h"
+#include "dasm_cpp.h"
 
 #include <iostream>
 
-namespace nsDasmProcess{
+namespace nsDasm{
 
 	using namespace std;
+	using namespace nsSymLoader;
+
+	// Disassembler
+	DasmList Disassembler::Disassemble(int nInstructions, uint16 initIP, uint16 initCS, SymbolData& symData){
+		clist cDasmList=dasm_disassemble(nInstructions, initIP, initCS);
+		DasmList dasmList=DasmList::ProcessDisassembly(cDasmList, symData);
+		return dasmList;
+	}
 
 	// DasmList
 
@@ -81,7 +89,7 @@ namespace nsDasmProcess{
 	 * @param e pointer to DasmLine object in question
 	 * @return address if present, or -1 if not jumping instruction.
 	 */
-	uint32 DasmList::ProcessDasmEntry(DasmLine* const e){
+	uint32 DasmList::ProcessJump(DasmLine* const e){
 		static string strs[14]={
 			"JMP",
 			"JE",
@@ -112,6 +120,39 @@ namespace nsDasmProcess{
 			}
 		}
 		return -1;
+	}
+
+	uint32 DasmList::ProcessSymbol(DasmLine* e, SymbolData& symData){
+		for(SymbolData::iterator it=symData.begin();
+			it!=symData.end();
+			++it){
+
+			char value[80];
+			itoa((*it).Value(), value, 16);
+			string valueStr=string(value);
+
+			vector<int> indexes;
+			int last=0;
+			while(last!=string::npos){
+				last=e->GetLine().find(valueStr, last+1);
+				if(last!=string::npos){
+					indexes.push_back(last);
+				}
+			}
+			for(vector<int>::iterator vit=indexes.begin();
+				vit!=indexes.end();
+				++vit){
+				e->GetLine().replace(*vit, valueStr.size(), (*it).Name());
+
+				int sizeDiff=(*it).Name().size()-valueStr.size();
+				for(vector<int>::iterator _vit=vit;
+					_vit!=indexes.end();
+					++_vit){
+					(*vit)+=sizeDiff;
+				}
+			}
+		}
+		return 0;
 	}
 
 
@@ -156,6 +197,8 @@ namespace nsDasmProcess{
 		while(lBound<uBound){
 			DasmList::iterator mid=lBound+(uBound-lBound)/2;
 			if(searchAddr==mid->GetAddr()){
+				cout << "Found DasmList entry : " << endl;
+				cout << mid->GetCStr() << endl;
 				return mid;
 			}
 			if(searchAddr>mid->GetAddr()){
@@ -175,7 +218,7 @@ namespace nsDasmProcess{
 	 * @param dasmList output from C disassembler (dasm.c) module
 	 * @return DasmList object containing processed disassembly data
 	 */
-	DasmList DasmList::ProcessDisassembly(clist dasmList){
+	DasmList DasmList::ProcessDisassembly(clist dasmList, SymbolData& symData){
 
 		// find size of disassembly list
 		int listSize=0;
@@ -205,7 +248,7 @@ namespace nsDasmProcess{
 				it!=dasmOut.end();
 				++it){
 				uint32 addr;
-				if((addr=ProcessDasmEntry(*it))!=-1){
+				if((addr=ProcessJump(*it))!=-1){
 					// we have found a jumping instruction
 					// use binary search and find the target
 					DasmList::iterator target=FindEntry(addr, it, dasmOut.begin(), dasmOut.end());
@@ -214,6 +257,9 @@ namespace nsDasmProcess{
 						it->SetJumpTo(*target);
 					}
 				}
+
+				// process symbols
+				ProcessSymbol(*it, symData);
 			}
 		}
 
