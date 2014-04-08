@@ -8,6 +8,7 @@
 
 #include "../../../emulator_engine/src/emulator_engine_interface.h"
 #include "../../../../system/multithreading/mutex/c/cmutex.h"
+namespace nsEmulatorComponent{
 
 namespace nsDeviceTest{
 	int VirtualDevice_Initialize(void* param1, void* param2);
@@ -15,4 +16,5 @@ namespace nsDeviceTest{
 	int VirtualDevice_AcceptEmulationMutex(MUTEX sysMutex, sys_state_ptr sysState);
 }
 
+}
 #endif

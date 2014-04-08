@@ -12,6 +12,8 @@
 
 #include  <map>
 
+namespace nsEmulatorComponent{
+
 namespace nsDebugger{
 
 	using namespace std;
@@ -151,6 +153,8 @@ namespace nsDebugger{
 		static Debugger* m_instance;
 		BreakpointList m_bpList;
 	};
+}
+
 }
 
 #endif

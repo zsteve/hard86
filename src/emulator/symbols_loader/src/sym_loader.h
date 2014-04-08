@@ -10,6 +10,8 @@
 #include <vector>
 #include "../../../global/typedefs.h"
 
+namespace nsEmulatorComponent{
+
 namespace nsSymLoader{
 
 	using namespace std;
@@ -124,6 +126,8 @@ namespace nsSymLoader{
 		vector<Symbol> m_symVect;
 	private:
 	};
+}
+
 }
 
 #endif

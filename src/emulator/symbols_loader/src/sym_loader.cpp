@@ -8,6 +8,8 @@
 #include "sym_loader.h"
 #include "../../../global/defines.h"
 
+namespace nsEmulatorComponent{
+
 namespace nsSymLoader{
 	// helper functions
 
@@ -126,4 +128,5 @@ namespace nsSymLoader{
 		delete[] m_data;
 	}
 
+}
 }

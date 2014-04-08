@@ -14,6 +14,8 @@
 #include "../../../../system/multithreading/mutex/c/cmutex.h"
 #include "../../../../system/multithreading/mutex/cpp/mutex.h"
 
+namespace nsEmulatorComponent{
+
 namespace nsEmulator{
 
 	enum Regs{
@@ -72,6 +74,8 @@ namespace nsEmulator{
 		DBGCALLBACK m_bpHitFunc, m_preExFunc, m_posExFunc;
 	private:
 	};
+
+}
 
 }
 

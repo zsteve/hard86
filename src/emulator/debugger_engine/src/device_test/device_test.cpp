@@ -10,6 +10,7 @@
 #include "../../../../system/multithreading/mutex/c/cmutex.h"
 
 using namespace std;
+namespace nsEmulatorComponent{
 
 namespace nsDeviceTest{
 
@@ -33,4 +34,5 @@ namespace nsDeviceTest{
 		return 0;
 	}
 
+}
 }

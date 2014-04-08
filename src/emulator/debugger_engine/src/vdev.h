@@ -15,6 +15,8 @@
 
 using namespace std;
 
+namespace nsEmulatorComponent{
+
 namespace nsVDev{
 
 	/**
@@ -105,8 +107,10 @@ namespace nsVDev{
 			*/
 		vector<pair<int, VDev> > m_vdevList;
 
-		int lastID=0;
+		int m_lastID;
 	};
+
+}
 
 }
 #endif

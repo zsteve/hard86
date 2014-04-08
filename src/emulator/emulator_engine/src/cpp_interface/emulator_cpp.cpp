@@ -8,6 +8,7 @@
 #include "../emulator_engine.h"
 #include "../emulator_engine_interface.h"
 
+namespace nsEmulatorComponent{
 namespace nsEmulator{
 
 	Emulator* Emulator::m_instance=NULL;
@@ -57,4 +58,6 @@ namespace nsEmulator{
 		system_init((MUTEX*)m_sysMutex.GetHandle(), m_bpHitFunc, m_preExFunc, m_posExFunc);
 		system_load_mem(m_sysMem, m_sysMemSize);
 	}
+}
+
 }

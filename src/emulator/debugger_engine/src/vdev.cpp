@@ -20,6 +20,8 @@
 
 using namespace std;
 
+namespace nsEmulatorComponent{
+
 namespace nsVDev{
 
 	// VDev
@@ -65,7 +67,7 @@ namespace nsVDev{
 	VDevList* VDevList::m_instance=NULL;
 
 	VDevList::VDevList() : m_vdevList(0){
-
+		m_lastID=0;
 	}
 
 	VDevList::~VDevList(){
@@ -80,8 +82,8 @@ namespace nsVDev{
 	}
 
 	int VDevList::Add(VDev& vdev){
-		m_vdevList.push_back(make_pair(lastID++, vdev));
-		return lastID-1;
+		m_vdevList.push_back(make_pair(m_lastID++, vdev));
+		return m_lastID-1;
 	}
 
 	int VDevList::Remove(int vdevID){
@@ -96,5 +98,7 @@ namespace nsVDev{
 		}
 		return -1;
 	}
+
+}
 
 }

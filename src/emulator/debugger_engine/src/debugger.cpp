@@ -21,6 +21,8 @@
 
 using namespace std;
 
+namespace nsEmulatorComponent{
+
 namespace nsDebugger{
 
 	using namespace nsVDev;
@@ -142,4 +144,6 @@ namespace nsDebugger{
 	BreakpointList::~BreakpointList(){
 
 	}
+}
+
 }

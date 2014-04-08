@@ -22,6 +22,8 @@
 
 #include "../../../../system/datastruct/clist/clist.h"
 
+namespace nsEmulatorComponent{
+
 namespace nsDasm{
 
 	using namespace std;
@@ -161,6 +163,8 @@ namespace nsDasm{
 
 	private:
 	};
+}
+
 }
 
 #endif

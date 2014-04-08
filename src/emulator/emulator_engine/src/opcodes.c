@@ -2607,10 +2607,12 @@ void op_0x25(){
 
 /* AND rm8, r8 */
 void op_0x20(){
-	MOD_REG_RM(1);
 	uint8 rm8;
+	MOD_REG_RM(1);
 	rm8=read_rm_val_8(OP_DS);
-	write_rm_val_8(and_8(rm8, RREG8(M_REG)), OP_DS);
+	if(execute_flag){
+		write_rm_val_8(and_8(rm8, RREG8(M_REG)), OP_DS);
+	}
 #ifdef SHOW_DEBUG
 	out_opinfo("AND %s, %s", print_rm_val_8(OP_DS), text_regs[BREG(M_REG)]);
 #endif
@@ -2620,10 +2622,12 @@ void op_0x20(){
 
 /* AND rm16, r16 */
 void op_0x21(){
-	MOD_REG_RM(1);
 	uint16 rm16;
+	MOD_REG_RM(1);
 	rm16=read_rm_val_16(OP_DS);
-	write_rm_val_16(and_16(rm16, RREG16(M_REG)), OP_DS);
+	if(execute_flag){
+		write_rm_val_16(and_16(rm16, RREG16(M_REG)), OP_DS);
+	}
 #ifdef SHOW_DEBUG
 	out_opinfo("AND %s, %s", print_rm_val_16(OP_DS), text_regs[M_REG]);
 #endif
@@ -2633,10 +2637,12 @@ void op_0x21(){
 
 /* AND r8, rm8 */
 void op_0x22(){
-	MOD_REG_RM(1);
 	uint8 rm8;
+	MOD_REG_RM(1);
 	rm8=read_rm_val_8(OP_DS);
-	WREG8(M_REG, and_8(RREG8(M_REG), rm8));
+	if(execute_flag){
+		WREG8(M_REG, and_8(RREG8(M_REG), rm8));
+	}
 #ifdef SHOW_DEBUG
 	out_opinfo("AND %s, %s", text_regs[BREG(M_REG)], print_rm_val_8(OP_DS));
 #endif
@@ -2646,10 +2652,12 @@ void op_0x22(){
 
 /* AND r16, rm16 */
 void op_0x23(){
-	MOD_REG_RM(1);
 	uint16 rm16;
+	MOD_REG_RM(1);
 	rm16=read_rm_val_16(OP_DS);
-	WREG16(M_REG, and_16(RREG16(M_REG), rm16));
+	if(execute_flag){
+		WREG16(M_REG, and_16(RREG16(M_REG), rm16));
+	}
 #ifdef SHOW_DEBUG
 	out_opinfo("AND %s, %s", text_regs[M_REG], print_rm_val_8(OP_DS));
 #endif

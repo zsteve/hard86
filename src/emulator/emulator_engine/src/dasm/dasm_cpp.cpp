@@ -7,6 +7,8 @@
 
 #include <iostream>
 
+namespace nsEmulatorComponent{
+
 namespace nsDasm{
 
 	using namespace std;
@@ -265,4 +267,6 @@ namespace nsDasm{
 
 		return dasmOut;
 	}
+}
+
 }
