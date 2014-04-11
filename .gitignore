@@ -11,3 +11,20 @@
 *.lai
 *.la
 *.a
+
+# Visual Studio
+*.ncb
+*.sdf
+*.ipch
+*.user
+*.tlog
+*.obj
+*.res
+*.pdb
+*.idb
+*.log
+*.lastbuildstate
+*.cache
+
+# Compiled Executables
+*.exe

@@ -19,6 +19,6 @@ factorial:
 start:
   ; parameter : ax = n
   ; calculate 5!
-  mov ax, 5
+  mov ax, 100
   call factorial
   ret

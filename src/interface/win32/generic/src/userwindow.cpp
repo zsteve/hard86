@@ -1,6 +1,6 @@
-#include  "userwindow.h"
+#include "userwindow.h"
 
-namespace nsWin32Component{
+namespace nsObjWin32{
 
 namespace nsWindows{
 

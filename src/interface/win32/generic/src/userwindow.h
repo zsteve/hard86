@@ -4,7 +4,7 @@
 #include <Windows.h>
 #include "window.h"
 
-namespace nsWin32Component{
+namespace nsObjWin32{
 
 namespace nsWindows{
 	
@@ -12,12 +12,7 @@ namespace nsWindows{
 
 	public:
 
-		UserWindow(HINSTANCE hInstance){
-			m_hInstance=hInstance;
-		}
-
 		UserWindow(){
-
 		}
 
 		virtual ~UserWindow(){

@@ -2,7 +2,7 @@
 #include <Windows.h>
 #include "frame.h"
 
-namespace nsWin32Component{
+namespace nsObjWin32{
 
 namespace nsWindows{
 
@@ -35,6 +35,14 @@ namespace nsWindows{
 			{
 
 			}
+			break;
+		case WM_COMMAND:
+			{
+
+			}
+			break;
+		case WM_DESTROY:
+			SendMessage(WM_CLOSE, NULL, NULL);
 			break;
 		case WM_CLOSE:
 			PostQuitMessage(WM_QUIT);

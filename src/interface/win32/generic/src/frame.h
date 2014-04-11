@@ -4,7 +4,7 @@
 #include <Windows.h>
 #include "userwindow.h"
 
-namespace nsWin32Component{
+namespace nsObjWin32{
 
 namespace nsWindows{
 	
@@ -12,14 +12,15 @@ namespace nsWindows{
 		
 	public:
 
-		Frame(HINSTANCE hInstance){
-			m_hInstance=hInstance;
+		Frame(){
 			m_className=L"Frame_Class";
 		}
 
-		virtual ~Frame(){}
+		virtual ~Frame(){
+			DestroyWindow(m_hWnd);
+		}
 
-		HWND Create(int w, int h, int x=CW_USEDEFAULT, int y=CW_USEDEFAULT);
+		virtual HWND Create(int w, int h, int x=CW_USEDEFAULT, int y=CW_USEDEFAULT);
 
 		ATOM Register();
 
@@ -27,7 +28,7 @@ namespace nsWindows{
 
 	protected:
 
-		HWND Create(DWORD dwExStyle,
+		virtual HWND Create(DWORD dwExStyle,
 					LPCTSTR lpWindowName,
 					DWORD dwStyle,
 					int x, int y,

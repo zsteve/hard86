@@ -1,14 +1,18 @@
 #include "global.h"
 #include <Windows.h>
 
-namespace nsWin32Component{
+namespace nsObjWin32{
 
 namespace nsGlobal{
-	int RectWidth(RECT& rc){
+
+	const int DEF_BUTTON_HT = 24;
+	const int DEF_BUTTON_WID = 80;
+
+	int RectWidth(const RECT& rc){
 		return (rc.right-rc.left);
 	}
 
-	int RectHeight(RECT& rc){
+	int RectHeight(const RECT& rc){
 		return (rc.bottom-rc.top);
 	}
 
