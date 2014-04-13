@@ -34,6 +34,8 @@ namespace nsWindows{
 
 		LRESULT SendMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
+		BOOL SetEnabled(bool enabled){ return EnableWindow(m_hWnd, enabled); }
+
 		void SetExStyle(DWORD dwStyle){m_exStyle=dwStyle;}
 
 		void SetStyle(DWORD dwStyle){m_style=dwStyle;}
@@ -69,6 +71,8 @@ namespace nsWindows{
 	{
 	public:
 
+		HasText(){ MessageBox(NULL, L"HasText", NULL, NULL); }
+		~HasText(){}
 
 		int GetText(wchar_t lpBuffer[]){
 			return GetWindowText(m_hWnd, lpBuffer, 80);

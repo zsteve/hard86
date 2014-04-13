@@ -3,6 +3,7 @@
 
 #include <Windows.h>
 #include <string>
+#include <list>
 
 using namespace std;
 
@@ -17,8 +18,7 @@ namespace nsFiles{
 	class FileObject
 	{
 	public:
-		FileObject(){ m_bOpened=false; }
-		FileObject(const FileObject& src){};
+		FileObject(){ m_bOpened=false; m_hFile=NULL; }
 		virtual ~FileObject(){}
 
 		virtual bool Open()=0;
@@ -34,11 +34,34 @@ namespace nsFiles{
 		virtual bool SetPath(const wstring& path){return SetPath(path.c_str());}
 		const wchar_t* GetPath(){return m_path.c_str();}
 
+		static wstring GetRelativePath(const wstring& absPath, const wstring& relativeTo);
+		static wstring GetAbsolutePath(const wstring& relPath, const wstring& relativeTo);
 	protected:
 		wstring m_path;
 		bool m_bOpened;
+
+		HANDLE m_hFile;
+
+		DWORD dwDesiredAccess;
+		DWORD dwShareMode;
+		DWORD dwFlagsAndAttributes;
+
+		static wstring& TidySlashes(wstring& str, wchar_t wantedSlash=L'\\');
+
+		// helper functions for GetRelativePath()
+		// Case insensitive character comparison
+		static int GetLastSimilarDirIndex(const wstring& path1, const wstring& path2);
+		static void WStrToLower(wstring& str);
+		static int GetDirLevels(const wstring& path);
+
+		// helper functions for GetAbsolutePath()
+		static void CutDirectory(wstring& str);
+		static wstring GetNextPathChunk(const wstring& str);
 	};
 
+	/**
+	 * File class
+	 */
 	class File : public FileObject
 	{
 	protected:
@@ -48,12 +71,9 @@ namespace nsFiles{
 			dwDesiredAccess=GENERIC_READ | GENERIC_WRITE;
 			dwShareMode=0;
 			dwFlagsAndAttributes=FILE_ATTRIBUTE_NORMAL;
-
-			Open();
 		}
 	public:
 		File(){
-			m_hFile=NULL;
 			m_size=0;
 			m_fileExt=L"";
 
@@ -63,13 +83,11 @@ namespace nsFiles{
 		}
 
 		File(const wchar_t* path){
-			m_hFile=NULL;
 			m_size=0;
 			Init(path);
 		}
 
 		File(const wstring& path){
-			m_hFile=NULL;
 			m_size=0;
 			Init(path.c_str());
 		}
@@ -105,13 +123,51 @@ namespace nsFiles{
 		int GetPointer();
 		bool SetEOF();
 	protected:
-		HANDLE m_hFile;
 		int m_size;
 		wstring m_fileExt;
+	};
 
-		DWORD dwDesiredAccess;
-		DWORD dwShareMode;
-		DWORD dwFlagsAndAttributes;
+	/**
+	 * Directory class
+	 */
+	class Directory : public FileObject
+	{
+	protected:
+		void Init(const wchar_t* path){
+			SetPath(path);
+		}
+	public:
+		Directory(){
+			Init(L"");
+		}
+
+		Directory(const wchar_t* path){
+			Init(path);
+		}
+
+		Directory(const wstring& path){
+			Init(path.c_str());
+		}
+
+		virtual ~Directory(){
+
+		}
+
+		bool List(list<File>& fileList);
+
+		bool Open();
+		bool Close();
+		bool Delete();
+		bool Create();
+		bool Move(const wchar_t* destPath);
+		bool Move(const wstring& destPath);
+		bool Copy(const wchar_t* destPath);
+		bool Copy(const wstring& destPath);
+	protected:
+		bool IsSpecialDir(const wchar_t name[]);
+
+		void Delete_Rec(const wstring& dir);
+		void List_Rec(const wstring& dir, list<File>& fileList);
 	};
 }
 

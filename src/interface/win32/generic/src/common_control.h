@@ -20,6 +20,8 @@ namespace nsWindows{
 
 		}
 
+		virtual HWND Create(LPCTSTR lpName, int x, int y, int w, int h, HWND hwndParent, int ID)=0;
+
 	protected:
 
 		static wchar_t* m_className;

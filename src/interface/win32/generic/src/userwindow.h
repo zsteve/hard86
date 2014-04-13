@@ -8,11 +8,12 @@ namespace nsObjWin32{
 
 namespace nsWindows{
 	
-	class UserWindow : public Window{
+	class UserWindow : virtual public Window{
 
 	public:
 
 		UserWindow(){
+
 		}
 
 		virtual ~UserWindow(){
@@ -26,6 +27,17 @@ namespace nsWindows{
 	protected:
 		static wchar_t* m_className;
 		ATOM m_classAtom;
+	};
+
+	class ToolWindow : public UserWindow{
+	public:
+		ToolWindow(){
+			m_exStyle|=WS_EX_TOOLWINDOW;
+		}
+
+		virtual ~ToolWindow(){
+
+		}
 	};
 
 }

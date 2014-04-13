@@ -1,4 +1,5 @@
 echo "Cleaning repository"
+cd src
 del /S *.exe
 del /S *.txt
 del /S *.ncb

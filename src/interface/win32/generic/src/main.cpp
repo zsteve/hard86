@@ -14,20 +14,35 @@
 using namespace nsObjWin32::nsWindows;
 using namespace nsObjWin32::nsGlobal;
 
-class dlg : public Dialog{
+class MainFrame : public Frame{
 public:
-	dlg(DWORD id){
-		m_resId=id;
+	MainFrame() {}
+	virtual ~MainFrame(){
+		DestroyWindow(m_hWnd);
 	}
 
-	 INT_PTR CALLBACK DlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-	 {
-		 switch(uMsg){
-		 default:
-			 return 0;
-		 }
-		 return 0;
-	 }
+	virtual LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
+		switch(uMsg){
+		case WM_CREATE:
+			{
+				
+			}
+			break;
+		case WM_COMMAND:
+			{
+
+			}
+			break;
+		case WM_DESTROY:
+			SendMessage(WM_CLOSE, NULL, NULL);
+			break;
+		case WM_CLOSE:
+			PostQuitMessage(WM_QUIT);
+		default:
+			return DefWindowProc(hWnd, uMsg, wParam, lParam);
+		}
+		return 0;
+	}
 };
 
 int CALLBACK WinMain(HINSTANCE hInstance,
@@ -37,13 +52,13 @@ int CALLBACK WinMain(HINSTANCE hInstance,
 {
 	Window::SetHInstance(hInstance);
 
-	Frame* pfrm=new Frame();
-	Frame& frm=*pfrm;
+	MainFrame frm;
+	frm.WndProc(NULL, NULL, NULL, NULL);
 	frm.Register();
 	frm.Create(320, 200);
 	frm.Show(SW_SHOWDEFAULT);
 
-	RetroProgressBar pb;
+	/*RetroProgressBar pb;
 	pb.Register();
 	pb.Create(frm.GetHWND(), ClientWidth(frm.GetHWND()), 24);
 	pb.Show(SW_SHOWDEFAULT);
@@ -54,12 +69,10 @@ int CALLBACK WinMain(HINSTANCE hInstance,
 	HBITMAP hBmp;
 	hBmp=LoadBitmap(hInstance, MAKEINTRESOURCE(IDB_BITMAP1));
 
-	TextStatic bn;
+	PushButton bn;
 	bn.Create(L"Text", 0, 48, DEF_BUTTON_WID, DEF_BUTTON_HT, frm.GetHWND(), 1001);
 	bn.Show(SW_SHOWDEFAULT);
-
-	dlg d(IDD_DIALOG1);
-	d.Create(NULL);
+	bn.SetEnabled(false);*/
 
 	MSG msg;
 	while(GetMessage(&msg, NULL, 0, 0)){

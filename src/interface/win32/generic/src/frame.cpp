@@ -7,9 +7,9 @@ namespace nsObjWin32{
 namespace nsWindows{
 
 	HWND Frame::Create(int w, int h, int x, int y){
-			return Create(NULL, L"Frame Window",
-				WS_OVERLAPPED | WS_SYSMENU | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_SIZEBOX,
-				x, y, w, h, NULL, NULL);
+		return Create(m_exStyle, L"Frame Window",
+						m_style,
+						x, y, w, h, NULL, NULL);
 	}
 
 	ATOM Frame::Register(){
@@ -27,29 +27,6 @@ namespace nsWindows{
 		wcx.lpszClassName=m_className;
 		wcx.hIconSm=NULL;
 		return (m_classAtom=RegisterClassEx(&wcx));
-	}
-
-	LRESULT CALLBACK Frame::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
-		switch(uMsg){
-		case WM_CREATE:
-			{
-
-			}
-			break;
-		case WM_COMMAND:
-			{
-
-			}
-			break;
-		case WM_DESTROY:
-			SendMessage(WM_CLOSE, NULL, NULL);
-			break;
-		case WM_CLOSE:
-			PostQuitMessage(WM_QUIT);
-		default:
-			return DefWindowProc(hWnd, uMsg, wParam, lParam);
-		}
-		return 0;
 	}
 
 	HWND Frame::Create(DWORD dwExStyle,

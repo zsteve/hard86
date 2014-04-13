@@ -9,7 +9,7 @@ using namespace nsObjWin32::nsFiles;
 
 int main(){
 
-	File myFile(L"C:\\test\\test.txt");
+	File myFile(L"C:\\test\\test");
 	wcout << "File : " << myFile.GetPath() << " was loaded" << endl;
 	wcout << "File size : " << myFile.Size() << endl;
 	myFile.Open();
@@ -20,6 +20,16 @@ int main(){
 	wcout << myFile.GetPointer() << endl;
 	myFile.SetPointer(1024);
 	myFile.SetEOF();
+
+	Directory myDir(L"G:\\test\\asdf\\asdf");
+	list<File> fl(0);
+	myDir.List(fl);
+	for(list<File>::iterator it=fl.begin();
+		it!=fl.end();
+		++it){
+		wcout << it->GetPath() << endl;
+	}
+	wcout << FileObject::GetAbsolutePath(L"../asdf", L"G:\\asdf\\asdf\\") << endl;
 	_getch();
 	return 0;
 }

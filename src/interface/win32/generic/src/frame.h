@@ -8,27 +8,24 @@ namespace nsObjWin32{
 
 namespace nsWindows{
 	
-	class Frame : public UserWindow{
+	class Frame : public UserWindow, public HasText{
 		
 	public:
 
 		Frame(){
 			m_className=L"Frame_Class";
+			m_style|=WS_OVERLAPPED | WS_SYSMENU | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_SIZEBOX;
 		}
 
-		virtual ~Frame(){
-			DestroyWindow(m_hWnd);
-		}
+		virtual ~Frame(){}
 
 		virtual HWND Create(int w, int h, int x=CW_USEDEFAULT, int y=CW_USEDEFAULT);
 
 		ATOM Register();
 
-		LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-
 	protected:
 
-		virtual HWND Create(DWORD dwExStyle,
+		HWND Create(DWORD dwExStyle,
 					LPCTSTR lpWindowName,
 					DWORD dwStyle,
 					int x, int y,
