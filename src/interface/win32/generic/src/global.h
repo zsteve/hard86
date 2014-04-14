@@ -2,6 +2,7 @@
 #define GLOBAL_H
 
 #include <Windows.h>
+#include "window.h"
 
 #define ALERT_ERR(msg)\
 	MessageBox(NULL, L"Error", L"Error : "##L##msg, MB_ICONERROR);
@@ -10,6 +11,8 @@ namespace nsObjWin32{
 
 namespace nsGlobal{
 
+	using namespace nsObjWin32::nsWindows;
+
 	extern const int DEF_BUTTON_HT;
 	extern const int DEF_BUTTON_WID;
 
@@ -17,6 +20,8 @@ namespace nsGlobal{
 	int RectHeight(const RECT& rc);
 	int WindowWidth(HWND hWnd);
 	int WindowHeight(HWND hWnd);
+	int WindowWidth(const Window& w);
+	int WindowHeight(const Window& w);
 	int ClientWidth(HWND hWnd);
 	int ClientHeight(HWND hWnd);
 

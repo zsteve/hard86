@@ -5,6 +5,8 @@ namespace nsObjWin32{
 
 namespace nsGlobal{
 
+	using namespace nsObjWin32::nsWindows;
+
 	const int DEF_BUTTON_HT = 24;
 	const int DEF_BUTTON_WID = 80;
 
@@ -26,6 +28,14 @@ namespace nsGlobal{
 		static RECT rc;
 		GetWindowRect(hWnd, &rc);
 		return RectHeight(rc);
+	}
+
+	int WindowWidth(const Window& w){
+		return WindowWidth(w.GetHWND());
+	}
+
+	int WindowHeight(const Window& w){
+		return WindowHeight(w.GetHWND());
 	}
 
 	int ClientWidth(HWND hWnd){

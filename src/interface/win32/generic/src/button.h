@@ -12,7 +12,7 @@ namespace nsWindows{
 	/**
 	 * Button base class
 	 */
-	class Button : virtual public CommonControl, virtual public HasText
+	class Button : public CommonControl
 	{
 	public:
 
@@ -41,7 +41,7 @@ namespace nsWindows{
 	private:
 	};
 
-	class PushButton : virtual public Button
+	class PushButton : public Button
 	{
 	public:
 
@@ -59,7 +59,7 @@ namespace nsWindows{
 	private:
 	};
 
-	class CheckBox : virtual public Button
+	class CheckBox : public Button
 	{
 	public:
 
@@ -77,16 +77,20 @@ namespace nsWindows{
 		LRESULT GetCheck(){return Button_GetCheck(m_hWnd);}
 	};
 
-	class BmpPushButton : public PushButton, public HasBitmap
+	class BmpPushButton : public PushButton
 	{
 	public:
 
-		BmpPushButton(DWORD style=0, DWORD exStyle=0){
-			m_style|=style;
+		BmpPushButton(DWORD style, DWORD exStyle=0){
+			m_style|=style|BS_BITMAP;
 			m_exStyle|=exStyle;
 		}
 
 		virtual ~BmpPushButton(){}
+
+		HBITMAP SetImage(HBITMAP hBmp){
+			return (HBITMAP)SendMessage(BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBmp);
+		}
 	};
 }
 

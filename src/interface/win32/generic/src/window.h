@@ -16,7 +16,14 @@ namespace nsWindows{
 			m_height=m_width=0;
 			m_hWnd=0;
 			m_style=m_exStyle=NULL;
+			m_className=L"";
 		};
+
+		Window(const wchar_t* className, DWORD style=0, DWORD exStyle=0){
+			m_className=(wchar_t*)className;
+			m_style=style;
+			m_exStyle=exStyle;
+		}
 
 		virtual ~Window(){}
 
@@ -30,7 +37,7 @@ namespace nsWindows{
 
 		static LRESULT CALLBACK Base_WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-		virtual HWND GetHWND(){return m_hWnd;}
+		virtual HWND GetHWND() const {return m_hWnd;}
 
 		LRESULT SendMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -41,38 +48,6 @@ namespace nsWindows{
 		void SetStyle(DWORD dwStyle){m_style=dwStyle;}
 
 		virtual BOOL Close(){return DestroyWindow(m_hWnd);}
-
-	protected:
-
-		friend class Dialog;
-
-		HWND m_hWnd;
-		static HINSTANCE m_hInstance;
-
-		virtual HWND Create(DWORD dwExStyle,
-					LPCTSTR lpWindowName,
-					DWORD dwStyle,
-					int x, int y,
-					int w, int h,
-					HWND hwndParent,
-					HMENU hMenu)=0;
-
-		int m_height;
-		int m_width;
-
-		DWORD m_style;
-		DWORD m_exStyle;
-
-	private:
-	};
-
-	// Mix in class for windows with text
-	class HasText : virtual public Window
-	{
-	public:
-
-		HasText(){ MessageBox(NULL, L"HasText", NULL, NULL); }
-		~HasText(){}
 
 		int GetText(wchar_t lpBuffer[]){
 			return GetWindowText(m_hWnd, lpBuffer, 80);
@@ -85,14 +60,32 @@ namespace nsWindows{
 		int GetTextLength(){
 			return GetWindowTextLength(m_hWnd);
 		}
-	};
 
-	class HasBitmap : virtual public Window
-	{
-	public:
-		LRESULT SetImage(int dwType, HGDIOBJ hImage){return SendMessage(BM_SETIMAGE, (WPARAM)dwType, (LPARAM)hImage);}
-	};
+	protected:
 
+		friend class Dialog;
+
+		wchar_t* m_className;
+
+		HWND m_hWnd;
+		static HINSTANCE m_hInstance;
+
+		virtual HWND Create(DWORD dwExStyle,
+					LPCTSTR lpWindowName,
+					DWORD dwStyle,
+					int x, int y,
+					int w, int h,
+					HWND hwndParent,
+					HMENU hMenu);
+
+		int m_height;
+		int m_width;
+
+		DWORD m_style;
+		DWORD m_exStyle;
+
+	private:
+	};
 }
 
 }

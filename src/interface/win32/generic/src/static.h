@@ -8,7 +8,7 @@ namespace nsObjWin32{
 
 namespace nsWindows{
 
-	class Static : virtual public CommonControl
+	class Static : public CommonControl
 	{
 	public:
 
@@ -27,7 +27,7 @@ namespace nsWindows{
 				HMENU hMenu);
 	};
 
-	class TextStatic : public Static, public HasText
+	class TextStatic : public Static
 	{
 	public:
 		TextStatic(DWORD style=0, DWORD exStyle=0){

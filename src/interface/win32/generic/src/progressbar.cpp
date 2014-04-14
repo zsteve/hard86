@@ -30,7 +30,7 @@ namespace nsWindows{
 		wcx.lpszMenuName=NULL;
 		wcx.lpszClassName=m_className;
 		wcx.hIconSm=NULL;
-		return (m_classAtom=RegisterClassEx(&wcx));
+		return (RegisterClassEx(&wcx));
 	}
 
 	LRESULT CALLBACK RetroProgressBar::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam){

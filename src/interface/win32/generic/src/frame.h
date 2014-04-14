@@ -8,7 +8,7 @@ namespace nsObjWin32{
 
 namespace nsWindows{
 	
-	class Frame : public UserWindow, public HasText{
+	class Frame : public UserWindow{
 		
 	public:
 
@@ -17,21 +17,13 @@ namespace nsWindows{
 			m_style|=WS_OVERLAPPED | WS_SYSMENU | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_SIZEBOX;
 		}
 
-		virtual ~Frame(){}
+		virtual ~Frame(){ DestroyWindow(m_hWnd); }
 
 		virtual HWND Create(int w, int h, int x=CW_USEDEFAULT, int y=CW_USEDEFAULT);
 
 		ATOM Register();
 
 	protected:
-
-		HWND Create(DWORD dwExStyle,
-					LPCTSTR lpWindowName,
-					DWORD dwStyle,
-					int x, int y,
-					int w, int h,
-					HWND hwndParent,
-					HMENU hMenu);
 	};
 
 }

@@ -46,6 +46,27 @@ namespace nsWindows{
 		return NULL;
 	}
 
+	HWND Window::Create(DWORD dwExStyle,
+				LPCTSTR lpWindowName,
+				DWORD dwStyle,
+				int x, int y,
+				int w, int h,
+				HWND hwndParent,
+				HMENU hMenu)
+	{
+		m_width=w;
+		m_height=h;
+		m_hWnd=CreateWindowEx(dwExStyle,
+								m_className,
+								lpWindowName,
+								dwStyle,
+								x, y,
+								w, h,
+								hwndParent, hMenu,
+								m_hInstance, this);
+		int e=GetLastError();
+		return m_hWnd;
+	}
 }
 
 }
