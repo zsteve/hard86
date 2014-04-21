@@ -81,10 +81,17 @@ void op_0x13();
 void op_0x50();
 void op_0x6a();
 void op_0x68();
+void op_0x0e();
+void op_0x16();
+void op_0x1e();
+void op_0x06();
 
 /* POP */
 void op_0x58();
 void op_0xe6();
+void op_0x1f();
+void op_0x07();
+void op_0x17();
 
 /* OUT */
 void op_0xe7();
@@ -164,5 +171,9 @@ void op_0xc3();
 void op_0xcb();
 void op_0xc2();
 void op_0xca();
+/* INT */
+void op_0xcd();
+/* IRET */
+void op_0xcf();
 
 #endif

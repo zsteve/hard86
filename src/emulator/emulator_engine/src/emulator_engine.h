@@ -34,15 +34,15 @@
 //#define op_0x03 op_unknown
 //#define op_0x04 op_unknown
 //#define op_0x05 op_unknown
-#define op_0x06 op_unknown
-#define op_0x07 op_unknown
+//#define op_0x06 op_unknown
+//#define op_0x07 op_unknown
 //#define op_0x08 op_unknown
 //#define op_0x09 op_unknown
 //#define op_0x0a op_unknown
 //#define op_0x0b op_unknown
 //#define op_0x0c op_unknown
 //#define op_0x0d op_unknown
-#define op_0x0e op_unknown
+//#define op_0x0e op_unknown
 #define op_0x0f op_unknown
 //#define op_0x10 op_unknown
 //#define op_0x11 op_unknown
@@ -50,16 +50,16 @@
 //#define op_0x13 op_unknown
 //#define op_0x14 op_unknown
 //#define op_0x15 op_unknown
-#define op_0x16 op_unknown
-#define op_0x17 op_unknown
+//#define op_0x16 op_unknown
+//#define op_0x17 op_unknown
 #define op_0x18 op_unknown
 #define op_0x19 op_unknown
 #define op_0x1a op_unknown
 #define op_0x1b op_unknown
 #define op_0x1c op_unknown
 #define op_0x1d op_unknown
-#define op_0x1e op_unknown
-#define op_0x1f op_unknown
+//#define op_0x1e op_unknown
+//#define op_0x1f op_unknown
 //#define op_0x20 op_unknown
 //#define op_0x21 op_unknown
 //#define op_0x22 op_unknown
@@ -93,21 +93,21 @@
 #define op_0x3e op_unknown
 #define op_0x3f op_unknown
 //#define op_0x40 op_unknown
-#define op_0x41 op_unknown
-#define op_0x42 op_unknown
-#define op_0x43 op_unknown
-#define op_0x44 op_unknown
-#define op_0x45 op_unknown
-#define op_0x46 op_unknown
-#define op_0x47 op_unknown
+#define op_0x41 op_0x40
+#define op_0x42 op_0x40
+#define op_0x43 op_0x40
+#define op_0x44 op_0x40
+#define op_0x45 op_0x40
+#define op_0x46 op_0x40
+#define op_0x47 op_0x40
 //#define op_0x48 op_unknown
-#define op_0x49 op_unknown
-#define op_0x4a op_unknown
-#define op_0x4b op_unknown
-#define op_0x4c op_unknown
-#define op_0x4d op_unknown
-#define op_0x4e op_unknown
-#define op_0x4f op_unknown
+#define op_0x49 op_0x48
+#define op_0x4a op_0x48
+#define op_0x4b op_0x48
+#define op_0x4c op_0x48
+#define op_0x4d op_0x48
+#define op_0x4e op_0x48
+#define op_0x4f op_0x48
 //#define op_0x50 op_unknown
 #define op_0x51 op_0x50
 #define op_0x52 op_0x50
@@ -233,9 +233,9 @@
 //#define op_0xca op_unknown
 //#define op_0xcb op_unknown
 #define op_0xcc op_unknown
-#define op_0xcd op_unknown
+//#define op_0xcd op_unknown
 #define op_0xce op_unknown
-#define op_0xcf op_unknown
+//#define op_0xcf op_unknown
 //#define op_0xd0 op_unknown
 //#define op_0xd1 op_unknown
 //#define op_0xd2 op_unknown
@@ -329,7 +329,7 @@ typedef struct{
 
 /* get the real address of a segment address and segment number */
 #define GET_ADDR(address, segment)\
-	(segment*0x10)+address
+	(((uint32)segment)*0x10)+address
 
 /* register access */
 #define REG_16(rg) *((uint16*)sys_state.rg)
@@ -374,10 +374,10 @@ typedef struct{
 #define REG_BP	5
 #define REG_SI	6
 #define REG_DI	7
-#define REG_CS	8
-#define REG_SS	9
-#define REG_DS	10
-#define REG_ES	11
+#define REG_ES	8
+#define REG_CS	9
+#define REG_SS	10
+#define REG_DS	11
 #define REG_IP	12
 #define REG_FLAGS 13
 #define REG_AL	14
@@ -396,6 +396,9 @@ typedef struct{
 */
 #define BREG(reg) reg+14
 
+/* Converts 2-bit SREG field to internal value */
+#define SREG(reg) reg+8
+
 #define TEXT_REG(reg) text_regs[reg]
 
 typedef void (*op_func)();
@@ -403,6 +406,14 @@ typedef void (*op_func)();
 void write_debug(char* file, int line, char* str);
 
 void out_opinfo(char* str, ...);
+
+/* BIOS */
+#define BIOS_MEM_SEG	0x0
+#define BIOS_MEM_OFFSET 0x400
+
+/* Video */
+#define VIDEO_MEM_SEG 0xb800
+#define VIDEO_MEM_OFFSET 0x0
 
 /* TODO */
 

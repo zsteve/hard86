@@ -11,6 +11,7 @@
 #include <math.h>
 #include <wchar.h>
 #include <varargs.h>
+#include <assert.h>
 
 #include "emulator_engine.h"
 #include "emulator_engine_interface.h"
@@ -33,7 +34,7 @@ op_func op_table[256];
 
 /* textual representation of registers */
 char text_regs[22][6]={
-	"AX", "CX", "DX", "BX", "SP", "BP", "SI", "DI", "CS", "SS", "DS", "ES", "IP", "FLAGS",
+	"AX", "CX", "DX", "BX", "SP", "BP", "SI", "DI", "ES", "CS", "SS", "DS", "IP", "FLAGS",
 	"AL", "CL", "DL", "BL", "AH", "CH", "DH", "BH"};
 
 /* system state */
@@ -113,11 +114,17 @@ void write_reg(int reg, uint16 val){
 	case REG_DI:
 		DI=val;
 		break;
+	case REG_ES:
+		ES=val;
+		break;
 	case REG_CS:
 		CS=val;
 		break;
-	case REG_ES:
-		ES=val;
+	case REG_SS:
+		SS=val;
+		break;
+	case REG_DS:
+		DS=val;
 		break;
 	case REG_IP:
 		IP=val;
@@ -178,11 +185,17 @@ uint16 read_reg(int reg){
 	case REG_DI:
 		return DI;
 		break;
+	case REG_ES:
+		return ES;
+		break;
 	case REG_CS:
 		return CS;
 		break;
-	case REG_ES:
-		return ES;
+	case REG_SS:
+		return SS;
+		break;
+	case REG_DS:
+		return DS;
 		break;
 	case REG_IP:
 		return IP;
@@ -308,6 +321,28 @@ void system_load_mem(uint8* data, uint32 size){
 	o+=0x100;
 	for(i=0; i<size; i++){
 		*(sys_state.mem+i+o)=*(data+i);
+	}
+}
+
+void system_load_bios(uint8* data, uint16 size){
+	/* BIOS gets loaded at base 0x400 */
+	/*	Last 512 bytes of BIOS are interrupt offsets into the BIOS.
+		These get written to 0x400 instead
+	*/
+	uint16 int_offset=size-512;
+	int i;
+	assert(size>=512);
+	// copy IDT
+	for(i=0; i<512; i++){
+		/*	IDT format :
+			SEG:IP
+		*/
+		((uint16*)sys_state.mem)[(i*2)]=0;
+		((uint16*)sys_state.mem)[(i*2)+1]=((uint16*)(data+int_offset))[i];
+	}
+	// copy rest of BIOS
+	for(i=0; i<int_offset; i++){
+		sys_state.mem[i+0x400]=data[i];
 	}
 }
 

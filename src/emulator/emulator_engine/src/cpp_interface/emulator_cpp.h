@@ -34,7 +34,9 @@ namespace nsEmulator{
 			DBGCALLBACK preExFunc,
 			DBGCALLBACK posExFunc,
 			uint8* sysMem,
-			uint32 sysMemSize);
+			uint32 sysMemSize,
+			uint8* sysBios,
+			uint16 sysBiosSize);
 
 		static Emulator* m_instance;
 	public:
@@ -43,7 +45,9 @@ namespace nsEmulator{
 									DBGCALLBACK preExFunc,
 									DBGCALLBACK posExFunc,
 									uint8* sysMem,
-									uint32 sysMemSize);
+									uint32 sysMemSize,
+									uint8* sysBios,
+									uint16 sysBiosSize);
 
 		static Emulator* GetInstance();
 

@@ -73,6 +73,12 @@ int execute_flag=1;	/*	execute flag :
 #define WREG16(reg, val)\
 	write_reg(reg, val)
 
+#define WSREG(reg, val)\
+	write_reg(SREG(reg), val)
+
+#define RSREG(reg)\
+	read_reg(SREG(reg))
+
 /* read relative to IP */
 #define RRELIP8(v)\
 	read_mem_8(sys_state.r_ip+v)
@@ -86,6 +92,9 @@ int execute_flag=1;	/*	execute flag :
 
 #define TEXTREG16(v)\
 	text_regs[v]
+
+#define TEXTSREG(v)\
+	text_regs[SREG(v)]
 
 static uint8 disp_size;	/* size of displacement, can be 0, 1 or 2 */
 
@@ -219,7 +228,7 @@ uint16 read_rm_val_16(uint16 seg){
 		return read_mem_16(addr);
 	case 3:
 		/* register addressing */
-		return RREG8(op_data.rm);
+		return RREG16(op_data.rm);
 		break;
 	}
 	return 0;
@@ -239,10 +248,12 @@ char* print_rm_val_16(uint16 seg){
 	switch(op_data.mod){
 		/* modes */
 	case 0:
-		/* displacement only mode */
-		strcat(rm_val_str, itoa(disp16, disp_str, 16));
-		strcat(rm_val_str, "]");
-		return rm_val_str;
+		if(op_data.rm==6){
+			/* displacement only mode */
+			strcat(rm_val_str, itoa(disp16, disp_str, 16));
+			strcat(rm_val_str, "]");
+			return rm_val_str;
+		}
 	case 1:
 	case 2:
 		/* two byte signed displacement */
@@ -271,7 +282,10 @@ char* print_rm_val_16(uint16 seg){
 			strcat(rm_val_str, "BX");
 			break;
 		}
-		strcat(rm_val_str, "] + ");
+		if(op_data.rm!=7)
+			strcat(rm_val_str, "] + ");
+		else
+			strcat(rm_val_str, "]");
 		if(op_data.mod==1){
 			strcat(rm_val_str, itoa(disp8, disp_str, 16));
 		}else if(op_data.mod==2){
@@ -296,10 +310,12 @@ char* print_rm_val_8(uint16 seg){
 	switch(op_data.mod){
 		/* modes */
 	case 0:
-		/* displacement only mode */
-		strcat(rm_val_str, itoa(disp16, disp_str, 16));
-		strcat(rm_val_str, "]");
-		return rm_val_str;
+		if(op_data.rm==6){
+			/* displacement only mode */
+			strcat(rm_val_str, itoa(disp16, disp_str, 16));
+			strcat(rm_val_str, "]");
+			return rm_val_str;
+		}
 	case 1:
 	case 2:
 		/* two byte signed displacement */
@@ -328,7 +344,11 @@ char* print_rm_val_8(uint16 seg){
 			strcat(rm_val_str, "BX");
 			break;
 		}
-		strcat(rm_val_str, "] + ");
+		if(op_data.rm!=7)
+			strcat(rm_val_str, "] + ");
+		else
+			strcat(rm_val_str, "]");
+
 		if(op_data.mod==1){
 			strcat(rm_val_str, itoa(disp8, disp_str, 16));
 		}
@@ -389,7 +409,7 @@ int write_rm_val_8(uint8 val, uint16 seg){
 			break;
 		}
 		end:
-		addr=GET_ADDR(addr & 0xffff, seg);
+		addr=GET_ADDR(addr, seg);
 		write_mem_8(val, addr);
 		return;
 	case 3:
@@ -486,6 +506,7 @@ void process_instr_prefixes(){
 	while(b==0x2e||
 		b==0x36||
 		b==0x3e||
+		b==0x26||
 		b==0xf3||
 		b==0xf2){
 		
@@ -902,12 +923,12 @@ void op_0x8b(){
 void op_0x8c(){
 	uint16 sreg;
 	MOD_REG_RM(1);
-	sreg=RREG16(M_REG);
+	sreg=RSREG(M_REG);
 	if(execute_flag)
 		write_rm_val_16(sreg, OP_DS);
 
 #ifdef SHOW_DEBUG
-	out_opinfo("MOV %s, %s", print_rm_val_16(OP_DS), text_regs[M_REG]);
+	out_opinfo("MOV %s, %s", print_rm_val_16(OP_DS), TEXTSREG(M_REG));
 #endif
 	INC_IP(disp_size+1);
 	return;
@@ -919,10 +940,10 @@ void op_0x8e(){
 	MOD_REG_RM(1);
 	rm16=read_rm_val_16(OP_DS);
 	if(execute_flag)
-		WREG16(M_REG, rm16);
+		WSREG(M_REG, rm16);
 
 #ifdef SHOW_DEBUG
-	out_opinfo("MOV %s, %s", text_regs[M_REG], print_rm_val_16(OP_DS));
+	out_opinfo("MOV %s, %s", TEXTSREG(M_REG), print_rm_val_16(OP_DS));
 #endif
 	INC_IP(disp_size+1);
 	return;
@@ -1813,6 +1834,50 @@ void op_0x68(){
 	return;
 }
 
+/* PUSH CS */
+void op_0x0e(){
+	if(execute_flag)
+		stack_push(CS);
+#ifdef SHOW_DEBUG
+	out_opinfo("PUSH CS");
+#endif
+	INC_IP(0);
+	return;
+}
+
+/* PUSH SS */
+void op_0x16(){
+	if(execute_flag)
+		stack_push(SS);
+#ifdef SHOW_DEBUG
+	out_opinfo("PUSH SS");
+#endif
+	INC_IP(0);
+	return;
+}
+
+/* PUSH DS */
+void op_0x1e(){
+	if(execute_flag)
+		stack_push(DS);
+#ifdef SHOW_DEBUG
+	out_opinfo("PUSH DS");
+#endif
+	INC_IP(0);
+	return;
+}
+
+/* PUSH ES */
+void op_0x06(){
+	if(execute_flag)
+		stack_push(ES);
+#ifdef SHOW_DEBUG
+	out_opinfo("PUSH ES");
+#endif
+	INC_IP(0);
+	return;
+}
+
 /* Various 0x8f */
 void op_0x8f(){
 	uint8 op_ext;
@@ -1844,6 +1909,36 @@ void op_0x58(){
 #endif
 	INC_IP(0);
 	return;
+}
+
+/* POP DS */
+void op_0x1f(){
+	if(execute_flag)
+		DS=stack_pop();
+#ifdef SHOW_DEBUG
+	out_opinfo("POP DS");
+#endif
+	INC_IP(0);
+}
+
+/* POP ES */
+void op_0x07(){
+	if(execute_flag)
+		ES=stack_pop();
+#ifdef SHOW_DEBUG
+	out_opinfo("POP ES");
+#endif
+	INC_IP(0);
+}
+
+/* POP SS */
+void op_0x17(){
+	if(execute_flag)
+		SS=stack_pop();
+#ifdef SHOW_DEBUG
+	out_opinfo("POP SS");
+#endif
+	INC_IP(0);
 }
 
 /* OUT imm8, AL */
@@ -2702,7 +2797,7 @@ void op_0x09(){
 	uint16 rm16;
 	MOD_REG_RM(1);
 	rm16=read_rm_val_16(OP_DS);
-	write_rm_val_16(or_16(RREG8(M_REG), rm16), OP_DS);
+	write_rm_val_16(or_16(RREG16(M_REG), rm16), OP_DS);
 #ifdef SHOW_DEBUG
 	out_opinfo("OR %s, %s", print_rm_val_16(OP_DS), TEXTREG16(M_REG));
 #endif
@@ -2770,7 +2865,7 @@ void op_0x31(){
 	uint16 rm16;
 	MOD_REG_RM(1);
 	rm16=read_rm_val_16(OP_DS);
-	write_rm_val_16(or_16(RREG8(M_REG), rm16), OP_DS);
+	write_rm_val_16(xor_16(RREG16(M_REG), rm16), OP_DS);
 #ifdef SHOW_DEBUG
 	out_opinfo("XOR %s, %s", print_rm_val_16(OP_DS), TEXTREG16(M_REG));
 #endif
@@ -2880,5 +2975,50 @@ void op_0xca(){
 	}
 	else{
 		INC_IP(2);
+	}
+}
+
+/* execute interrupt call */
+void int_call(uint8 inum){
+	uint16 new_cs, new_ip;
+	uint16 mem_offset=inum<<2;
+	new_cs=read_mem_16(mem_offset);
+	new_ip=read_mem_16(mem_offset+2)+0x400;
+	stack_push(FLAGS);
+	stack_push(CS);
+	stack_push(IP+2);
+	FLAG_IF=0;
+	CS=new_cs;
+	IP=new_ip;
+}
+
+void int_return(){
+	IP=stack_pop();
+	CS=stack_pop();
+	FLAGS=stack_pop();
+}
+
+/* INT imm8 */
+void op_0xcd(){
+	uint8 imm8=RRELIP8(1);
+#ifdef SHOW_DEBUG
+	out_opinfo("INT %x", imm8);
+#endif
+	if(execute_flag){
+		int_call(imm8);
+	}else{
+		INC_IP(1);
+	}
+}
+
+/* IRET */
+void op_0xcf(){
+#ifdef SHOW_DEBUG
+	out_opinfo("IRET");
+#endif
+	if(execute_flag){
+		int_return();
+	}else{
+		INC_IP(0);
 	}
 }

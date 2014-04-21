@@ -117,6 +117,7 @@ void write_io_port(uint8 val, uint16 port);
 uint8 read_io_port(uint16 port);
 
 void system_load_mem(uint8* data, uint32 size);
+void system_load_bios(uint8* data, uint16 size);
 
 void write_reg(int reg, uint16 val);
 uint16 read_reg(int reg);

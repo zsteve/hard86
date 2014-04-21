@@ -45,7 +45,7 @@ int main(){
 	fclose(in_file);
 
 	// load FAS symbols file
-	uint8* fas_data;
+	/*uint8* fas_data;
 	int fas_size;
 	{
 		FILE* fas_file=fopen("test/test.fas", "r");
@@ -55,16 +55,30 @@ int main(){
 		fclose(fas_file);
 	}
 
-	SymbolData symbolData(fas_data, fas_size);
+	SymbolData symbolData(fas_data, fas_size);*/
+	SymbolData symbolData;
 
 	sysMutex.Unlock();
+
+	// load BIOS
+	uint8* bios_data;
+	int bios_size;
+	{
+		FILE* bios_file=fopen("bios/h86bios.bin", "r");
+		bios_size=fsize(bios_file);
+		bios_data=(uint8*)malloc(bios_size);
+		fread(bios_data, bios_size, 1, bios_file);
+		fclose(bios_file);
+	}
 
 	Emulator& emulator=*Emulator::GetInstance(sysMutex,
 		Debugger::BreakPointHit,
 		Debugger::PreInstructionExecute,
 		Debugger::PostInstructionExecute,
 		data,
-		size);
+		size,
+		bios_data,
+		bios_size);
 
 
 	Disassembler dasm;

@@ -22,10 +22,12 @@ namespace nsEmulator{
 		DBGCALLBACK preExFunc,
 		DBGCALLBACK posExFunc,
 		uint8* sysMem,
-		uint32 sysMemSize){
+		uint32 sysMemSize,
+		uint8* sysBios,
+		uint16 sysBiosSize){
 
 		if(!m_instance){
-			m_instance=new Emulator(sysMutex, bpHitFunc, preExFunc, posExFunc, sysMem, sysMemSize);
+			m_instance=new Emulator(sysMutex, bpHitFunc, preExFunc, posExFunc, sysMem, sysMemSize, sysBios, sysBiosSize);
 		}
 		return m_instance;
 	}
@@ -36,7 +38,9 @@ namespace nsEmulator{
 		DBGCALLBACK preExFunc,
 		DBGCALLBACK posExFunc,
 		uint8* sysMem,
-		uint32 sysMemSize){
+		uint32 sysMemSize,
+		uint8* sysBios,
+		uint16 sysBiosSize){
 
 		m_sysMutex=sysMutex;
 		m_bpHitFunc=bpHitFunc;
@@ -50,6 +54,7 @@ namespace nsEmulator{
 		m_sysMemSize=sysMemSize;
 
 		system_init((MUTEX*)m_sysMutex.GetHandle(), m_bpHitFunc, m_preExFunc, m_posExFunc);
+		system_load_bios(sysBios, sysBiosSize);
 		system_load_mem(m_sysMem, m_sysMemSize);
 	}
 
