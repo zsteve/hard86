@@ -21,7 +21,7 @@ namespace nsHard86Win32{
 
 		virtual HWND Create(int x, int y, int w, int h, HWND hwndParent, HMENU hMenu=NULL)=0;
 
-#define MSGHANDLER(name) LRESULT CALLBACK On##name(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+#define MSGHANDLER(name) void  On##name(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		MSGHANDLER(Sizing);
 		MSGHANDLER(Moving);

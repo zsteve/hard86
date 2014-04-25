@@ -11,6 +11,8 @@ namespace nsHard86Win32{
 
 	void WriteDebug(const wchar_t* message, const wchar_t* func, const wchar_t* file, int line);
 
+#define OUT_DEBUG(msg) WriteDebug(L"Error : "L##msg, __FUNCTIONW__, __FILEW__, __LINE__)
+
 }
 
 #endif

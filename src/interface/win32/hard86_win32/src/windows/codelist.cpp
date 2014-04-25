@@ -13,6 +13,30 @@ namespace nsHard86Win32{
 
 bool CodeList::m_registered=false;
 
+CodeList::CodeList(bool hasScrollBar) : m_listData(0), m_sels(0)
+{
+	m_style|=WS_CHILD;
+	m_className=L"Hard86_CodeList";
+	if(!m_registered){
+		Register();
+		m_registered=true;
+	}
+
+	for(int i=0; i<120; i++){
+		wchar_t str[16];
+		_itow(i, str, 10);
+		m_listData.push_back(std::wstring(L"Item ")+str);
+	}
+
+	m_itemHeight=16;
+	m_curSel=0;
+	m_basePos=0;
+
+	m_hasScrollBar=hasScrollBar;
+
+	m_enabledState=true;
+}
+
 ATOM CodeList::Register(){
 	WNDCLASSEX wcx;
 	wcx.cbSize=sizeof(WNDCLASSEX);
@@ -57,7 +81,7 @@ LRESULT CALLBACK CodeList::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
 	return 0;
 }
 
-#define MSGHANDLER(name) LRESULT CALLBACK CodeList::On##name(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+#define MSGHANDLER(name) void  CodeList::On##name(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 MSGHANDLER(Create){
 	if(m_hasScrollBar){
@@ -67,7 +91,6 @@ MSGHANDLER(Create){
 		SetScrollPos(m_scrollBar.GetHWND(), SB_CTL, 0, true);
 		m_scrollBar.Show();
 	}
-	return 0;
 }
 
 MSGHANDLER(SetFont){
@@ -85,11 +108,10 @@ MSGHANDLER(SetFont){
 	m_itemHeight=tm.tmHeight+2;
 
 	ReleaseDC(hWnd, hDC);
-	return 0;
 }
 
 MSGHANDLER(LButtonDown){
-	if(!m_enabledState) return 0;
+	if(!m_enabledState) return;
 	int x=LOWORD(lParam);
 	int y=HIWORD(lParam);
 	int selIndex=(y/m_itemHeight);
@@ -98,7 +120,6 @@ MSGHANDLER(LButtonDown){
 	RECT rect;
 	GetClientRect(hWnd, &rect);
 	InvalidateRect(hWnd, &rect, true);
-	return 0;
 }
 
 MSGHANDLER(Paint){
@@ -115,21 +136,22 @@ MSGHANDLER(Paint){
 	int w=WindowWidth(*this);
 	int h=WindowHeight(*this);
 
-	COLORREF itemColor=m_defItemColor;
+	COLORREF defItemColor=Settings::GetColor(Settings::Color::CODELIST_ITEM_COLOR);
+	COLORREF itemColor=defItemColor;
 
-	for(int i=m_basePos; i<m_listData.size(); i++, ypos+=m_itemHeight, itemColor=m_defItemColor){
+	for(int i=m_basePos; i<m_listData.size(); i++, ypos+=m_itemHeight, itemColor=defItemColor){
 		if(m_curSel==i){
 			if(m_enabledState)
-				itemColor=m_curSelColor;
+				itemColor=Settings::GetColor(Settings::Color::SEL_COLOR);
 			else
-				itemColor=RGB(120, 120, 120);
+				itemColor=Settings::GetColor(Settings::Color::INACTIVE_SEL_COLOR);
 		}else{
 			for(int j=0; j<m_sels.size(); j++){
 				if(m_sels[j].first==i){
 					if(m_enabledState)
 						itemColor=m_sels[j].second;
 					else
-						itemColor=RGB(120, 120, 120);
+						itemColor=Settings::GetColor(Settings::Color::INACTIVE_SEL_COLOR);
 					break;
 				}
 			}
@@ -139,11 +161,11 @@ MSGHANDLER(Paint){
 		Rectangle(hDC, 0, ypos, w, ypos+m_itemHeight);
 		SetBkColor(hDC, itemColor);
 		TextOut(hDC, Center(0, (int)(w-(m_listData[i].size()*tm.tmAveCharWidth))), ypos+1, m_listData[i].c_str(), m_listData[i].size());
-		SetBkColor(hDC, RGB(255, 255, 255));
+		SetBkColor(hDC, Settings::GetColor(Settings::Color::BK_COLOR));
 		SelectObject(hDC, hOldBrush);
 		DeleteObject(hBrush);
 	}
-	HBRUSH hBrush=CreateSolidBrush(RGB(255, 255, 255));
+	HBRUSH hBrush=CreateSolidBrush(Settings::GetColor(Settings::Color::BK_COLOR));
 	HGDIOBJ hOldBrush=SelectObject(hDC, (HGDIOBJ)hBrush);
 	while(ypos<h){
 		Rectangle(hDC, 0, ypos, w, ypos+m_itemHeight);
@@ -165,7 +187,6 @@ MSGHANDLER(Paint){
 	SelectObject(hDC, (HGDIOBJ)hOldFont);
 
 	EndPaint(hWnd, &ps);
-	return 0;
 }
 
 MSGHANDLER(VScroll){
@@ -207,7 +228,6 @@ MSGHANDLER(VScroll){
 	si.fMask=SIF_POS;
 	SetScrollInfo(m_scrollBar.GetHWND(), SB_CTL, &si, TRUE);
 	RedrawWindow(m_hWnd, NULL, NULL, RDW_INVALIDATE);
-	return 0;
 }
 
 MSGHANDLER(Enable){
@@ -216,7 +236,6 @@ MSGHANDLER(Enable){
 		EnableWindow(m_scrollBar.GetHWND(), (BOOL)wParam);
 	}
 	RedrawWindow(m_hWnd, NULL, NULL, RDW_INVALIDATE);
-	return 0;
 }
 
 #undef MSGHANDLER

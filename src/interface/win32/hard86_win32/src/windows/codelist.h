@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include "../../../objwin32/src/gui/userwindow.h"
 #include "../../../objwin32/src/gui/scrollbar.h"
+#include "../settings.h"
 
 using namespace nsObjWin32::nsGUI;
 
@@ -15,31 +16,7 @@ namespace nsHard86Win32{
 
 class CodeList : public UserWindow{
 public:
-	CodeList(bool hasScrollBar=true) :	m_listData(0),
-					m_sels(0){
-		m_style|=WS_CHILD;
-		m_className=L"Hard86_CodeList";
-		if(!m_registered){
-			Register();
-			m_registered=true;
-		}
-
-		for(int i=0; i<120; i++){
-			wchar_t str[16];
-			_itow(i, str, 10);
-			m_listData.push_back(std::wstring(L"Item ")+str);
-		}
-
-		m_itemHeight=16;
-		m_curSel=0;
-		m_basePos=0;
-		m_curSelColor=RGB(64, 64, 255);
-		m_defItemColor=RGB(255, 255, 255);
-		
-		m_hasScrollBar=hasScrollBar;
-
-		m_enabledState=true;
-	}
+	CodeList(bool hasScrollBar=true);
 
 	virtual ~CodeList(){
 		DestroyWindow(m_hWnd);
@@ -47,8 +24,8 @@ public:
 
 	LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-	HWND Create(wchar_t* wndName, int x, int y, int w, int h, HWND hwndParent, int id){
-		Window::Create(m_exStyle, wndName, m_style, x, y, w, h, hwndParent, (HMENU)id);
+	HWND Create(int x, int y, int w, int h, HWND hwndParent, int id){
+		Window::Create(m_exStyle, L"", m_style, x, y, w, h, hwndParent, (HMENU)id);
 		Show();
 		return m_hWnd;
 	}
@@ -76,7 +53,7 @@ public:
 
 protected:
 
-#define MSGHANDLER(name) LRESULT CALLBACK On##name(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+#define MSGHANDLER(name) void On##name(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	// Message handlers
 
 	MSGHANDLER(Create);
@@ -96,9 +73,6 @@ protected:
 
 	int m_itemHeight;	// height of each item
 
-	COLORREF m_curSelColor;		// cursor selection color
-	COLORREF m_defItemColor;	// default item color
-
 	bool m_hasScrollBar;
 	ScrollBar m_scrollBar;		// only if scrollbar is enabled
 
@@ -107,6 +81,7 @@ protected:
 	};
 
 	bool m_enabledState;		// enabled/disabled state
+
 private:
 	static bool m_registered;
 };

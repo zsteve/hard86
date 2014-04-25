@@ -21,7 +21,7 @@ namespace nsGUI{
 		wcx.cbWndExtra=NULL;
 		wcx.hInstance=m_hInstance;
 		wcx.hIcon=NULL;
-		wcx.hCursor=NULL;
+		wcx.hCursor=LoadCursor(m_hInstance, IDC_ARROW);
 		wcx.hbrBackground=(HBRUSH)GetStockObject(WHITE_BRUSH);
 		wcx.lpszMenuName=NULL;
 		wcx.lpszClassName=m_className;

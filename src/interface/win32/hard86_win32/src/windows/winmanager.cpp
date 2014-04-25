@@ -33,5 +33,11 @@ bool WinManager::RemoveWindow(int id){
 	return true;
 }
 
+bool WinManager::SetFont(int id, HFONT font){
+	if(m_wndMap.count(id)) return false;
+	m_wndMap[id]->SendMessage(WM_SETFONT, (WPARAM)font, FALSE);
+	return true;
+}
+
 }
 

@@ -94,7 +94,7 @@ namespace nsHard86Win32{
 
 	protected:
 		// message handlers
-#define MSGHANDLER(name) LRESULT CALLBACK On##name(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+#define MSGHANDLER(name) void  On##name(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		MSGHANDLER(Create);
 #undef MSGHANDLER
 

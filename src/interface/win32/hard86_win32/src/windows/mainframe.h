@@ -29,7 +29,7 @@ public:
 protected:
 
 	// Message handlers
-#define MSGHANDLER(name) LRESULT CALLBACK On##name(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+#define MSGHANDLER(name) void  On##name(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	MSGHANDLER(Create);
 	MSGHANDLER(Sizing);

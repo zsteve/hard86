@@ -2,6 +2,7 @@
 #define WINMAIN_H
 
 #include <Windows.h>
+#include "settings.h"
 #include "windows/mainframe.h"
 #include "windows/winmanager.h"
 
@@ -13,6 +14,7 @@ private:
 	{
 		m_hInstance=hInstance;
 		Window::SetHInstance(hInstance);
+		m_settings=Settings::GetInstance();
 	}
 
 	~Application()
@@ -40,6 +42,9 @@ public:
 
 	// Window manager
 	WinManager m_winManager;
+
+	// Settings manager
+	Settings* m_settings;
 private:
 protected:
 };

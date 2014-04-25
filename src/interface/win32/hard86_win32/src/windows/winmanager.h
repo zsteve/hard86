@@ -25,21 +25,24 @@ public:
 	bool Exists(int id){ return (bool)m_wndMap.count(id); }
 	
 	Window*& operator[](int id){ return (Window*)m_wndMap[id]; }
+
+	bool SetFont(int id, HFONT font);
 protected:
 	std::map<int, Window*> m_wndMap;
 	HFONT m_defFont;
 private:
 };
 
+
+
 class StickyWindow{
 public:
 	StickyWindow(){}
 
-#define MSGHANDLER(name) LRESULT CALLBACK On##name(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+#define MSGHANDLER(name) void  On##name(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	MSGHANDLER(Sizing){
 		m_dragManager.SnapSize((LPRECT)lParam);
-		return 0;
 	}
 
 	MSGHANDLER(Moving){
@@ -65,7 +68,6 @@ public:
 			::DeferWindowPos(hDWP, (*windows)[i], 0, rects[i].left, rects[i].top, 0, 0, SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOZORDER);
 		//			::SetWindowPos((*windows)[i], 0, rects[i].left, rects[i].top, 0, 0, SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOZORDER);
 		EndDeferWindowPos(hDWP);
-		return 0;
 	}
 
 	MSGHANDLER(NCLButtonDown){
@@ -78,7 +80,6 @@ public:
 		GetWindowRect(hWnd, &r);
 		m_relativeOffset.x=GET_X_LPARAM(lParam) - r.left;
 		m_relativeOffset.y=GET_Y_LPARAM(lParam) - r.top;
-		return 0;
 	}
 
 #undef MSGHANDLER

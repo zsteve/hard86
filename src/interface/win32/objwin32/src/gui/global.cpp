@@ -59,7 +59,7 @@ namespace nsGlobal{
 	}
 
 	int SetWindowSize(HWND hWnd, int w, int h){
-		return MoveWindow(hWnd, WindowX(hWnd), WindowY(hWnd), w, h, true);
+		return SetWindowPos(hWnd, (HWND)-2, WindowX(hWnd), WindowY(hWnd), w, h, SWP_NOZORDER);
 	}
 
 	int SetWindowXY(HWND hWnd, int x, int y){

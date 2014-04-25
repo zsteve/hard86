@@ -28,6 +28,9 @@ namespace nsGlobal{
 	DLLEXPORT int SetWindowSize(HWND hWnd, int w, int h);
 	DLLEXPORT int SetWindowXY(HWND hWnd, int x, int y);
 
+	DLLEXPORT int WindowX(HWND hWnd);
+	DLLEXPORT int WindowY(HWND hWnd);
+
 	template<typename T>
 	DLLEXPORT T Center(T a, T b){
 		return (a+b)/2;

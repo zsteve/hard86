@@ -58,11 +58,10 @@ namespace nsHard86Win32{
 		SetWindowSize(hWnd, width, ypos+height);
 	}
 
-#define MSGHANDLER(name) LRESULT CALLBACK RegisterWatcher::On##name(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+#define MSGHANDLER(name) void  RegisterWatcher::On##name(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	MSGHANDLER(Create){
 		CreateChildren(hWnd);
-		return 0;
 	}
 
 #undef MSGHANDLER

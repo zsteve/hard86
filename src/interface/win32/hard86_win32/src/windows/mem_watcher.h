@@ -4,6 +4,7 @@
 #include <Windows.h>
 #include "../global.h"
 #include "toolwindow.h"
+#include "hexgrid.h"
 
 namespace nsHard86Win32{
 
@@ -12,7 +13,7 @@ using namespace nsObjWin32::nsGUI;
 class MemoryWatcher : public Hard86ToolWindow{
 public:
 	MemoryWatcher() : Hard86ToolWindow(m_registered){
-
+		m_style|=WS_SIZEBOX;
 	}
 
 	virtual ~MemoryWatcher(){
@@ -27,7 +28,29 @@ public:
 		return m_hWnd;
 	}
 private:
+
+	// Message handlers
+#define MSGHANDLER(name) void On##name(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+
+	MSGHANDLER(Create);
+
+#undef MSGHANDLER
+
+	void CreateChildren(HWND hWnd);
+
+	enum Children{
+		MEMGRID
+	};
+
+	WinManager m_children;
+
+	template<typename T>
+	T*& Child(int id){
+		return (T*&)m_children[id];
+	}
+
 	static bool m_registered;
+
 };
 
 }
