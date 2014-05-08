@@ -1,0 +1,168 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\emulator_engine">
+      <UniqueIdentifier>{f92e9e26-6b93-4026-8f68-330ca2df58f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\emulator_engine">
+      <UniqueIdentifier>{12a7dae7-d324-43d7-a42e-d15117bb68df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\debugger_engine">
+      <UniqueIdentifier>{17ffe27c-f82a-4264-b1ef-5e8c714f4fef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\debugger_engine">
+      <UniqueIdentifier>{22afb208-765b-4e5a-ae93-d39148fac871}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external">
+      <UniqueIdentifier>{1772e59c-02ab-4ac6-8dd2-77b2e78a7bd5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external\mutex">
+      <UniqueIdentifier>{695c55a6-e9d2-4053-ba35-dcbfc67d3259}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external\cmutex">
+      <UniqueIdentifier>{3257d895-2ba9-4fd7-9efd-3a61a01fdcde}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external\clist">
+      <UniqueIdentifier>{5434863b-b336-49d1-b792-d63dde74e3fa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\debugger_engine\device_test">
+      <UniqueIdentifier>{f98b7430-e714-44f3-bde7-59b8ed5f50df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\debugger_engine\device_test">
+      <UniqueIdentifier>{f3861491-5fd7-41e2-8e1a-c48609b9a772}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\emulator_engine\cpp_interface">
+      <UniqueIdentifier>{110b07f6-4817-4416-88df-d3883cdcccab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\emulator_engine\cpp_interface">
+      <UniqueIdentifier>{3a03c3e9-0936-4a36-914d-0a1892a2a08b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\emulator_engine\dasm">
+      <UniqueIdentifier>{6a3c0af9-41cc-492a-b665-74aa658a9888}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\emulator_engine\dasm">
+      <UniqueIdentifier>{a255b4a6-2447-4ce5-8737-dce1eba393b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\symbols_loader">
+      <UniqueIdentifier>{785ac9fd-044a-4785-aa1e-07868bd75154}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\symbols_loader">
+      <UniqueIdentifier>{969aed85-c1fb-4b52-838d-0fd967b93268}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external\event">
+      <UniqueIdentifier>{9ef5d65d-4b4a-4b6c-adc5-ee4088fac72c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\debugger_engine\src\device_test\device_test.h">
+      <Filter>Header Files\debugger_engine\device_test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\debugger_engine\src\debugger.h">
+      <Filter>Header Files\debugger_engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\debugger_engine\src\vdev.h">
+      <Filter>Header Files\debugger_engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\emulator_engine\src\cpp_interface\emulator_cpp.h">
+      <Filter>Header Files\emulator_engine\cpp_interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\emulator_engine\src\opcodes.h">
+      <Filter>Header Files\emulator_engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\emulator_engine\src\global.h">
+      <Filter>Header Files\emulator_engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\emulator_engine\src\flags.h">
+      <Filter>Header Files\emulator_engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\emulator_engine\src\emulator_engine_interface.h">
+      <Filter>Header Files\emulator_engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\emulator_engine\src\emulator_engine.h">
+      <Filter>Header Files\emulator_engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\emulator_engine\src\dasm\dasm.h">
+      <Filter>Header Files\emulator_engine\dasm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\emulator_engine\src\dasm\dasm_cpp.h">
+      <Filter>Header Files\emulator_engine\dasm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\symbols_loader\src\sym_loader.h">
+      <Filter>Header Files\symbols_loader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\system\multithreading\mutex\cpp\mutex.h">
+      <Filter>external\mutex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\system\multithreading\mutex\c\cmutex.h">
+      <Filter>external\cmutex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\system\datastruct\clist\clist.h">
+      <Filter>external\clist</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\system\multithreading\event\cpp\event.h">
+      <Filter>external\event</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\debugger_engine\src\device_test\device_test.cpp">
+      <Filter>Source Files\debugger_engine\device_test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\debugger_engine\src\vdev.cpp">
+      <Filter>Source Files\debugger_engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\debugger_engine\src\debugger.cpp">
+      <Filter>Source Files\debugger_engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\emulator_engine\src\cpp_interface\emulator_cpp.cpp">
+      <Filter>Source Files\emulator_engine\cpp_interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\emulator_engine\src\opcodes.c">
+      <Filter>Source Files\emulator_engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\emulator_engine\src\emulator_engine.c">
+      <Filter>Source Files\emulator_engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\emulator_engine\src\flags.c">
+      <Filter>Source Files\emulator_engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\emulator_engine\src\global.c">
+      <Filter>Source Files\emulator_engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\emulator_engine\src\dasm\dasm.c">
+      <Filter>Source Files\emulator_engine\dasm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\emulator_engine\src\dasm\dasm_cpp.cpp">
+      <Filter>Source Files\emulator_engine\dasm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\symbols_loader\src\sym_loader.cpp">
+      <Filter>Source Files\symbols_loader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\system\multithreading\mutex\cpp\mutex.cpp">
+      <Filter>external\mutex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\system\multithreading\mutex\c\cmutex.c">
+      <Filter>external\cmutex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\system\datastruct\clist\clist.c">
+      <Filter>external\clist</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\system\multithreading\event\cpp\event.cpp">
+      <Filter>external\event</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

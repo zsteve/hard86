@@ -4,8 +4,8 @@
  * Stephen Zhang, 2014
  */
 
-#ifndef THREAD_H
-#define THREAD_H
+#ifndef THREAD_C_H
+#define THREAD_C_H
 
 #include <windows.h>
 

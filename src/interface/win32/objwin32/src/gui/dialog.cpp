@@ -1,7 +1,5 @@
 #include "dialog.h"
 
-using namespace nsObjWin32::nsGlobal;
-
 namespace nsObjWin32{
 
 namespace nsGUI{
@@ -35,6 +33,10 @@ namespace nsGUI{
 	{
 		m_hInstance=Window::m_hInstance;
 		return m_hWnd=CreateDialogParam(m_hInstance, MAKEINTRESOURCE(m_resId), hwndParent, Dialog::Base_DlgProc, (LPARAM)this);
+	}
+
+	LRESULT Dialog::SendMessage(UINT uMsg, WPARAM wParam, LPARAM lParam){
+		return ::SendMessage(m_hWnd, uMsg, wParam, lParam);
 	}
 
 }

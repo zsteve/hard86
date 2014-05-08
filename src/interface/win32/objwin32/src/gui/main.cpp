@@ -13,7 +13,6 @@
 #include "../../vs2010/win32_generic_unit/win32_generic_unit/resource1.h"
 
 using namespace nsObjWin32::nsGUI;
-using namespace nsObjWin32::nsGlobal;
 
 class MainFrame : public Frame
 {

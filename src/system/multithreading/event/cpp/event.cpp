@@ -8,15 +8,38 @@
 #include "event.h"
 
 Event::Event(bool initialState){
+	m_nInstances=new int;
+	*m_nInstances=1;
 	m_hEvent=CreateEvent(NULL, FALSE, (BOOL)initialState, NULL);
 }
 
 Event::Event(bool initialState, bool manualReset){
+	m_nInstances=new int;
+	*m_nInstances=1;
 	m_hEvent=CreateEvent(NULL, (BOOL)manualReset, (BOOL)initialState, NULL);
 }
 
+Event::Event(const Event& src){
+	m_nInstances=src.m_nInstances;
+	*m_nInstances++;
+	m_hEvent=src.m_hEvent;
+}
+
 Event::~Event(){
-	CloseHandle(m_hEvent);
+	*m_nInstances--;
+	if(!*m_nInstances){
+		delete m_nInstances;
+		CloseHandle(m_hEvent);
+	}
+}
+
+Event& Event::operator=(const Event& src){
+	*m_nInstances--;
+	if(!*m_nInstances){
+		delete m_nInstances;
+		CloseHandle(m_hEvent);
+	}
+	return *this;
 }
 
 bool Event::Set(){

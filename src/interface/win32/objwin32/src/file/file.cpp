@@ -141,7 +141,7 @@ namespace nsFiles{
 	bool File::Open(){
 		if(m_bOpened) return false;
 		m_hFile=CreateFile(m_path.c_str(), dwDesiredAccess, dwShareMode, NULL, OPEN_EXISTING, dwFlagsAndAttributes, NULL); 
-		return (m_bOpened=m_hFile==INVALID_HANDLE_VALUE ? true : false);
+		return (m_bOpened=m_hFile==INVALID_HANDLE_VALUE ? false : true);
 	}
 
 	/**
@@ -200,6 +200,7 @@ namespace nsFiles{
 	}
 
 	wstring File::GetExt(const wstring& path){
+		if(path==L"") return wstring(L"");
 		wstring::const_iterator it=path.end();
 		while(--it>=path.begin() && (*it)!=L'\\' && (*it)!=L'/'){
 			if(*it==L'.'){

@@ -1,11 +1,31 @@
+/*  Hard86 - An 8086 Emulator with support for virtual hardware
+	
+    Copyright (C) 2014 Stephen Zhang
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, write to the Free Software Foundation, Inc.,
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.	
+*/
+
 #include "hexgrid.h"
 #include "../../../objwin32/src/gui/global.h"
 #include "../global.h"
 #include <WindowsX.h>
 
-namespace nsHard86Win32{
+#include "../emulator.h"
+#include "../../../../../system/multithreading/mutex/cpp/mutex.h"
 
-using namespace nsObjWin32::nsGlobal;
+namespace nsHard86Win32{
 
 bool HexGrid::m_registered=false;
 
@@ -16,6 +36,8 @@ HexGrid::HexGrid(bool hasScrollBar) : m_gridData(0), m_sel(0, 0){
 		Register();
 		m_registered=true;
 	}
+
+	m_hasScrollBar=hasScrollBar;
 
 	m_defFont=NULL;
 	m_itemWidth=m_itemHeight=16;	// these should never be used, as WM_SETFONT should be sent first.
@@ -71,6 +93,7 @@ LRESULT CALLBACK HexGrid::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
 	case WM_VSCROLL:
 		OnVScroll(hWnd, uMsg, wParam, lParam);
 		break;
+
 	default:
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
@@ -82,9 +105,9 @@ LRESULT CALLBACK HexGrid::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
 MSGHANDLER(Create){
 	SendMessage(WM_SETFONT, (WPARAM)GetStockObject(ANSI_FIXED_FONT), (LPARAM)TRUE);
 	if(m_hasScrollBar){
-		m_scrollBar.Create(ClientWidth(hWnd)-DEF_SCROLLBAR_W, 0, DEF_SCROLLBAR_W, ClientHeight(hWnd), hWnd, SCROLLBAR);
-		int itemsAtOnce=ClientHeight(hWnd)/m_itemHeight;
-		SetScrollRange(m_scrollBar.GetHWND(), SB_CTL, 0, (m_gridData.size()/m_hexColumns)-1, true);
+		m_scrollBar.Create(ClientWidth()-ScrollBar::DEF_W, 0, ScrollBar::DEF_W, ClientHeight(), hWnd, SCROLLBAR);
+		int itemsAtOnce=ClientHeight()/m_itemHeight;
+		SetScrollRange(m_scrollBar.GetHWND(), SB_CTL, 0, (m_gridData.size()/m_hexColumns)-m_rows, true);
 		SetScrollPos(m_scrollBar.GetHWND(), SB_CTL, 0, true);
 		m_scrollBar.Show();
 	}
@@ -95,8 +118,8 @@ MSGHANDLER(Paint){
 	HDC hDC=BeginPaint(hWnd, &ps);
 
 	int w, h;
-	w=ClientWidth(hWnd);
-	h=ClientHeight(hWnd);
+	w=ClientWidth();
+	h=ClientHeight();
 
 	HDC hMemDC=CreateCompatibleDC(hDC);
 	HBITMAP hMemBitmap=CreateCompatibleBitmap(hDC, w, h);
@@ -130,9 +153,9 @@ MSGHANDLER(Paint){
 			_itow(m_gridData[index+m_basePos], hex, 16);
 
 			if(index >= m_sel.first && index <= m_sel.second){
-				SetBkColor(hMemDC, Settings::GetColor(Settings::Color::SEL_COLOR));
+				SetBkColor(hMemDC, Settings::GetColor(Settings::Colors::SEL_COLOR));
 				TextOut(hMemDC, j*m_itemWidth, i*m_itemHeight, hex, 2);
-				SetBkColor(hMemDC, Settings::GetColor(Settings::Color::BK_COLOR));
+				SetBkColor(hMemDC, Settings::GetColor(Settings::Colors::BK_COLOR));
 			}
 			else{
 				TextOut(hMemDC, j*m_itemWidth, i*m_itemHeight, hex, 2);
@@ -157,13 +180,13 @@ MSGHANDLER(Paint){
 
 			wchar_t asc[2]={ (wchar_t)(char)m_gridData[index+m_basePos], L'\0' };
 			if(index >= m_sel.first && index <= m_sel.second){
-				SetBkColor(hMemDC, Settings::GetColor(Settings::Color::SEL_COLOR));
+				SetBkColor(hMemDC, Settings::GetColor(Settings::Colors::SEL_COLOR));
 				TextOut(hMemDC,
 					(j*(m_itemWidth/2))+(m_hexColumns*m_itemWidth)+m_itemWidth,
 					i*m_itemHeight,
 					asc,
 					1);
-				SetBkColor(hMemDC, Settings::GetColor(Settings::Color::BK_COLOR));
+				SetBkColor(hMemDC, Settings::GetColor(Settings::Colors::BK_COLOR));
 			}
 			else{
 				TextOut(hMemDC,
@@ -215,9 +238,9 @@ MSGHANDLER(Size){
 	SetGridDimensions();
 	MoveWindow(hWnd, 0, 0, LOWORD(lParam), HIWORD(lParam), true);
 	if(m_hasScrollBar){
-		SetWindowSize(m_scrollBar.GetHWND(), DEF_SCROLLBAR_W, HIWORD(lParam));
-		SetWindowXY(m_scrollBar.GetHWND(), LOWORD(lParam)-DEF_SCROLLBAR_W, 0);
-		SetScrollRange(m_scrollBar.GetHWND(), SB_CTL, 0, (m_gridData.size()/m_hexColumns)-1, true);
+		SetWindowSize(m_scrollBar.GetHWND(), ScrollBar::DEF_W, HIWORD(lParam));
+		SetWindowXY(m_scrollBar.GetHWND(), LOWORD(lParam)-ScrollBar::DEF_W, 0);
+		SetScrollRange(m_scrollBar.GetHWND(), SB_CTL, 0, (m_gridData.size()/m_hexColumns)-m_rows, true);
 		SetScrollPos(m_scrollBar.GetHWND(), SB_CTL, 0, true);
 	}
 	DefWindowProc(hWnd, uMsg, wParam, lParam);
@@ -269,7 +292,7 @@ MSGHANDLER(VScroll){
 		break;
 	case SB_THUMBTRACK:
 	case SB_THUMBPOSITION:
-		if(m_basePos < (m_gridData.size()-m_hexColumns)){
+		if(m_basePos < (m_gridData.size()-(m_hexColumns*m_rows))){
 			m_basePos=HIWORD(wParam)*m_hexColumns;
 			si.nPos=si.nTrackPos;
 		}
@@ -284,8 +307,8 @@ MSGHANDLER(VScroll){
 
 void HexGrid::SetGridDimensions(){
 	int w, h;
-	w=ClientWidth(m_hWnd);
-	h=ClientHeight(m_hWnd);
+	w=ClientWidth();
+	h=ClientHeight();
 	float w_units=((w-m_itemWidth)/m_itemWidth);
 	w_units/=3;
 	m_hexColumns=w_units*2;

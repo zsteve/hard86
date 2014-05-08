@@ -17,6 +17,7 @@ Thread::Thread(LPTHREAD_START_ROUTINE threadProc, dword threadParam, int stackSi
 							(LPVOID)threadParam,
 							CREATE_SUSPENDED,
 							&m_threadID);
+	m_state=Suspended;
 }
 
 Thread::~Thread(){
@@ -24,13 +25,16 @@ Thread::~Thread(){
 }
 
 bool Thread::Start(){
+	m_state=Running;
 	return ResumeThread(m_hThread);
 }
 
 bool Thread::Pause(){
+	m_state=Suspended;
 	return SuspendThread(m_hThread);
 }
 
 bool Thread::Kill(){
+	m_state=Terminated;
 	return TerminateThread(m_hThread, 0);
 }

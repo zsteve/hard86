@@ -18,11 +18,22 @@ public:
 
 	bool Start();
 	bool Pause();
+	// Warning : usage of Kill() is dangerous, as thread will be terminated immediately
+	// Any resources allocated by the thread will not be released.
 	bool Kill();
+
+	void* GetHandle(){ return m_hThread; }
+
+	enum ThreadState{
+		Running, Suspended, Terminated
+	};
+
+	ThreadState State(){ return m_state; }
 private:
 protected:
 	HANDLE m_hThread;
 	DWORD m_threadID;
+	ThreadState m_state;
 };
 
 #endif

@@ -5,7 +5,6 @@ del /S *.txt
 del /S *.ncb
 del /S *.sdf
 del /S *.ipch
-del /S *.user
 del /S *.tlog
 del /S *.obj
 del /S *.res

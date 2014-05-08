@@ -1,6 +1,20 @@
-/**
-* @file debugger module
-* Stephen Zhang, 2014
+/*  Hard86 - An 8086 Emulator with support for virtual hardware
+	
+    Copyright (C) 2014 Stephen Zhang
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, write to the Free Software Foundation, Inc.,
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.	
 */
 
 #ifndef DEBUGGER_H
@@ -12,7 +26,7 @@
 
 #include  <map>
 
-namespace nsEmulatorComponent{
+#define DLLEXPORT __declspec(dllexport)
 
 namespace nsDebugger{
 
@@ -22,7 +36,7 @@ namespace nsDebugger{
 	/**
 	* List of breakpoint entries
 	*/
-	class BreakpointList{
+	class DLLEXPORT BreakpointList{
 	public:
 		class Breakpoint{
 		public:
@@ -75,7 +89,6 @@ namespace nsDebugger{
 			uint8 m_new_byte;
 
 			bool m_active;
-		private:
 		};
 
 	protected:
@@ -110,7 +123,7 @@ namespace nsDebugger{
 	/**
 	 * singleton Debugger class
 	 */
-	class Debugger{
+	class DLLEXPORT Debugger{
 	private:
 		Debugger()
 		{
@@ -148,13 +161,21 @@ namespace nsDebugger{
 		BreakpointList::iterator BreakpointBegin(){ return m_bpList.begin(); }
 		BreakpointList::iterator BreakpointEnd(){ return m_bpList.end(); }
 
+		void RegisterFrontendCallbacks(DBGCALLBACK preInstructionExecute,
+			DBGCALLBACK postInstructionExecute,
+			DBGCALLBACK breakPointHit);
+
 	protected:
 		static VDevList* m_vdevList;
 		static Debugger* m_instance;
 		BreakpointList m_bpList;
+
+		static DBGCALLBACK m_frontendPreInstructionExecute;
+		static DBGCALLBACK m_frontendPostInstructionExecute;
+		static DBGCALLBACK m_frontendBreakPointHit;
 	};
 }
 
-}
+#undef DLLEXPORT
 
 #endif

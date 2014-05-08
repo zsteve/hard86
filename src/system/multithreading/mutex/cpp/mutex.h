@@ -17,10 +17,12 @@ public:
 
 	virtual ~Mutex();
 
+	Mutex& operator=(const Mutex& src);
+
     /**
      * Locks MUTEX, blocking if necessary
      */
-	void Lock();
+	int Lock();
 	/**
 	 * Attempts to lock MUTEX. Does not block.
 	 * @return true if locking succeeded, false if locking failed
@@ -29,12 +31,14 @@ public:
 	/**
 	 * Unlocks MUTEX
 	 */
-	void Unlock();
+	int Unlock();
 
 	void* GetHandle(){ return m_hMutex; }
 private:
 protected:
 	HANDLE m_hMutex;
+
+	int* m_nInstances;
 };
 
 #endif

@@ -1,14 +1,26 @@
-/**
-* @file FASM symbols loader
-* Stephen Zhang, 2014
+/*  Hard86 - An 8086 Emulator with support for virtual hardware
+	
+    Copyright (C) 2014 Stephen Zhang
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, write to the Free Software Foundation, Inc.,
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.	
 */
 
 #include <iostream>
 
 #include "sym_loader.h"
 #include "../../../global/defines.h"
-
-namespace nsEmulatorComponent{
 
 namespace nsSymLoader{
 	// helper functions
@@ -101,7 +113,8 @@ namespace nsSymLoader{
 
 	// SymbolData
 	SymbolData::SymbolData() : m_symVect(0){
-		
+		m_data=NULL;
+		m_dataSize=NULL;
 	}
 
 	SymbolData::SymbolData(uint8* symFileData, int dataSize) : m_symVect(0),\
@@ -118,15 +131,35 @@ namespace nsSymLoader{
 
 	SymbolData::SymbolData(const SymbolData& src){
 		m_dataSize=src.m_dataSize;
-		m_data=new uint8[m_dataSize];
-		memcpy(m_data, src.m_data, m_dataSize);
+		if(m_dataSize!=0){
+			m_data=new uint8[m_dataSize];
+			memcpy(m_data, src.m_data, m_dataSize);
+		}
+		else{
+			m_data=NULL;
+		}
 		m_headerData=src.m_headerData;
 		m_symVect=src.m_symVect;
 	}
 
-	SymbolData::~SymbolData(){
-		delete[] m_data;
+	SymbolData& SymbolData::operator=(const SymbolData& rhs){
+		if(m_data) delete[] m_data;
+		m_dataSize=rhs.m_dataSize;
+		if(m_dataSize!=0){
+			m_data=new uint8[m_dataSize];
+			memcpy(m_data, rhs.m_data, m_dataSize);
+		}
+		else{
+			m_data=NULL;
+		}
+		m_headerData=rhs.m_headerData;
+		m_symVect=rhs.m_symVect;
+		return *this;
 	}
 
-}
+	SymbolData::~SymbolData(){
+		if(m_data)
+			delete[] m_data;
+	}
+
 }

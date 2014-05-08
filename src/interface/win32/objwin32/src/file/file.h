@@ -15,7 +15,7 @@ namespace nsFiles{
 	 * FileObject base class
 	 * Defines the basic behaviour of File objects (disk files, directories)
 	 */
-	class FileObject
+	class __declspec(dllexport) FileObject
 	{
 	public:
 		FileObject(){ m_bOpened=false; m_hFile=NULL; }
@@ -62,7 +62,7 @@ namespace nsFiles{
 	/**
 	 * File class
 	 */
-	class File : public FileObject
+	class __declspec(dllexport) File  : public FileObject
 	{
 	protected:
 		void Init(const wchar_t* path){
@@ -130,7 +130,7 @@ namespace nsFiles{
 	/**
 	 * Directory class
 	 */
-	class Directory : public FileObject
+	class __declspec(dllexport) Directory : public FileObject
 	{
 	protected:
 		void Init(const wchar_t* path){

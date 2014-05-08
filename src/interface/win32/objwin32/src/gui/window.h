@@ -5,6 +5,7 @@
 #define DLLEXPORT __declspec(dllexport)
 
 #include <Windows.h>
+#include <string>
 
 namespace nsObjWin32{
 
@@ -46,23 +47,46 @@ namespace nsGUI{
 
 		BOOL SetEnabled(bool enabled){ return EnableWindow(m_hWnd, enabled); }
 
-		void SetExStyle(DWORD dwStyle){ m_exStyle=dwStyle; }
+		void SetExStyle(DWORD dwStyle){ m_exStyle|=dwStyle; }
 
-		void SetStyle(DWORD dwStyle){ m_style=dwStyle; }
+		void SetStyle(DWORD dwStyle){ m_style|=dwStyle; }
 
 		virtual BOOL Close(){ return DestroyWindow(m_hWnd); }
 
-		int GetText(wchar_t lpBuffer[]){
+		inline void SetFont(HFONT hFont, bool bRedraw=false){ SendMessage(WM_SETFONT, (WPARAM)hFont, bRedraw); }
+
+		inline int GetText(wchar_t lpBuffer[]) const{
 			return GetWindowText(m_hWnd, lpBuffer, 80);
 		}
 
-		int SetText(wchar_t* lpName){
+		inline int SetText(const wchar_t* lpName) const{
 			return SetWindowText(m_hWnd, lpName);
 		}
 
-		int GetTextLength(){
+		inline int GetTextLength() const{
 			return GetWindowTextLength(m_hWnd);
 		}
+
+		inline std::wstring GetText() const{
+			wchar_t* buffer=new wchar_t[GetTextLength()+1];
+			GetText(buffer);
+			std::wstring retv(buffer);
+			delete[] buffer;
+			return retv;
+		}
+
+		inline int WindowWidth();
+		inline int WindowHeight();
+		inline int ClientWidth();
+		inline int ClientHeight();
+		inline int XPos();
+		inline int YPos();
+		inline int SetSize(int w, int h);
+		inline int SetWidth(int w);
+		inline int SetHeight(int h);
+		inline int SetXY(int x, int y);
+		inline int SetX(int x);
+		inline int SetY(int y);
 
 	protected:
 

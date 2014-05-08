@@ -1,6 +1,20 @@
-/**
-* @file C++ Interface for Emulator
-* Stephen Zhang, 2014
+/*  Hard86 - An 8086 Emulator with support for virtual hardware
+	
+    Copyright (C) 2014 Stephen Zhang
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, write to the Free Software Foundation, Inc.,
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.	
 */
 
 #ifndef EMULATOR_CPP_H
@@ -14,12 +28,12 @@
 #include "../../../../system/multithreading/mutex/c/cmutex.h"
 #include "../../../../system/multithreading/mutex/cpp/mutex.h"
 
-namespace nsEmulatorComponent{
+#define DLLEXPORT __declspec(dllexport)
 
 namespace nsEmulator{
 
-	enum Regs{
-		ax, cx, dx, bx, sp, bp, si, di, cs, ss, ds, es, ip, flags,
+	enum DLLEXPORT Regs{
+		ax, cx, dx, bx, sp, bp, si, di, es, cs, ss, ds, ip, flags,
 		al, cl, dl, bl, ah, ch, dh, bh
 	};
 
@@ -27,7 +41,7 @@ namespace nsEmulator{
 	 * Singleton Emulator class
 	 * interface to the C component
 	 */
-	class Emulator{
+	class DLLEXPORT Emulator{
 	private:
 		Emulator(Mutex sysMutex,
 			DBGCALLBACK bpHitFunc,
@@ -40,6 +54,9 @@ namespace nsEmulator{
 
 		static Emulator* m_instance;
 	public:
+
+		static const int MemSize=1048576;
+
 		static Emulator* GetInstance(Mutex sysMutex,
 									DBGCALLBACK bpHitFunc,
 									DBGCALLBACK preExFunc,
@@ -51,25 +68,33 @@ namespace nsEmulator{
 
 		static Emulator* GetInstance();
 
+		static bool HasInstance(void){ return (bool)m_instance; }
+
+		static void DisposeInstance();
+
 		// Instance functions
 
-		uint16 ReadMem16(uint32 addr){ return read_mem_16(addr); }
-		uint8 ReadMem8(uint32 addr){ return read_mem_8(addr); }
+		uint16 ReadMem16(uint32 addr);
+		uint8 ReadMem8(uint32 addr);
 
-		void WriteMem16(uint16 val, uint32 addr) { write_mem_16(val, addr); }
-		void WriteMem8(uint8 val, uint32 addr) { write_mem_8(val, addr); }
+		void WriteMem16(uint16 val, uint32 addr);
+		void WriteMem8(uint8 val, uint32 addr);
 
-		void WriteIOPort(uint8 val, uint16 port){ write_io_port(val, port); }
-		uint8 ReadIOPort(uint16 port){ return read_io_port(port); }
+		void WriteIOPort(uint8 val, uint16 port);
+		uint8 ReadIOPort(uint16 port);
 
-		void WriteReg(int reg, uint16 val){ write_reg(reg, val); }
-		uint16 ReadReg(int reg){ return read_reg(reg); }
+		void WriteReg(int reg, uint16 val);
+		uint16 ReadReg(int reg);
 
-		void StackPush(uint16 val){ stack_push(val); }
-		uint16 StackPop(){ return stack_pop(); }
+		void StackPush(uint16 val);
+		uint16 StackPop();
 
-		int Execute(){ return system_execute(); }
+		sys_state_ptr SystemState(){ return get_system_state(); }
+
+		int Execute();
+		void Stop();
 		void Reset();
+
 	protected:
 		uint8* m_sysMem;
 		uint32 m_sysMemSize;
@@ -79,7 +104,7 @@ namespace nsEmulator{
 	private:
 	};
 
-}
+#undef DLLEXPORT
 
 }
 

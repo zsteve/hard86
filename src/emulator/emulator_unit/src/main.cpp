@@ -1,3 +1,22 @@
+/*  Hard86 - An 8086 Emulator with support for virtual hardware
+	
+    Copyright (C) 2014 Stephen Zhang
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, write to the Free Software Foundation, Inc.,
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.	
+*/
+
 #include <iostream>
 
 #include "../../debugger_engine/src/debugger.h"
@@ -12,11 +31,11 @@
 
 using namespace std;
 
-using namespace nsEmulatorComponent::nsDebugger;
-using namespace nsEmulatorComponent::nsVDev;
-using namespace nsEmulatorComponent::nsDasm;
-using namespace nsEmulatorComponent::nsEmulator;
-using namespace nsEmulatorComponent::nsSymLoader;
+using namespace nsDebugger;
+using namespace nsVDev;
+using namespace nsDasm;
+using namespace nsEmulator;
+using namespace nsSymLoader;
 
 long fsize(FILE *stream)
 {
@@ -31,12 +50,12 @@ long fsize(FILE *stream)
 int main(){
 	Mutex sysMutex;
 	VDevList* vdevList=VDevList::GetInstance();
-	VDev testDev(nsEmulatorComponent::nsDeviceTest::VirtualDevice_Initialize,
-		nsEmulatorComponent::nsDeviceTest::VirtualDevice_Terminate,
-		nsEmulatorComponent::nsDeviceTest::VirtualDevice_AcceptEmulationMutex,
+	VDev testDev(nsDeviceTest::VirtualDevice_Initialize,
+		nsDeviceTest::VirtualDevice_Terminate,
+		nsDeviceTest::VirtualDevice_AcceptEmulationMutex,
 		(void*)22, (void*)24);
 	vdevList->Add(testDev);
-	Debugger::Init(vdevList);
+	Debugger::Init(vdevList, Event());
 	Debugger* dbg=Debugger::GetInstance();
 	FILE* in_file=fopen("test/test.com", "r");
 	int size=fsize(in_file);

@@ -1,3 +1,22 @@
+/*  Hard86 - An 8086 Emulator with support for virtual hardware
+	
+    Copyright (C) 2014 Stephen Zhang
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, write to the Free Software Foundation, Inc.,
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.	
+*/
+
 #ifndef HARD86_HEXGRID_H
 #define HARD86_HEXGRID_H
 
@@ -36,6 +55,14 @@ public:
 	}
 
 	ATOM Register();
+
+	vector<uint8>& GetData(){ return m_gridData; }
+
+	int GetCapacity(){ return m_hexColumns*m_rows; }
+
+	int GetRows(){ return m_rows; }
+
+	int GetColumns(){ return m_hexColumns; }
 
 protected:
 

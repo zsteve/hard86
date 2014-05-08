@@ -28,6 +28,9 @@ namespace nsGUI{
 
 		void SetStyle(DWORD dwStyle, BOOL fRedraw=FALSE){ return Button_SetStyle(m_hWnd, dwStyle, fRedraw); }
 
+		static const int DEF_H=20;
+		static const int DEF_W=84;
+
 	protected:
 
 		HWND Create(DWORD dwExStyle,

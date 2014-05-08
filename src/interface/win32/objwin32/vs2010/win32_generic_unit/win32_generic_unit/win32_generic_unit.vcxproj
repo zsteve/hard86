@@ -84,6 +84,7 @@
     <ClCompile Include="..\..\..\src\gui\button.cpp" />
     <ClCompile Include="..\..\..\src\gui\common_control.cpp" />
     <ClCompile Include="..\..\..\src\gui\dialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\editbox.cpp" />
     <ClCompile Include="..\..\..\src\gui\frame.cpp" />
     <ClCompile Include="..\..\..\src\gui\global.cpp" />
     <ClCompile Include="..\..\..\src\gui\main.cpp" />
@@ -97,6 +98,7 @@
     <ClInclude Include="..\..\..\src\gui\button.h" />
     <ClInclude Include="..\..\..\src\gui\common_control.h" />
     <ClInclude Include="..\..\..\src\gui\dialog.h" />
+    <ClInclude Include="..\..\..\src\gui\editbox.h" />
     <ClInclude Include="..\..\..\src\gui\frame.h" />
     <ClInclude Include="..\..\..\src\gui\global.h" />
     <ClInclude Include="..\..\..\src\gui\progressbar.h" />

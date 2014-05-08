@@ -13,9 +13,7 @@
 
 namespace nsObjWin32{
 
-namespace nsGlobal{
-
-	using namespace nsObjWin32::nsGUI;
+namespace nsGUI{
 
 	DLLEXPORT int RectWidth(const RECT& rc);
 	DLLEXPORT int RectHeight(const RECT& rc);
@@ -26,10 +24,16 @@ namespace nsGlobal{
 	DLLEXPORT int ClientWidth(HWND hWnd);
 	DLLEXPORT int ClientHeight(HWND hWnd);
 	DLLEXPORT int SetWindowSize(HWND hWnd, int w, int h);
+	DLLEXPORT int SetChildWindowSize(HWND hWnd, int w, int h);
 	DLLEXPORT int SetWindowXY(HWND hWnd, int x, int y);
 
 	DLLEXPORT int WindowX(HWND hWnd);
 	DLLEXPORT int WindowY(HWND hWnd);
+	DLLEXPORT int ClientX(HWND hWnd);
+	DLLEXPORT int ClientY(HWND hWnd);
+
+	DLLEXPORT int FontWidth(HDC hDC);
+	DLLEXPORT int FontHeight(HDC hDC);
 
 	template<typename T>
 	DLLEXPORT T Center(T a, T b){

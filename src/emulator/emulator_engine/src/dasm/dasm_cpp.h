@@ -1,6 +1,20 @@
-/**
-* @file C++ disassembly interface and processing functions
-* Stephen Zhang, 2014
+/*  Hard86 - An 8086 Emulator with support for virtual hardware
+	
+    Copyright (C) 2014 Stephen Zhang
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, write to the Free Software Foundation, Inc.,
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.	
 */
 
 #ifndef DASM_PROCESS_H
@@ -22,7 +36,7 @@
 
 #include "../../../../system/datastruct/clist/clist.h"
 
-namespace nsEmulatorComponent{
+#define DLLEXPORT __declspec(dllexport)
 
 namespace nsDasm{
 
@@ -32,7 +46,7 @@ namespace nsDasm{
 
 	class DasmList;
 
-	class Disassembler{
+	class DLLEXPORT Disassembler{
 	public:
 		Disassembler(){}
 		~Disassembler(){}
@@ -43,7 +57,7 @@ namespace nsDasm{
 	/**
 	 * one line of disassembled code
 	 */
-	class DasmLine{
+	class DLLEXPORT DasmLine{
 	protected:
 		string m_line;	/// disassembled line
 		uint32 m_addr;	/// address of line
@@ -91,7 +105,7 @@ namespace nsDasm{
 	 * The last copy of a certain object
 	 * is destructed.
 	 */
-	class DasmList{
+	class DLLEXPORT DasmList{
 	public:
 		class iterator : \
 			public std::iterator<random_access_iterator_tag, DasmLine*, int>
@@ -165,6 +179,6 @@ namespace nsDasm{
 	};
 }
 
-}
+#undef DLLEXPORT
 
 #endif

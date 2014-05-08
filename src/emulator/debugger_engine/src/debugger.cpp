@@ -1,6 +1,20 @@
-/**
-* @file debugger module
-* Stephen Zhang, 2014
+/*  Hard86 - An 8086 Emulator with support for virtual hardware
+	
+    Copyright (C) 2014 Stephen Zhang
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, write to the Free Software Foundation, Inc.,
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.	
 */
 
 #include <iostream>
@@ -21,14 +35,16 @@
 
 using namespace std;
 
-namespace nsEmulatorComponent{
-
 namespace nsDebugger{
 
 	using namespace nsVDev;
 
 	VDevList* Debugger::m_vdevList=NULL;
 	Debugger* Debugger::m_instance=NULL;
+
+	DBGCALLBACK Debugger::m_frontendPreInstructionExecute;
+	DBGCALLBACK Debugger::m_frontendPostInstructionExecute;
+	DBGCALLBACK Debugger::m_frontendBreakPointHit;
 
 	Debugger* Debugger::GetInstance(){
 		if(!m_instance){
@@ -69,16 +85,10 @@ namespace nsDebugger{
 	 * @param sysMutex system MUTEX
 	 */
 	void Debugger::PreInstructionExecute(MUTEX sysMutex, sys_state_ptr sysState){
-
-	}
-
-	/**
-	 * callback function after instruction executes
-	 * @param sysMutex system MUTEX
-	 */
-	void Debugger::PostInstructionExecute(MUTEX sysMutex, sys_state_ptr sysState){
-
 		sys_state_ptr sys_state=get_system_state();
+
+		m_frontendPreInstructionExecute(sysMutex, sysState);
+
 		/* update virtual devices */
 		if(!m_vdevList->empty()){
 			VDevList::iterator it=m_vdevList->begin();
@@ -86,6 +96,14 @@ namespace nsDebugger{
 				(*it).second.AcceptEmulationMutex(sysMutex, sysState);
 			}
 		}
+	}
+
+	/**
+	 * callback function after instruction executes
+	 * @param sysMutex system MUTEX
+	 */
+	void Debugger::PostInstructionExecute(MUTEX sysMutex, sys_state_ptr sysState){
+		
 	}
 
 	/**
@@ -144,6 +162,14 @@ namespace nsDebugger{
 	BreakpointList::~BreakpointList(){
 
 	}
+
+	void Debugger::RegisterFrontendCallbacks(DBGCALLBACK preInstructionExecute,
+											DBGCALLBACK postInstructionExecute,
+											DBGCALLBACK breakPointHit)
+	{
+		m_frontendPreInstructionExecute=preInstructionExecute;
+		m_frontendPostInstructionExecute=postInstructionExecute;
+		m_frontendBreakPointHit=breakPointHit;
+	}
 }
 
-}

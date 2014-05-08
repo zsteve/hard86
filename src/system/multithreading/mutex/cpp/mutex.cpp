@@ -14,23 +14,41 @@
 */
 
 Mutex::Mutex(){
+	m_nInstances=new int;
+	*m_nInstances=1;
 	m_hMutex=CreateMutex(NULL, FALSE, NULL);
 }
 
 Mutex::Mutex(const Mutex& src){
+	m_nInstances=src.m_nInstances;
+	*m_nInstances++;
 	m_hMutex=src.m_hMutex;
 }
 
 Mutex::Mutex(void* hMutex){
+	m_nInstances=new int;
+	*m_nInstances=1;
 	m_hMutex=hMutex;
 }
 
 Mutex::~Mutex(){
-
+	*m_nInstances--;
+	if(!*m_nInstances){
+		delete m_nInstances;
+		CloseHandle(m_hMutex);
+	}
 }
 
-void Mutex::Lock(){
-	WaitForSingleObject(m_hMutex, INFINITE);
+Mutex& Mutex::operator=(const Mutex& src){
+	m_nInstances=src.m_nInstances;
+	*m_nInstances++;
+	m_hMutex=src.m_hMutex;
+	return *this;
+}
+
+int Mutex::Lock(){
+	int retv=WaitForSingleObject(m_hMutex, INFINITE);
+	return retv;
 }
 
 bool Mutex::TryLock(){
@@ -41,6 +59,7 @@ bool Mutex::TryLock(){
 	return true;
 }
 
-void Mutex::Unlock(){
-	ReleaseMutex(m_hMutex);
+int Mutex::Unlock(){
+	int retv=ReleaseMutex(m_hMutex);
+	return retv;
 }

@@ -1,8 +1,21 @@
-/**
- * @file Emulator engine
- * x86 emulator engine for hard86
- * Stephen Zhang, 2014
- */
+/*  Hard86 - An 8086 Emulator with support for virtual hardware
+	
+    Copyright (C) 2014 Stephen Zhang
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, write to the Free Software Foundation, Inc.,
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.	
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -333,7 +346,7 @@ void system_load_bios(uint8* data, uint16 size){
 	int i;
 	assert(size>=512);
 	// copy IDT
-	for(i=0; i<512; i++){
+	for(i=0; i<256; i++){
 		/*	IDT format :
 			SEG:IP
 		*/
@@ -431,10 +444,12 @@ int system_execute(){
 	extern int halt_flag;
 
 	while(!halt_flag){
+		R_IP=GET_ADDR(IP, CS);
+		process_instr_prefixes();
+
 		pre_execute_callback(sys_mutex, &sys_state);
 		mutex_lock(sys_mutex);
 		/* update r_ip */
-		R_IP=GET_ADDR(IP, CS);
 
 		if(read_mem_8(GET_ADDR(IP, CS))==0xcc){
 			/* int3 debug interrupt - hand control to debugger */
@@ -443,8 +458,6 @@ int system_execute(){
 			breakpoint_hit_callback(sys_mutex, &sys_state);
 			continue;
 		}
-
-		process_instr_prefixes();
 
 		system_print_state();
 

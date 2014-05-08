@@ -13,7 +13,12 @@ class Event{
 	public:
 		Event(bool initialState=false);
 		Event(bool initialState, bool manualReset);
+
+		Event(const Event& src);
+
 		virtual ~Event();
+
+		Event& operator=(const Event& src);
 
 		bool Set();
 		bool Reset();
@@ -21,6 +26,8 @@ class Event{
 		bool TryWaitFor();
 	protected:
 		HANDLE m_hEvent;
+
+		int* m_nInstances;
 	private:
 };
 

@@ -1,3 +1,22 @@
+/*  Hard86 - An 8086 Emulator with support for virtual hardware
+	
+    Copyright (C) 2014 Stephen Zhang
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, write to the Free Software Foundation, Inc.,
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.	
+*/
+
 #include <WindowsX.h>
 
 #include <utility>
@@ -7,14 +26,14 @@
 #include "../global.h"
 
 using namespace nsObjWin32::nsGUI;
-using namespace nsObjWin32::nsGlobal;
 
 namespace nsHard86Win32{
 
 bool CodeList::m_registered=false;
 
-CodeList::CodeList(bool hasScrollBar) : m_listData(0), m_sels(0)
+CodeList::CodeList(int textAlignStyle, bool hasScrollBar) : m_listData(0)
 {
+	m_textAlignStyle=textAlignStyle;
 	m_style|=WS_CHILD;
 	m_className=L"Hard86_CodeList";
 	if(!m_registered){
@@ -22,14 +41,9 @@ CodeList::CodeList(bool hasScrollBar) : m_listData(0), m_sels(0)
 		m_registered=true;
 	}
 
-	for(int i=0; i<120; i++){
-		wchar_t str[16];
-		_itow(i, str, 10);
-		m_listData.push_back(std::wstring(L"Item ")+str);
-	}
-
 	m_itemHeight=16;
 	m_curSel=0;
+	m_extraSel=0;
 	m_basePos=0;
 
 	m_hasScrollBar=hasScrollBar;
@@ -85,8 +99,8 @@ LRESULT CALLBACK CodeList::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
 
 MSGHANDLER(Create){
 	if(m_hasScrollBar){
-		m_scrollBar.Create(ClientWidth(hWnd)-DEF_SCROLLBAR_W, 0, DEF_SCROLLBAR_W, ClientHeight(hWnd), hWnd, SCROLLBAR);
-		int itemsAtOnce=ClientHeight(hWnd)/m_itemHeight;
+		m_scrollBar.Create(ClientWidth()-ScrollBar::DEF_W, 0, ScrollBar::DEF_W, ClientHeight(), hWnd, SCROLLBAR);
+		int itemsAtOnce=ClientHeight()/m_itemHeight;
 		SetScrollRange(m_scrollBar.GetHWND(), SB_CTL, 0, (m_listData.size() >= itemsAtOnce ? m_listData.size() : 1), true);
 		SetScrollPos(m_scrollBar.GetHWND(), SB_CTL, 0, true);
 		m_scrollBar.Show();
@@ -133,52 +147,43 @@ MSGHANDLER(Paint){
 	GetTextMetrics(hDC, &tm);
 
 	int ypos=0;
-	int w=WindowWidth(*this);
-	int h=WindowHeight(*this);
+	int w=WindowWidth();
+	int h=WindowHeight();
 
-	COLORREF defItemColor=Settings::GetColor(Settings::Color::CODELIST_ITEM_COLOR);
+	COLORREF defItemColor=Settings::GetColor(Settings::Colors::CODELIST_ITEM_COLOR);
 	COLORREF itemColor=defItemColor;
 
 	for(int i=m_basePos; i<m_listData.size(); i++, ypos+=m_itemHeight, itemColor=defItemColor){
 		if(m_curSel==i){
 			if(m_enabledState)
-				itemColor=Settings::GetColor(Settings::Color::SEL_COLOR);
+				itemColor=Settings::GetColor(Settings::Colors::SEL_COLOR);
 			else
-				itemColor=Settings::GetColor(Settings::Color::INACTIVE_SEL_COLOR);
-		}else{
-			for(int j=0; j<m_sels.size(); j++){
-				if(m_sels[j].first==i){
-					if(m_enabledState)
-						itemColor=m_sels[j].second;
-					else
-						itemColor=Settings::GetColor(Settings::Color::INACTIVE_SEL_COLOR);
-					break;
-				}
-			}
+				itemColor=Settings::GetColor(Settings::Colors::INACTIVE_SEL_COLOR);
+		}
+		if(m_extraSel==i){
+			if(m_enabledState)
+				itemColor=Settings::GetColor(Settings::Colors::CODELIST_CURRENTLINE_COLOR);
+			else
+				itemColor=Settings::GetColor(Settings::Colors::INACTIVE_SEL_COLOR);
 		}
 		HBRUSH hBrush=CreateSolidBrush(itemColor);
 		HGDIOBJ hOldBrush=SelectObject(hDC, (HGDIOBJ)hBrush);
 		Rectangle(hDC, 0, ypos, w, ypos+m_itemHeight);
 		SetBkColor(hDC, itemColor);
-		TextOut(hDC, Center(0, (int)(w-(m_listData[i].size()*tm.tmAveCharWidth))), ypos+1, m_listData[i].c_str(), m_listData[i].size());
-		SetBkColor(hDC, Settings::GetColor(Settings::Color::BK_COLOR));
+		if(m_textAlignStyle==CENTER)
+			TextOut(hDC, Center(0, (int)(w-(m_listData[i].size()*tm.tmAveCharWidth))), ypos+1, m_listData[i].c_str(), m_listData[i].size());
+		else if(m_textAlignStyle==LEFT)
+			TextOut(hDC, 4, ypos+1, m_listData[i].c_str(), m_listData[i].size());
+		SetBkColor(hDC, Settings::GetColor(Settings::Colors::BK_COLOR));
 		SelectObject(hDC, hOldBrush);
 		DeleteObject(hBrush);
 	}
-	HBRUSH hBrush=CreateSolidBrush(Settings::GetColor(Settings::Color::BK_COLOR));
+	HBRUSH hBrush=CreateSolidBrush(Settings::GetColor(Settings::Colors::BK_COLOR));
 	HGDIOBJ hOldBrush=SelectObject(hDC, (HGDIOBJ)hBrush);
 	while(ypos<h){
 		Rectangle(hDC, 0, ypos, w, ypos+m_itemHeight);
 		ypos+=m_itemHeight;
 	}
-
-	SelectObject(hDC, (HGDIOBJ)GetStockObject(BLACK_PEN));
-
-	MoveToEx(hDC, 0, 0, NULL);
-	LineTo(hDC, w-DEF_SCROLLBAR_W-1, 0);
-	LineTo(hDC, w-DEF_SCROLLBAR_W-1, h-1);
-	LineTo(hDC, 0, h-1);
-	LineTo(hDC, 0, 0);
 
 	SelectObject(hDC, hOldBrush);
 	DeleteObject(hBrush);
@@ -217,7 +222,7 @@ MSGHANDLER(VScroll){
 		break;
 	}
 
-	int itemsAtOnce=ClientHeight(hWnd)/m_itemHeight;
+	int itemsAtOnce=ClientHeight()/m_itemHeight;
 	if(m_curSel > (m_basePos+itemsAtOnce)){
 		m_basePos=m_curSel-itemsAtOnce;
 	}

@@ -68,6 +68,19 @@ namespace nsGUI{
 		int e=GetLastError();
 		return m_hWnd;
 	}
+
+	inline int Window::WindowWidth(){ return nsGUI::WindowWidth(m_hWnd); }
+	inline int Window::WindowHeight(){ return nsGUI::WindowHeight(m_hWnd); }
+	inline int Window::ClientWidth(){ return nsGUI::ClientWidth(m_hWnd); }
+	inline int Window::ClientHeight(){ return nsGUI::ClientHeight(m_hWnd); }
+	inline int Window::XPos(){ return nsGUI::WindowX(m_hWnd); }
+	inline int Window::YPos(){ return nsGUI::WindowY(m_hWnd); }
+	inline int Window::SetSize(int w, int h){ return (m_style & WS_CHILD) ? nsGUI::SetChildWindowSize(m_hWnd, w, h) : nsGUI::SetWindowSize(m_hWnd, w, h); }
+	inline int Window::SetWidth(int w){ return SetSize(w, WindowWidth()); }
+	inline int Window::SetHeight(int h){ return SetSize(WindowHeight(), h); }
+	inline int Window::SetXY(int x, int y){ return nsGUI::SetWindowXY(m_hWnd, x, y); }
+	inline int Window::SetX(int x){ return SetXY(x, YPos()); }
+	inline int Window::SetY(int y){ return SetXY(XPos(), y); }
 }
 
 }

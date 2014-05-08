@@ -1,0 +1,18 @@
+<Hard86Project>
+	<Variables>
+		<LoadSegAddr seg="0" addr="0">
+		</LoadSegAddr>
+	</Variables>
+	
+	<Paths binaryPath="test.com" FASPath="test.fas" userVDevPath="">
+	</Paths>
+	
+	<VDevs>
+		<Test1 name="Test1" path="Test1Path"/>
+		<Test2 name="Test2" path="Test1Path"/>
+		<Test3 name="Test3" path="Test1Path"/>
+	</VDevs>
+	
+	<BPList>
+	</BPList>
+</Hard86Project>

@@ -1,9 +1,32 @@
+/*  Hard86 - An 8086 Emulator with support for virtual hardware
+	
+    Copyright (C) 2014 Stephen Zhang
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, write to the Free Software Foundation, Inc.,
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.	
+*/
+
 #ifndef HARD86_REGISTER_WATCHER_H
 #define HARD86_REGISTER_WATCHER_H
 
+
+
 #include <Windows.h>
 #include <CommCtrl.h>
+
 #include "../global.h"
+
 #include "toolwindow.h"
 #include "winmanager.h"
 #include "../../../objwin32/src/gui/dialog.h"
@@ -15,32 +38,17 @@ namespace nsHard86Win32{
 
 	class SingleRegWatcher : public Dialog{
 	public:
-		SingleRegWatcher(){
+		SingleRegWatcher(int i){
 			m_resId=IDD_REGWATCHER;
 			m_regName=L"Undefined";
+			m_regNum=i;
 		}
 
 		virtual ~SingleRegWatcher(){
 
 		}
 
-		INT_PTR CALLBACK DlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
-			switch(uMsg){
-			case WM_INITDIALOG:
-				{
-					// Create subclass of edit box function
-					SetWindowSubclass(GetDlgItem(hWnd, IDC_REGVALUE), &EditSubclassProc, m_editSubclassID, NULL);
-				}
-				break;
-			case WM_CLOSE:
-				{
-					RemoveWindowSubclass(GetDlgItem(hWnd, IDC_REGVALUE), &EditSubclassProc, m_editSubclassID);
-				}
-			default:
-				return 0;
-			}
-			return 0;
-		}
+		INT_PTR CALLBACK DlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 		static LRESULT CALLBACK EditSubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam,\
 										UINT_PTR uIdSubclass, DWORD_PTR dwRefData){
@@ -69,8 +77,10 @@ namespace nsHard86Win32{
 		}
 	private:
 		static const int m_editSubclassID=1;
-		wstring m_regName;
 		static const int m_maxDigits=4;
+
+		wstring m_regName;
+		int m_regNum;
 	};
 
 	// Register watch window
@@ -81,6 +91,9 @@ namespace nsHard86Win32{
 		}
 
 		virtual ~RegisterWatcher(){
+			for(int i=REGWATCHER_AX; i<=REGWATCHER_IP; i++){
+				delete m_regWatchers[i];
+			}
 			DestroyWindow(m_hWnd);
 		}
 
@@ -118,16 +131,12 @@ namespace nsHard86Win32{
 
 		static const wchar_t m_regNames[][6];
 
-		template<typename T>
-		T*& Child(int id){
-			return (T*&)m_children[id];
-		}
+		SingleRegWatcher* m_regWatchers[REGWATCHER_IP+1];
 
 		WinManager m_children;
 	private:
 		static bool m_registered;
 	};
-
 }
 
 #endif

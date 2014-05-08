@@ -1,3 +1,22 @@
+/*  Hard86 - An 8086 Emulator with support for virtual hardware
+	
+    Copyright (C) 2014 Stephen Zhang
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, write to the Free Software Foundation, Inc.,
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.	
+*/
+
 #ifndef HARD86_CODELIST_H
 #define HARD86_CODELIST_H
 
@@ -16,7 +35,7 @@ namespace nsHard86Win32{
 
 class CodeList : public UserWindow{
 public:
-	CodeList(bool hasScrollBar=true);
+	CodeList(int textAlignStyle=CENTER, bool hasScrollBar=true);
 
 	virtual ~CodeList(){
 		DestroyWindow(m_hWnd);
@@ -32,7 +51,9 @@ public:
 
 	ATOM Register();
 
-	// Interface
+	int GetCapacity(){ return ClientHeight()/m_itemHeight; }
+
+	// Data interface
 	/**
 	 * Inserts item
 	 * @param elem item to be inserted
@@ -51,6 +72,23 @@ public:
 
 	void Clear(){ m_listData.clear(); }
 
+	std::vector<std::wstring>::iterator GetIterator(){ return m_listData.begin(); }
+
+	void SetSelection(int i){
+		m_curSel=i;
+		InvalidateRect(m_hWnd, NULL, true);
+	}
+
+	void SetExtraSelection(int i){
+		m_extraSel=i;
+		InvalidateRect(m_hWnd, NULL, true);
+	}
+
+	enum Styles{
+		CENTER,
+		LEFT
+	};
+
 protected:
 
 #define MSGHANDLER(name) void On##name(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -65,10 +103,12 @@ protected:
 
 #undef MSGHANDLER
 
+	int m_textAlignStyle;
+
 	std::vector<std::wstring> m_listData;
-	std::vector<std::pair<int, COLORREF>> m_sels;
 
 	int m_curSel;	// index of item currently selected by cursor
+	int m_extraSel;	// extra selection
 	int m_basePos;	// index of item at y-position 0
 
 	int m_itemHeight;	// height of each item

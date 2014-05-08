@@ -6,8 +6,6 @@ namespace nsObjWin32{
 
 namespace nsGUI{
 
-	using namespace nsGlobal;
-
 	HWND RetroProgressBar::Create(HWND hwndParent, int w, int h, int x, int y){
 		m_width=w;
 		m_height=h;

@@ -19,6 +19,8 @@ namespace nsGUI{
 		virtual ~ScrollBar(){}
 
 		HWND Create(int x, int y, int w, int h, HWND hwndParent, int ID, int range=100, int pos=0);
+
+		static const int DEF_W=16;
 	
 	private:
 		HWND Create(LPCTSTR lpName, int x, int y, int w, int h, HWND hwndParent, int ID){return NULL;};

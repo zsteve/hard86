@@ -1,6 +1,20 @@
-/**
-* @file FASM symbols loader
-* Stephen Zhang, 2014
+/*  Hard86 - An 8086 Emulator with support for virtual hardware
+	
+    Copyright (C) 2014 Stephen Zhang
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, write to the Free Software Foundation, Inc.,
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.	
 */
 
 #ifndef SYM_LOADER
@@ -10,7 +24,7 @@
 #include <vector>
 #include "../../../global/typedefs.h"
 
-namespace nsEmulatorComponent{
+#define DLLEXPORT __declspec(dllexport)
 
 namespace nsSymLoader{
 
@@ -20,7 +34,7 @@ namespace nsSymLoader{
 	void pascal_strcpy(char* dest, char* src);
 	void pascal_tocstr(char* dest, char* src);
 
-	struct HeaderData {
+	struct DLLEXPORT HeaderData{
 		// o_ prefix means offset
 		// l_ prefix means length
 		uint16 l_header;
@@ -46,7 +60,7 @@ namespace nsSymLoader{
 		}
 	};
 
-	class Symbol{
+	class DLLEXPORT Symbol{
 	public:
 		Symbol();
 		Symbol(const Symbol& src);
@@ -66,12 +80,14 @@ namespace nsSymLoader{
 	private:
 	};
 
-	class SymbolData{
+	class DLLEXPORT SymbolData{
 	public:
 		SymbolData();
 		SymbolData(uint8* symFileData, int dataSize);
 		SymbolData(const SymbolData& src);
 		~SymbolData();
+
+		SymbolData& operator=(const SymbolData& rhs);
 
 		class iterator : \
 			public std::iterator<random_access_iterator_tag, Symbol, int>
@@ -128,6 +144,6 @@ namespace nsSymLoader{
 	};
 }
 
-}
+#undef DLLEXPORT
 
 #endif
