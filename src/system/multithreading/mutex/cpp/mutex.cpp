@@ -15,33 +15,43 @@
 
 Mutex::Mutex(){
 	m_nInstances=new int;
-	*m_nInstances=1;
+	(*m_nInstances)=1;
 	m_hMutex=CreateMutex(NULL, FALSE, NULL);
 }
 
 Mutex::Mutex(const Mutex& src){
 	m_nInstances=src.m_nInstances;
-	*m_nInstances++;
+	(*m_nInstances)++;
 	m_hMutex=src.m_hMutex;
 }
 
 Mutex::Mutex(void* hMutex){
 	m_nInstances=new int;
-	*m_nInstances=1;
+	// since we are initializing from a raw handle
+	// we don't know the lifetime of that handle.
+	// therefore, in order to prevent usage of a released handle,
+	// we will not attempt to use instance tracking or
+	// releasing in the destructor.
+	(*m_nInstances)=-1;
 	m_hMutex=hMutex;
 }
 
 Mutex::~Mutex(){
-	*m_nInstances--;
+	if((*m_nInstances)==-1){
+		delete m_nInstances;
+		return;
+	}
+	(*m_nInstances)--;
 	if(!*m_nInstances){
 		delete m_nInstances;
+		m_nInstances=NULL;
 		CloseHandle(m_hMutex);
 	}
 }
 
 Mutex& Mutex::operator=(const Mutex& src){
 	m_nInstances=src.m_nInstances;
-	*m_nInstances++;
+	(*m_nInstances)++;
 	m_hMutex=src.m_hMutex;
 	return *this;
 }

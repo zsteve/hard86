@@ -23,9 +23,16 @@ namespace nsHard86Win32{
 
 	H86Project* H86Project::m_instance=NULL;
 
-	H86Project::H86Project(char* data){
-		m_data=new char[strlen(data)+1];
-		strcpy(m_data, data);
+	H86Project::H86Project(const wstring& path){
+		m_file=File(path.c_str());
+		if(!m_file.Exists()){
+			OUT_DEBUG("m_file nonexistent");
+			return;
+		}
+		m_file.Open();
+		m_data=new char[m_file.Size()];
+		m_file.Read(m_data, m_file.Size());
+		m_file.Close();
 		m_doc=new xml_document<>();
 		try{
 			m_doc->parse<0>(m_data);
@@ -36,6 +43,16 @@ namespace nsHard86Win32{
 	}
 
 	H86Project::~H86Project(){
+		// Write to file
+		// Make filesize zero
+		m_file.Open();
+		m_file.SetPointer(0);
+		m_file.SetEOF();
+		char* xmlBuffer=new char[1048576];	// hopefully that is large enough!
+		*(print(xmlBuffer, *m_doc, 0))=NULL;
+		m_file.Write(xmlBuffer);
+		m_file.Close();
+		delete[] xmlBuffer;
 		delete m_doc;
 		delete m_data;
 	}

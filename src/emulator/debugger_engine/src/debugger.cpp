@@ -55,6 +55,16 @@ namespace nsDebugger{
 
 	void Debugger::Init(VDevList* vdevList){
 		m_vdevList=vdevList;
+	}
+
+	void Debugger::Reset(){
+		if(m_instance){
+			delete m_instance;
+		}
+		m_instance=NULL;
+	}
+
+	void Debugger::InitVDevs(){
 		// start initializing
 		if(!m_vdevList->empty()){
 			for(VDevList::iterator it=m_vdevList->begin();
@@ -63,13 +73,6 @@ namespace nsDebugger{
 				(*it).second.Initialize((*it).second.GetParams().first, (*it).second.GetParams().second);
 			}
 		}
-	}
-
-	void Debugger::Reset(){
-		if(m_instance){
-			delete m_instance;
-		}
-		m_instance=NULL;
 	}
 
 	/**

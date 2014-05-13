@@ -60,26 +60,24 @@ namespace nsDasm{
 	class DLLEXPORT DasmLine{
 	protected:
 		string m_line;	/// disassembled line
-		uint32 m_addr;	/// address of line
+		uint16 m_seg;	///
+		uint16 m_addr;	/// seg:addr of line
 		DasmLine* m_jumpTo;	/// possible pointer to DasmLine to jump to in case of Jxx/CALL instruction
 
 	public:
-		DasmLine(string& line, uint32 addr, DasmLine* jumpTo=NULL){ 
+		DasmLine(string& line, uint16 seg, uint16 addr, DasmLine* jumpTo=NULL){ 
 			m_line=line;
+			m_seg=seg;
 			m_addr=addr;
 			m_jumpTo=jumpTo;
 		}
-		DasmLine(const char* line, uint32 addr, DasmLine* jumpTo=NULL){
-			*this=DasmLine(string(line), addr, jumpTo);
-		}
-		DasmLine(){
-			m_line="";
-			m_addr=NULL;
-			m_jumpTo=NULL;
+		DasmLine(const char* line, uint16 seg, uint16 addr, DasmLine* jumpTo=NULL){
+			*this=DasmLine(string(line), seg, addr, jumpTo);
 		}
 
 		const DasmLine& operator=(const DasmLine& rhs){
 			m_line=rhs.m_line;
+			m_seg=rhs.m_seg;
 			m_addr=rhs.m_addr;
 			m_jumpTo=rhs.m_jumpTo;
 			return *this;
@@ -91,7 +89,10 @@ namespace nsDasm{
 
 		const char* GetCStr(){ return m_line.c_str(); }
 
-		uint32 GetAddr(){ return m_addr; }
+		uint32 GetExtAddr(){ return (((uint32)m_seg)<<4) + m_addr; }
+
+		uint16 GetAddr(){ return m_addr; }
+		uint16 GetSeg(){ return m_seg; }
 
 		void SetJumpTo(DasmLine* jumpTo){
 			m_jumpTo=jumpTo;

@@ -141,7 +141,7 @@ namespace nsFiles{
 	bool File::Open(){
 		if(m_bOpened) return false;
 		m_hFile=CreateFile(m_path.c_str(), dwDesiredAccess, dwShareMode, NULL, OPEN_EXISTING, dwFlagsAndAttributes, NULL); 
-		return (m_bOpened=m_hFile==INVALID_HANDLE_VALUE ? false : true);
+		return (m_bOpened=(m_hFile==INVALID_HANDLE_VALUE ? false : true));
 	}
 
 	/**
@@ -160,6 +160,10 @@ namespace nsFiles{
 	 * Closes current file
 	 */
 	bool File::Close(){
+		if(!m_hFile){
+			m_bOpened=false;
+			return 0;
+		}
 		CloseHandle(m_hFile);
 		m_hFile=NULL;
 		m_bOpened=false;

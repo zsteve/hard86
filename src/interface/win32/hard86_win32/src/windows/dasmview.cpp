@@ -110,7 +110,7 @@ namespace nsHard86Win32{
 			for(DasmList::iterator it=m_dasmList.begin();
 				it!=m_dasmList.end();
 				++it){
-				if(it->GetAddr()==addr){
+				if((*it)->GetExtAddr()==addr){
 					// Found another entry with the current IP. Don't update m_dasmList
 					CodeList* codeList=Child<CodeList>(CODELIST);
 					codeList->SetExtraSelection(it-m_dasmList.begin());
@@ -126,7 +126,7 @@ namespace nsHard86Win32{
 		for(DasmList::iterator it=m_dasmList.begin();
 			it!=m_dasmList.end();
 			++it){
-			Child<CodeList>(CODELIST)->Insert(StringToWString(it->GetCStr()));
+			Child<CodeList>(CODELIST)->Insert(make_pair(DWORD_B(it->GetSeg(), it->GetAddr()), strtowstr(it->GetCStr())));
 		}
 		Child<CodeList>(CODELIST)->SetExtraSelection(0);
 
@@ -182,7 +182,7 @@ namespace nsHard86Win32{
 		codeList->SetFont(Settings::GetFont(Settings::Fonts::MONOSPACE_FONT));
 		
 		// Disassembly not loaded, so we inform the user
-		codeList->Insert(L"Disassembly not loaded");
+		codeList->Insert(make_pair(0, L"Disassembly not loaded"));
 
 		codeList->Show();
 

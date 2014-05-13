@@ -38,13 +38,15 @@ namespace nsVDev{
 
 	// VDev
 
-	VDev::VDev(InitFunc initFunc, TermFunc termFunc, AcceptMutexFunc acceptFunc, void* param1, void* param2){
+	VDev::VDev(InitFunc initFunc, TermFunc termFunc, AcceptMutexFunc acceptFunc, wstring& fileName, void* param1, void* param2){
 		m_initFunc=initFunc;
 		m_termFunc=termFunc;
 		m_acceptMutexFunc=acceptFunc;
 
 		m_params.first=param1;
 		m_params.second=param2;
+
+		m_fileName=fileName;
 	}
 
 	VDev::VDev(const VDev& src){
@@ -52,6 +54,7 @@ namespace nsVDev{
 		this->m_termFunc=src.m_termFunc;
 		this->m_acceptMutexFunc=src.m_acceptMutexFunc;
 		this->m_params=src.m_params;
+		this->m_fileName=src.m_fileName;
 	}
 
 	VDev::~VDev(){

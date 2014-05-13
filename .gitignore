@@ -6,6 +6,9 @@
 # Compiled Dynamic libraries
 *.so
 *.dylib
+*.dll
+*.lib
+*.exp
 
 # Compiled Static libraries
 *.lai
@@ -25,6 +28,8 @@
 *.log
 *.lastbuildstate
 *.cache
+*.suo
+*.svlMVSymbolCache2
 
 # Compiled Executables
 *.exe

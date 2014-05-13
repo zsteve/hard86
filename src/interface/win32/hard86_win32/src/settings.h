@@ -31,6 +31,9 @@
 
 #include "../../../../lib/inih/cpp/INIReader.h"
 
+#include "../../objwin32/src/gui/dialog.h"
+#include "resource/resource.h"
+
 using namespace std;
 
 namespace nsHard86Win32{
@@ -147,6 +150,31 @@ namespace nsHard86Win32{
 		void ProcessINI();
 	};
 
+	using namespace nsObjWin32::nsGUI;
+
+	class SettingsDlg : public Dialog{
+	private:
+		SettingsDlg(){
+			m_resId=IDD_APPSETTINGS;
+		}
+
+		virtual ~SettingsDlg(){
+			EndDialog(m_hWnd, WM_CLOSE);
+		}
+
+		static SettingsDlg* m_instance;
+	public:
+
+		static SettingsDlg* GetInstance(){
+			if(m_instance){
+				delete m_instance;
+			}
+			m_instance=new SettingsDlg();
+			return m_instance;
+		}
+
+		virtual INT_PTR CALLBACK DlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	};
 }
 
 #endif

@@ -38,8 +38,13 @@ namespace nsHard86Win32{
 	DWORD WINAPI EmulatorThread::EmulatorThreadProc(LPVOID lpParam){
 		
 		Emulator* emulator=Emulator::GetInstance();
+		EmulatorThread* emuThread=GetInstance();
 
 		emulator->Execute();
+
+		emuThread->m_state=Suspended;
+		emuThread->SysMutex().Unlock();
+		emuThread->NotifyMsgWindow();
 
 		return 0;
 	}
@@ -63,5 +68,90 @@ namespace nsHard86Win32{
 	void EmulatorThread::BreakPointHit(MUTEX sysMutex, sys_state_ptr sysState)
 	{
 
+	}
+
+	// VDevDlg
+
+	VDevDlg* VDevDlg::m_instance;
+
+	INT_PTR CALLBACK VDevDlg::DlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+	{
+		switch(uMsg){
+		case WM_CLOSE:
+			if(H86Project::HasInstance()){
+				H86Project* project=H86Project::GetInstance();
+				VDevList* vdevList=VDevList::GetInstance();
+				project->Remove_VDevList();
+
+				vector<pair<string, string> > vdevListVect(0);
+				for(VDevList::iterator it=vdevList->begin();
+					it!=vdevList->end();
+					++it){
+					vdevListVect.push_back(make_pair(wstrtostr((*it).second.GetFileName()), wstrtostr((*it).second.GetFileName())));
+				}
+				project->Add_VDevList(vdevListVect);
+			}
+			EndDialog(hWnd, WM_CLOSE);
+			break;
+		case WM_INITDIALOG:
+			{
+				VDevList* vdevList=VDevList::GetInstance();
+				if(!vdevList->empty()){
+					for(VDevList::iterator it=vdevList->begin();
+						it!=vdevList->end();
+						++it){
+						::SendMessage(GetDlgItem(hWnd, IDC_VDEVLISTBOX), LB_ADDSTRING, NULL, (LPARAM)(*it).second.GetFileName().c_str());
+					}
+				}
+			}
+			break;
+		case WM_DROPFILES:
+			{
+				if(!Emulator::HasInstance()) break;
+				HDROP hDrop=(HDROP)wParam;
+				int nFiles=DragQueryFile(hDrop, -1, NULL, NULL);
+				
+				vector<wstring> dropFiles(nFiles);
+
+				for(int i=0; i<nFiles; i++){
+					wchar_t fName[MAX_PATH]=L"";
+					DragQueryFile(hDrop, i, fName, MAX_PATH);
+					dropFiles.push_back(wstring(fName));
+				}
+
+				VDevList* vdevList=VDevList::GetInstance();
+				for(vector<wstring>::iterator it=dropFiles.begin();
+					it!=dropFiles.end();
+					++it){
+					// Load library
+					HMODULE hMod=LoadLibrary(it->c_str());
+					if(hMod){
+						vdevList->Add(VDev((VDev::InitFunc)GetProcAddress(hMod, "VirtualDevice_Initialize"), \
+							(VDev::TermFunc)GetProcAddress(hMod, "VirtualDevice_Terminate"), \
+							(VDev::AcceptMutexFunc)GetProcAddress(hMod, "VirtualDevice_AcceptEmulationMutex"),
+							*it));
+						::SendMessage(GetDlgItem(hWnd, IDC_VDEVLISTBOX), LB_ADDSTRING, NULL, (LPARAM)(*it).c_str());
+					}
+				}
+			}
+			break;
+		case WM_COMMAND:
+			switch(LOWORD(wParam)){
+			case IDC_REMOVE:
+				{
+					int item=SendDlgItemMessage(hWnd, IDC_VDEVLISTBOX, LB_GETCURSEL, NULL, NULL);
+					if(item!=LB_ERR){
+						VDevList* vdevList=VDevList::GetInstance();
+						vdevList->Remove((*(vdevList->begin()+item)).first);
+						SendDlgItemMessage(hWnd, IDC_VDEVLISTBOX, LB_DELETESTRING, (WPARAM)item, NULL);
+					}
+				}
+				break;
+			}
+			break;
+		default:
+			return 0;
+		}
+		return 0;
 	}
 }

@@ -57,6 +57,8 @@ LRESULT CALLBACK MainFrame::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 		OnCreate(hWnd, uMsg, wParam, lParam);
 		break;
 	case WM_CLOSE:
+		Application::SetExiting(true);
+		EmulatorThread::SetMsgWindow(NULL);	// quick hack to make emulator thread exit without blocking
 		SendMessage(WM_DESTROY, NULL, NULL);
 		break;
 	case WM_SIZING:
@@ -107,27 +109,25 @@ void MainFrame::CreateChildren(HWND hWnd){
 		btns[1].iString		=0;
 
 		btns[2].iBitmap		=2;
-		btns[2].idCommand	=ID_EXECUTION_RELOAD;
+		btns[2].idCommand	=ID_EXECUTION_STEPINTO;
 		btns[2].fsState		=TBSTATE_ENABLED;
 		btns[2].fsStyle		=TBSTYLE_BUTTON;
 		btns[2].dwData		=0;
 		btns[2].iString		=0;
 
 		btns[3].iBitmap		=3;
-		btns[3].idCommand	=ID_EXECUTION_STEPINTO;
+		btns[3].idCommand	=ID_EXECUTION_ANIMATE;
 		btns[3].fsState		=TBSTATE_ENABLED;
 		btns[3].fsStyle		=TBSTYLE_BUTTON;
 		btns[3].dwData		=0;
 		btns[3].iString		=0;
 
 		btns[4].iBitmap		=4;
-		btns[4].idCommand	=ID_EXECUTION_ANIMATE;
+		btns[4].idCommand	=ID_EXECUTION_RELOAD;
 		btns[4].fsState		=TBSTATE_ENABLED;
 		btns[4].fsStyle		=TBSTYLE_BUTTON;
 		btns[4].dwData		=0;
 		btns[4].iString		=0;
-
-		int e=GetLastError();
 
 		m_hwndToolbar=CreateToolbarEx(hWnd, 
 										WS_VISIBLE | WS_CHILD | WS_BORDER,
@@ -192,6 +192,7 @@ MSGHANDLER(NCLButtonDown){
 }
 
 MSGHANDLER(Command){
+	static bool isAnimating=false;
 	using namespace nsEmulator;
 	switch(LOWORD(wParam)){
 	case ID_FILE_EXIT:
@@ -210,10 +211,19 @@ MSGHANDLER(Command){
 		if(!Emulator::HasInstance()) break;
 		EmulatorThread::Suspend();
 		Child<StatusBar>(STATUSBAR)->SetStatus(L"Suspended");
+		if(isAnimating){
+			SendMessage(WM_COMMAND, ID_EXECUTION_ANIMATE, NULL);
+			EmulatorThread::SetSingleStep(false);
+		}
 		break;
 	case ID_EXECUTION_RELOAD:
 		if(!Emulator::HasInstance()) break;
-		MessageBox(hWnd, L"Not implemented", L"TODO", MB_OK);
+		EmulatorThread::SetMsgWindow(NULL);	// quick hack to make emulator thread exit without blocking
+		EmulatorThread::DisposeInstance();
+		EmulatorThread::SetMsgWindow(this);	// set msg window again
+		EmulatorThread::GetInstance();
+		Emulator::GetInstance()->Reset();
+		Child<StatusBar>(STATUSBAR)->SetStatus(L"Suspended");
 		break;
 	case ID_EXECUTION_STEPINTO:
 		if(!Emulator::HasInstance()) break;
@@ -222,7 +232,16 @@ MSGHANDLER(Command){
 		Child<StatusBar>(STATUSBAR)->SetStatus(L"Suspended");
 		break;
 	case ID_EXECUTION_ANIMATE:
-		SetTimer(hWnd, 1, 10, NULL);
+		{
+			if(isAnimating){
+				KillTimer(hWnd, 10);
+				isAnimating=false;
+			}
+			else{
+				SetTimer(hWnd, 10, 10, NULL);
+				isAnimating=true;
+			}
+		}
 		break;
 	case ID_FILE_LOADPROJECT:
 		LoadProject();
@@ -235,6 +254,14 @@ MSGHANDLER(Command){
 	case ID_FILE_LOAD:
 		LoadFile();
 		EmulatorThread::NotifyWindow(this);
+		break;
+	case ID_TOOLS_SETTINGS:
+		{
+			SettingsDlg::GetInstance()->Create();
+		}
+		break;
+	case ID_TOOLS_VIRTUALDEVICES:
+		VDevDlg::GetInstance()->Create();
 		break;
 	}
 }
@@ -318,9 +345,9 @@ void MainFrame::LoadFileToEmulator(const wstring& path, const wstring& fasPath){
 	}
 
 	// Load BIOS
-	File biosFile(Application::GetAppDirectory()+L"\\"+StringToWString(Settings::GetPath(Settings::Paths::BIOS_PATH)));
+	File biosFile(Application::GetAppDirectory()+L"\\"+strtowstr(Settings::GetPath(Settings::Paths::BIOS_PATH)));
 	if(!biosFile.Exists()){
-		OUT_DEBUG("BIOS file does not exist");
+		OUT_DEBUG_FATAL("BIOS file does not exist");
 		return;
 	}
 	biosFile.Open();
@@ -343,6 +370,8 @@ void MainFrame::LoadFileToEmulator(const wstring& path, const wstring& fasPath){
 
 	delete[] fileData;
 	delete[] biosData;
+
+	Debugger::GetInstance()->InitVDevs();
 
 	OnH86UpdateSysData(m_hWnd, H86_UPDATE_SYS_DATA, (WPARAM)EmulatorThread::SysMutex().GetHandle(), (LPARAM)Emulator::GetInstance()->SystemState());
 }
@@ -368,27 +397,38 @@ void MainFrame::LoadProject(){
 	ofn.Flags=NULL;
 
 	if(!GetOpenFileName(&ofn)) return;	// if user pressed cancel, abort operation
-	
+
 	LoadProjectToFrontend(wstring(path));
 	Child<StatusBar>(STATUSBAR)->SetInfo(L"Loaded project");
 }
 
 void MainFrame::LoadProjectToFrontend(const wstring& path){
-	// Load to Application::project
-	File projectFile(path);
-	projectFile.Open();
-	char* projectData=new char[projectFile.Size()];
-	projectFile.Read(projectData, projectFile.Size());
-	projectFile.Close();
 
-	Application::GetInstance()->project=H86Project::GetInstance(projectData);
-	delete[] projectData;
+	// Load to Application::project
+	H86Project* project=H86Project::GetInstance(path);
 
 	// Load project data
 	Application* app=Application::GetInstance();
+	VDevList* vdevList=VDevList::GetInstance();
+
+	vector<pair<string, string> > vdevListVect=project->Get_VDevList();
+	for(vector<pair<string, string> >::iterator it=vdevListVect.begin();
+		it!=vdevListVect.end();
+		++it){
+		// Load library
+		HMODULE hMod=LoadLibrary(strtowstr(it->second).c_str());
+		if(hMod){
+			vdevList->Add(VDev((VDev::InitFunc)GetProcAddress(hMod, "VirtualDevice_Initialize"), \
+				(VDev::TermFunc)GetProcAddress(hMod, "VirtualDevice_Terminate"), \
+				(VDev::AcceptMutexFunc)GetProcAddress(hMod, "VirtualDevice_AcceptEmulationMutex"),
+				strtowstr(it->second)));
+		}
+		
+	}
 	
-	LoadFileToEmulator(StringToWString(app->project->Get_BinaryPath()),
-						StringToWString(app->project->Get_FASPath()));
+	
+	LoadFileToEmulator(strtowstr(H86Project::GetInstance()->Get_BinaryPath()),
+		strtowstr(H86Project::GetInstance()->Get_FASPath()));
 
 }
 

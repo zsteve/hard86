@@ -1,0 +1,360 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Libraries">
+      <UniqueIdentifier>{f6293bde-33a6-4de2-9c81-a44786a45712}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libraries\ObjWin32">
+      <UniqueIdentifier>{da984c8d-2b9e-4aca-809a-03ba2c21088e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libraries\ObjWin32\Local Static">
+      <UniqueIdentifier>{e2fb1b1a-0bbb-4a08-9490-ff336ea1bad6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libraries\StickyWindows">
+      <UniqueIdentifier>{adc6b878-8e7c-4932-b9b7-84d85b5bf666}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libraries\inih">
+      <UniqueIdentifier>{a61f4b07-86e1-42ca-ba87-32b51086fadd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libraries\system">
+      <UniqueIdentifier>{00ec7c53-360e-4351-9319-820f0c7c1112}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libraries\system\multithreading">
+      <UniqueIdentifier>{911e56a8-dda8-49f3-876e-8983da6a6735}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Emulator">
+      <UniqueIdentifier>{1aa82fc6-6907-4de7-a6ab-9e510a9d289b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libraries\system\datastruct">
+      <UniqueIdentifier>{fb08ee29-c36b-4bbb-b199-023aa4ceefcc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libraries\system\datastruct\clist">
+      <UniqueIdentifier>{a7e81205-eb10-4ac9-b06e-a1b95e5f494c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Emulator\Source Files">
+      <UniqueIdentifier>{53ce473c-ed50-47c9-b98e-0711e316fa8e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Emulator\Source Files\emulator_engine">
+      <UniqueIdentifier>{a0926000-75d5-4def-9f1b-5cc0cf9e9c48}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Emulator\Source Files\emulator_engine\cpp_interface">
+      <UniqueIdentifier>{ce045638-aa41-46e4-a09e-b83fee38eeba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Emulator\Source Files\emulator_engine\dasm">
+      <UniqueIdentifier>{e42c5548-627f-477f-9adf-5dcaace1557b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Emulator\Source Files\debugger_engine">
+      <UniqueIdentifier>{c5fd2269-7cc8-4364-9a44-03b4c6a91d26}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Emulator\Source Files\debugger_engine\device_test">
+      <UniqueIdentifier>{0c6f10ad-62ed-472b-b7e2-3a108801f59c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Emulator\Source Files\symbols_loader">
+      <UniqueIdentifier>{5e77458f-f9fc-46d0-a7d7-656f33a07658}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Emulator\Header Files">
+      <UniqueIdentifier>{5e5e0b90-e16f-494e-abdc-a1d5f6e11f9b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Emulator\Header Files\emulator_engine">
+      <UniqueIdentifier>{b926a4d7-f083-434b-8ff0-c7746614eaf8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Emulator\Header Files\emulator_engine\cpp_interface">
+      <UniqueIdentifier>{a6fdd3d1-88bb-43fd-90d9-ddfdf1479216}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Emulator\Header Files\emulator_engine\dasm">
+      <UniqueIdentifier>{e731b785-2837-4d28-9a8d-5f32ad5ae35a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Emulator\Header Files\debugger_engine">
+      <UniqueIdentifier>{2daf6020-96b6-48fc-bdd3-761f746d98e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Emulator\Header Files\debugger_engine\device_test">
+      <UniqueIdentifier>{8ba0d01a-297f-479d-b96c-dff807450b6e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Emulator\Header Files\symbols_loader">
+      <UniqueIdentifier>{6e6c3414-ed7d-4dab-a2fb-e377122cdf49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Emulator\Header Files\external">
+      <UniqueIdentifier>{940d93ce-f162-4ea1-9d07-8877a9e63c16}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Emulator\Header Files\external\mutex">
+      <UniqueIdentifier>{3d6944d4-1a34-4e08-8876-5725e2c699fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libraries\system\multithreading\mutex">
+      <UniqueIdentifier>{03e9da23-291c-4fad-be3d-d0a799c67d05}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libraries\system\multithreading\event">
+      <UniqueIdentifier>{637ff472-f98b-4f54-abca-bdb97ad0ae47}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libraries\system\multithreading\cmutex">
+      <UniqueIdentifier>{e35ad393-08bb-407a-98da-e770e95120f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libraries\system\multithreading\thread">
+      <UniqueIdentifier>{e0cefec3-7521-4802-9ef9-4568e722576e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libraries\rapidxml">
+      <UniqueIdentifier>{8c533bd2-8d04-44cd-a498-b793b080a894}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\global.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\winmain.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\windows\mainframe.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\windows\register_watcher.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\windows\toolwindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\lib\stickywindows\StickyDragManager.h">
+      <Filter>Libraries\StickyWindows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\windows\winmanager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\windows\mem_watcher.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\windows\codelist.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\resource\resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\windows\hexgrid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\lib\inih\cpp\INIReader.h">
+      <Filter>Libraries\inih</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\lib\inih\ini.h">
+      <Filter>Libraries\inih</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\settings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\windows\dasmview.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\emulator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\system\datastruct\clist\clist.h">
+      <Filter>Libraries\system\datastruct\clist</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\emulator\emulator_engine\src\emulator_engine.h">
+      <Filter>Emulator\Header Files\emulator_engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\emulator\emulator_engine\src\emulator_engine_interface.h">
+      <Filter>Emulator\Header Files\emulator_engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\emulator\emulator_engine\src\flags.h">
+      <Filter>Emulator\Header Files\emulator_engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\emulator\emulator_engine\src\global.h">
+      <Filter>Emulator\Header Files\emulator_engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\emulator\emulator_engine\src\opcodes.h">
+      <Filter>Emulator\Header Files\emulator_engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\emulator\emulator_engine\src\cpp_interface\emulator_cpp.h">
+      <Filter>Emulator\Header Files\emulator_engine\cpp_interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\emulator\emulator_engine\src\dasm\dasm.h">
+      <Filter>Emulator\Header Files\emulator_engine\dasm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\emulator\emulator_engine\src\dasm\dasm_cpp.h">
+      <Filter>Emulator\Header Files\emulator_engine\dasm</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\emulator\debugger_engine\src\debugger.h">
+      <Filter>Emulator\Header Files\debugger_engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\emulator\debugger_engine\src\vdev.h">
+      <Filter>Emulator\Header Files\debugger_engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\emulator\debugger_engine\src\device_test\device_test.h">
+      <Filter>Emulator\Header Files\debugger_engine\device_test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\emulator\symbols_loader\src\sym_loader.h">
+      <Filter>Emulator\Header Files\symbols_loader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\system\multithreading\mutex\cpp\mutex.h">
+      <Filter>Libraries\system\multithreading\mutex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\system\multithreading\event\cpp\event.h">
+      <Filter>Libraries\system\multithreading\event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\system\multithreading\mutex\c\cmutex.h">
+      <Filter>Libraries\system\multithreading\cmutex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\system\multithreading\thread\cpp\thread.h">
+      <Filter>Libraries\system\multithreading\thread</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\lib\rapidxml\rapidxml.hpp">
+      <Filter>Libraries\rapidxml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\lib\rapidxml\rapidxml_iterators.hpp">
+      <Filter>Libraries\rapidxml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\lib\rapidxml\rapidxml_print.hpp">
+      <Filter>Libraries\rapidxml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\lib\rapidxml\rapidxml_utils.hpp">
+      <Filter>Libraries\rapidxml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\h86project.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\windows\statusbar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\winmain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\windows\mainframe.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\windows\register_watcher.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\objwin32_gui_static.cpp">
+      <Filter>Libraries\ObjWin32\Local Static</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\lib\stickywindows\StickyDragManager.cpp">
+      <Filter>Libraries\StickyWindows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\windows\winmanager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\windows\toolwindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\windows\mem_watcher.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\windows\hexgrid.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\windows\codelist.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\lib\inih\cpp\INIReader.cpp">
+      <Filter>Libraries\inih</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\lib\inih\ini.c">
+      <Filter>Libraries\inih</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\settings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\windows\dasmview.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\emulator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\system\datastruct\clist\clist.c">
+      <Filter>Libraries\system\datastruct\clist</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\emulator\emulator_engine\src\emulator_engine.c">
+      <Filter>Emulator\Source Files\emulator_engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\emulator\emulator_engine\src\flags.c">
+      <Filter>Emulator\Source Files\emulator_engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\emulator\emulator_engine\src\global.c">
+      <Filter>Emulator\Source Files\emulator_engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\emulator\emulator_engine\src\opcodes.c">
+      <Filter>Emulator\Source Files\emulator_engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\emulator\emulator_engine\src\cpp_interface\emulator_cpp.cpp">
+      <Filter>Emulator\Source Files\emulator_engine\cpp_interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\emulator\emulator_engine\src\dasm\dasm.c">
+      <Filter>Emulator\Source Files\emulator_engine\dasm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\emulator\emulator_engine\src\dasm\dasm_cpp.cpp">
+      <Filter>Emulator\Source Files\emulator_engine\dasm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\emulator\debugger_engine\src\debugger.cpp">
+      <Filter>Emulator\Source Files\debugger_engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\emulator\debugger_engine\src\vdev.cpp">
+      <Filter>Emulator\Source Files\debugger_engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\emulator\debugger_engine\src\device_test\device_test.cpp">
+      <Filter>Emulator\Source Files\debugger_engine\device_test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\emulator\symbols_loader\src\sym_loader.cpp">
+      <Filter>Emulator\Source Files\symbols_loader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\system\multithreading\mutex\cpp\mutex.cpp">
+      <Filter>Libraries\system\multithreading\mutex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\system\multithreading\event\cpp\event.cpp">
+      <Filter>Libraries\system\multithreading\event</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\system\multithreading\mutex\c\cmutex.c">
+      <Filter>Libraries\system\multithreading\cmutex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\system\multithreading\thread\cpp\thread.cpp">
+      <Filter>Libraries\system\multithreading\thread</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\frontend_global.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\h86project.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\windows\statusbar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="Debug\win32_ui_lib.lib">
+      <Filter>Libraries\ObjWin32</Filter>
+    </Library>
+    <Library Include="Debug\win32_file_lib.lib">
+      <Filter>Libraries\ObjWin32</Filter>
+    </Library>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\src\resource\resource.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="application.manifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="appicon.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\src\resource\appicon.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\src\resource\toolbar1.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+</Project>

@@ -56,8 +56,6 @@ private:
 
 		// initialize nsDebugger::Debugger
 		nsDebugger::Debugger::Init(nsVDev::VDevList::GetInstance());
-
-		project=NULL;	// no project by default.
 	}
 
 	static Application *m_instance;
@@ -66,6 +64,7 @@ public:
 	~Application()
 	{
 		EmulatorThread::DisposeInstance();
+		H86Project::DisposeInstance();
 	}
 
 	static Application* GetInstance(){
@@ -91,11 +90,14 @@ public:
 	// Settings manager
 	Settings* settings;
 
-	// Current project file object
-	H86Project* project;
-
 	// Application directory
 	wstring appDir;
+
+	// Exiting condition
+	bool isExiting;
+
+	static bool IsExiting(){ return GetInstance()->isExiting; }
+	static void SetExiting(bool b){ GetInstance()->isExiting=b; }
 
 private:
 protected:

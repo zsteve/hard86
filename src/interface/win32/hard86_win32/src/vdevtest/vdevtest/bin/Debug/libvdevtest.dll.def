@@ -1,0 +1,5 @@
+EXPORTS
+    SomeFunction @1
+    VirtualDevice_AcceptEmulationMutex @2
+    VirtualDevice_Initialize @3
+    VirtualDevice_Terminate @4

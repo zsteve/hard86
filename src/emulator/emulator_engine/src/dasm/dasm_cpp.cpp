@@ -184,23 +184,23 @@ namespace nsDasm{
 											DasmList::iterator searchBegin, DasmList::iterator searchEnd){
 		DasmList::iterator lBound, uBound;
 		// best case
-		if(searchAddr == searchFrom->GetAddr()){
+		if(searchAddr == searchFrom->GetExtAddr()){
 			return searchFrom;
 		}
-		if(searchAddr > searchFrom->GetAddr()){
+		if(searchAddr > searchFrom->GetExtAddr()){
 			// targeted address must exist in range
 			// (searchFrom, searchEnd)
-			if(searchAddr > (searchEnd-1)->GetAddr()){
+			if(searchAddr > (searchEnd-1)->GetExtAddr()){
 				// sought after address does not exist in range.
 				return searchEnd;
 			}
 			lBound=searchFrom+1;
 			uBound=searchEnd;
 		}
-		else if(searchAddr < searchFrom->GetAddr()){
+		else if(searchAddr < searchFrom->GetExtAddr()){
 			// targeted address must exist in range
 			// [searchBegin, searchFrom)
-			if(searchAddr < searchBegin->GetAddr()){
+			if(searchAddr < searchBegin->GetExtAddr()){
 				// sought after address does not exist in range.
 				return searchEnd;
 			}
@@ -210,15 +210,15 @@ namespace nsDasm{
 		// search within half open range [lBound, uBound)
 		while(lBound<uBound){
 			DasmList::iterator mid=lBound+(uBound-lBound)/2;
-			if(searchAddr==mid->GetAddr()){
+			if(searchAddr==mid->GetExtAddr()){
 				cout << "Found DasmList entry : " << endl;
 				cout << mid->GetCStr() << endl;
 				return mid;
 			}
-			if(searchAddr>mid->GetAddr()){
+			if(searchAddr>mid->GetExtAddr()){
 				lBound=mid+1;
 			}
-			else if(searchAddr<mid->GetAddr()){
+			else if(searchAddr<mid->GetExtAddr()){
 				uBound=mid-1;
 			}
 		}
@@ -251,7 +251,7 @@ namespace nsDasm{
 			do{
 				clistEntry=(dasm_list_entry*)clist_getcurr(&dasmList);
 
-				*it=new DasmLine(clistEntry->line, (clistEntry->seg<<4)+clistEntry->addr);
+				*it=new DasmLine(clistEntry->line, clistEntry->seg, clistEntry->addr);
 				it++;
 			} while(clist_next(&dasmList)!=-1);
 		}
@@ -276,6 +276,8 @@ namespace nsDasm{
 				ProcessSymbol(*it, symData);
 			}
 		}
+
+		clist_destroy(&dasmList);
 
 		return dasmOut;
 	}

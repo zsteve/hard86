@@ -74,4 +74,19 @@ namespace nsHard86Win32{
 #undef GET_STR
 	}
 
+	SettingsDlg* SettingsDlg::m_instance=NULL;
+
+	INT_PTR SettingsDlg::DlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+	{
+		switch(uMsg){
+		case WM_CLOSE:
+			EndDialog(hWnd, WM_CLOSE);
+			break;
+
+		default:
+			return 0;
+		}
+		return 0;
+	}
+
 }

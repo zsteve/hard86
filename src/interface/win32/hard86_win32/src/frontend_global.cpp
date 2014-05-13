@@ -30,26 +30,26 @@ namespace nsHard86Win32{
 	/**
 	 * Write to debug
 	 */
-	void WriteDebug(const wchar_t* message, const wchar_t* func, const wchar_t* file, int line){
+	void WriteDebug(const wchar_t* message, const wchar_t* func, const wchar_t* file, int line, bool fatal){
 		wfstream f("debug.log", ios_base::app);
 		f << message << L" at " << func << L", File: " << file << L", Line: " << line << endl;
+		if(fatal){
+			MessageBox(NULL, message, L"Error : check debug.log", MB_ICONERROR);
+		}
 	}
 
-	std::wstring StringToWString(const std::string& s){
+	std::wstring strtowstr(const std::string& s){
 		std::wstring retv;
 		retv.resize(s.size());
 		for(int i=0; i<s.size(); i++) retv[i]=(wchar_t)s[i];
 		return retv;
 	}
 
-	std::string WStringToString(const std::wstring& w){
-		char* s=new char[w.size()];
-		for(int i=0; i<w.size(); i++){
-			s[i]=w[i] & 255;
-		}
-		std::string retv(s);
-		delete[] s;
-		return s;
+	std::string wstrtostr(const std::wstring& w){
+		std::string retv;
+		retv.resize(w.size());
+		for(int i=0; i<w.size(); i++) retv[i]=(char)w[i];
+		return retv;
 	}
 
 }

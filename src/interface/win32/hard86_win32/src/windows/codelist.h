@@ -60,7 +60,7 @@ public:
 	 * @param position to be inserted at
 	 * @return true/false for success or failure
 	 */
-	bool Insert(const std::wstring& elem, int pos=-1){
+	bool Insert(const pair<uint32, std::wstring>& elem, int pos=-1){
 		if(pos==-1){
 			m_listData.push_back(elem);
 			return true;
@@ -72,7 +72,7 @@ public:
 
 	void Clear(){ m_listData.clear(); }
 
-	std::vector<std::wstring>::iterator GetIterator(){ return m_listData.begin(); }
+	std::vector<pair<uint32, std::wstring> >::iterator GetIterator(){ return m_listData.begin(); }
 
 	void SetSelection(int i){
 		m_curSel=i;
@@ -105,13 +105,15 @@ protected:
 
 	int m_textAlignStyle;
 
-	std::vector<std::wstring> m_listData;
+	std::vector<pair<uint32, std::wstring> > m_listData;
 
 	int m_curSel;	// index of item currently selected by cursor
 	int m_extraSel;	// extra selection
 	int m_basePos;	// index of item at y-position 0
 
 	int m_itemHeight;	// height of each item
+
+	int m_addrFieldWidth;	// width of address field
 
 	bool m_hasScrollBar;
 	ScrollBar m_scrollBar;		// only if scrollbar is enabled

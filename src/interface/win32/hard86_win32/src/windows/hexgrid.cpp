@@ -45,8 +45,6 @@ HexGrid::HexGrid(bool hasScrollBar) : m_gridData(0), m_sel(0, 0){
 	m_hexColumns=m_ascColumns=0;
 	m_basePos=0;
 	m_isSelecting=false;
-
-	for(int i=0; i<512; i++) m_gridData.push_back(i);
 }
 
 ATOM HexGrid::Register(){
@@ -218,7 +216,7 @@ MSGHANDLER(SetFont){
 	if(LOWORD(lParam)){
 		RECT rect;
 		GetClientRect(hWnd, &rect);
-		InvalidateRect(hWnd, &rect, true);
+		InvalidateRect(hWnd, &rect, false);
 	}
 	HDC hDC=GetDC(hWnd);
 

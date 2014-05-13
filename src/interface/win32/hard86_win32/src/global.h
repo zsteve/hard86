@@ -29,9 +29,10 @@ namespace nsHard86Win32{
 
 	enum AppWindows{ WND_MAINFRAME };
 
-	void WriteDebug(const wchar_t* message, const wchar_t* func, const wchar_t* file, int line);
+	void WriteDebug(const wchar_t* message, const wchar_t* func, const wchar_t* file, int line, bool fatal=false);
 
 #define OUT_DEBUG(msg) WriteDebug(L"Error : "L##msg, __FUNCTIONW__, __FILEW__, __LINE__)
+#define OUT_DEBUG_FATAL(msg) WriteDebug(L"Error : "L##msg, __FUNCTIONW__, __FILEW__, __LINE__, true)
 
 	/**
 	* Convert RGB to COLORREF
@@ -41,12 +42,12 @@ namespace nsHard86Win32{
 	/**
 	 * Convert wstring to string
 	 */
-	std::string WStringToString(const std::wstring& w);
+	std::string wstrtostr(const std::wstring& w);
 
 	/**
 	 * Convert string to wstring 
 	 */
-	std::wstring StringToWString(const std::string& s);
+	std::wstring strtowstr(const std::string& s);
 
 	/**
 	 * Special window message H86_UPDATE_SYS_DATA

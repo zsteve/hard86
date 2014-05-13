@@ -158,6 +158,8 @@ namespace nsDebugger{
 
 		bool HasBreakpoints();
 
+		void InitVDevs();
+
 		BreakpointList::iterator BreakpointBegin(){ return m_bpList.begin(); }
 		BreakpointList::iterator BreakpointEnd(){ return m_bpList.end(); }
 

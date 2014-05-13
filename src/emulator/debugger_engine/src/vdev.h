@@ -23,6 +23,7 @@
 #include <vector>
 #include <utility>
 #include <iterator>
+#include <string>
 
 #include "../../emulator_engine/src/emulator_engine_interface.h"
 #include "../../../system/multithreading/mutex/c/cmutex.h"
@@ -39,19 +40,21 @@ namespace nsVDev{
 	class DLLEXPORT VDev{
 	protected:
 		pair<void*, void*> m_params;
+		std::wstring m_fileName;
 	public:
 		/* Function Pointer Typedefs */
 		typedef int(*InitFunc)(void*, void*);
 		typedef int(*TermFunc)();
 		typedef int(*AcceptMutexFunc)(MUTEX, sys_state_ptr);
 
-		VDev(InitFunc initFunc, TermFunc termFunc, AcceptMutexFunc acceptFunc, void* param1=NULL, void* param2=NULL);
+		VDev(InitFunc initFunc, TermFunc termFunc, AcceptMutexFunc acceptFunc, wstring& fileName, void* param1=NULL, void* param2=NULL);
 		VDev(const VDev& src);
 		VDev(){}
 		VDev& operator=(const VDev& rhs){
 			this->m_acceptMutexFunc=rhs.m_acceptMutexFunc;
 			this->m_initFunc=rhs.m_initFunc;
 			this->m_termFunc=rhs.m_termFunc;
+			this->m_fileName=rhs.m_fileName;
 			return *this;
 		}
 
@@ -60,6 +63,7 @@ namespace nsVDev{
 		int Initialize();
 		int AcceptEmulationMutex(MUTEX emuMutex, sys_state_ptr sysState);
 		int Terminate();
+		std::wstring& GetFileName(){ return m_fileName; }
 
 		pair<void*, void*>& GetParams(){
 			return m_params;
@@ -87,6 +91,12 @@ namespace nsVDev{
 
 		static VDevList* GetInstance();
 
+		static bool HasInstance(){ return m_instance ? true : false; }
+		static void DisposeInstance(){
+			delete m_instance;
+			m_instance=NULL;
+		}
+
 		virtual ~VDevList();
 
 		int Add(VDev& vdev);
@@ -105,6 +115,7 @@ namespace nsVDev{
 			iterator& operator--(){ --m_it; return *this; }
 			bool operator==(const iterator& rhs){ return m_it==rhs.m_it; }
 			bool operator!=(const iterator& rhs){ return !(*this==rhs); }
+			iterator& operator+(int i){ m_it+=i; return *this; }
 			VDevPair& operator*(){ return *m_it; }
 		};
 

@@ -21,14 +21,18 @@
 #define HARD86_EMULATOR_H
 
 #include "global.h"
+#include "h86project.h"
 
 #include "../../objwin32/src/gui/window.h"
+#include "../../objwin32/src/gui/dialog.h"
 
 #include "../../../../emulator/emulator_engine/src/cpp_interface/emulator_cpp.h"
 #include "../../../../emulator/symbols_loader/src/sym_loader.h"
 #include "../../../../emulator/debugger_engine/src/debugger.h"
 #include "../../../../system/multithreading/thread/cpp/thread.h"
 #include "../../../../system/multithreading/event/cpp/event.h"
+
+#include "resource/resource.h"
 
 namespace nsHard86Win32{
 
@@ -59,9 +63,8 @@ namespace nsHard86Win32{
 
 				m_sysMutex.Unlock();
 
-				if(m_thread.State()==Thread::ThreadState::Suspended){
-					m_thread.Start();
-				}
+				Resume();
+
 				SetSingleStep(false);
 				WaitForSingleObject(m_thread.GetHandle(), INFINITE);
 			}
@@ -121,8 +124,13 @@ namespace nsHard86Win32{
 
 		static void SetMsgWindow(nsObjWin32::nsGUI::Window* msgWindow){ GetInstance()->m_msgWindow=msgWindow; }
 
+		static void NotifyMsgWindow(){
+			return NotifyWindow(GetInstance()->m_msgWindow);
+		}
+
 		static void NotifyWindow(nsObjWin32::nsGUI::Window* window){
 			if(!nsEmulator::Emulator::HasInstance()) return;
+			if(!window) return;
 			EmulatorThread* e=GetInstance();
 			window->SendMessage(H86_UPDATE_SYS_DATA, 
 								(WPARAM)e->m_sysMutex.GetHandle(),
@@ -147,6 +155,34 @@ namespace nsHard86Win32{
 
 		static bool m_singleStep;
 
+	};
+
+	using namespace nsObjWin32::nsGUI;
+
+	class VDevDlg : public Dialog{
+	private:
+		VDevDlg(){
+			m_resId=IDD_VDEV;
+		}
+
+		virtual ~VDevDlg(){
+			DestroyWindow(m_hWnd);
+		}
+
+		static VDevDlg* m_instance;
+	public:
+
+		static VDevDlg* GetInstance(){
+			if(m_instance){
+				delete m_instance;
+			}
+			m_instance=new VDevDlg();
+			return m_instance;
+		}
+
+		INT_PTR CALLBACK DlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+	private:
 	};
 }
 

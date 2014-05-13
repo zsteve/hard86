@@ -26,12 +26,16 @@
 #include <vector>
 
 #include "global.h"
+
+#include "../../objwin32/src/file/file.h"
 #include "../../../../lib/rapidxml/rapidxml.hpp"
+#include "../../../../lib/rapidxml/rapidxml_print.hpp"
 
 namespace nsHard86Win32{
 
 	using namespace rapidxml;
 	using namespace std;
+	using namespace nsObjWin32::nsFiles;
 
 	/**
 	 * Hard86 project file
@@ -42,9 +46,11 @@ namespace nsHard86Win32{
 	private:
 		static H86Project* m_instance;
 
-		H86Project(char* data);
+		H86Project(const wstring& path);
 
 		~H86Project();
+
+		File m_file;
 
 	public:
 
@@ -55,11 +61,11 @@ namespace nsHard86Win32{
 			return m_instance;
 		}
 
-		static H86Project* GetInstance(char* data){
+		static H86Project* GetInstance(const wstring& path){
 			if(m_instance){
 				delete m_instance;
 			}
-			m_instance=new H86Project(data);
+			m_instance=new H86Project(path);
 			return m_instance;
 		}
 
@@ -68,6 +74,10 @@ namespace nsHard86Win32{
 				delete m_instance;
 				m_instance=NULL;
 			}
+		}
+
+		static bool HasInstance(){
+			return m_instance ? true : false;
 		}
 
 		/// @return a pair containing [seg, addr]
@@ -197,6 +207,61 @@ namespace nsHard86Win32{
 			catch(rapidxml::parse_error e){
 				OUT_DEBUG("RapidXML parse error encountered");
 				return vector<pair<string, string> >(0);
+			}
+		}
+
+		// Removes all children of the VDevs node
+		void Remove_VDevList(){
+			try{
+				xml_node<>* node=m_doc->first_node("Hard86Project");
+				if(!node){
+					OUT_DEBUG("RapidXML failed to locate node");
+					return;
+				}
+				xml_node<>* vdevNode=node->first_node("VDevs");
+				if(!node){
+					OUT_DEBUG("RapidXML failed to locate node");
+					return;
+				}
+				node->remove_node(vdevNode);
+			}
+			catch(rapidxml::parse_error e){
+				OUT_DEBUG("RapidXML parse error encountered");
+				return;
+			}
+			
+		}
+
+		// Appends a vector<pair<string, string> > of VDev <name, path> 
+		void Add_VDevList(vector<pair<string, string> >& vdevList){
+			try{
+				xml_node<>* node=m_doc->first_node("Hard86Project");
+				if(!node){
+					OUT_DEBUG("RapidXML failed to locate node");
+					return;
+				}
+				xml_node<>* test=node->first_node("VDevs");
+				if(!test){
+					node->append_node(m_doc->allocate_node(node_element, "VDevs"));
+					node=node->last_node();
+				}
+				else{
+					node=test;
+				}
+				for(vector<pair<string, string> >::iterator it=vdevList.begin();
+					it!=vdevList.end();
+					++it){
+
+					node->append_node(m_doc->allocate_node(node_element, "VDev"));
+					xml_node<> *appendedNode=node->last_node();
+					appendedNode->append_attribute(m_doc->allocate_attribute("name", m_doc->allocate_string(it->first.c_str())));
+					appendedNode->append_attribute(m_doc->allocate_attribute("path", m_doc->allocate_string(it->second.c_str())));
+
+				}
+			}
+			catch(rapidxml::parse_error e){
+				OUT_DEBUG("RapidXML parse error encountered");
+				return;
 			}
 		}
 

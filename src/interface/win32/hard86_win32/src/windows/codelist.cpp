@@ -25,6 +25,8 @@
 #include "../../../objwin32/src/gui/global.h"
 #include "../global.h"
 
+#include "../../../../../ext_itoa/ext_itoa.h"
+
 using namespace nsObjWin32::nsGUI;
 
 namespace nsHard86Win32{
@@ -45,6 +47,7 @@ CodeList::CodeList(int textAlignStyle, bool hasScrollBar) : m_listData(0)
 	m_curSel=0;
 	m_extraSel=0;
 	m_basePos=0;
+	m_addrFieldWidth=100;
 
 	m_hasScrollBar=hasScrollBar;
 
@@ -166,14 +169,25 @@ MSGHANDLER(Paint){
 			else
 				itemColor=Settings::GetColor(Settings::Colors::INACTIVE_SEL_COLOR);
 		}
+
+		uint16 seg, addr;
+		seg=HIWORD(m_listData[i].first);
+		addr=LOWORD(m_listData[i].first);
+
 		HBRUSH hBrush=CreateSolidBrush(itemColor);
 		HGDIOBJ hOldBrush=SelectObject(hDC, (HGDIOBJ)hBrush);
 		Rectangle(hDC, 0, ypos, w, ypos+m_itemHeight);
 		SetBkColor(hDC, itemColor);
+		wstring address=ext_itow((int)seg, 16, 4)+L":"+ext_itow((int)addr, 16, 4);
 		if(m_textAlignStyle==CENTER)
-			TextOut(hDC, Center(0, (int)(w-(m_listData[i].size()*tm.tmAveCharWidth))), ypos+1, m_listData[i].c_str(), m_listData[i].size());
-		else if(m_textAlignStyle==LEFT)
-			TextOut(hDC, 4, ypos+1, m_listData[i].c_str(), m_listData[i].size());
+		{
+			TextOut(hDC, 4, ypos+1, address.c_str(), address.size());
+			TextOut(hDC, Center(m_addrFieldWidth, (int)(w-(m_listData[i].second.size()*tm.tmAveCharWidth))), ypos+1, m_listData[i].second.c_str(), m_listData[i].second.size());
+		}
+		else if(m_textAlignStyle==LEFT){
+			TextOut(hDC, 4, ypos+1, address.c_str(), address.size());
+			TextOut(hDC, m_addrFieldWidth, ypos+1, m_listData[i].second.c_str(), m_listData[i].second.size());
+		}
 		SetBkColor(hDC, Settings::GetColor(Settings::Colors::BK_COLOR));
 		SelectObject(hDC, hOldBrush);
 		DeleteObject(hBrush);

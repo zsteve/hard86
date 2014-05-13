@@ -76,7 +76,7 @@ LRESULT CALLBACK MemoryWatcher::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPA
 			}
 			sysMutex.Unlock();
 
-			InvalidateRect(hexGrid->GetHWND(), NULL, true);
+			InvalidateRect(hexGrid->GetHWND(), NULL, false);
 		}
 		break;
 	case WM_VSCROLL:
