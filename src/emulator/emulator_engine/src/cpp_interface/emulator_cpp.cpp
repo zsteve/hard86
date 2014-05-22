@@ -76,6 +76,12 @@ namespace nsEmulator{
 		memcpy(m_sysMem, sysMem, sysMemSize);
 		m_sysMemSize=sysMemSize;
 
+		m_sysBios=new uint8[sysBiosSize];
+		memcpy(m_sysBios, sysBios, sysBiosSize);
+		m_sysBiosSize=sysBiosSize;
+
+		SetStepThroughExternInt(false);
+
 		system_init((MUTEX*)m_sysMutex.GetHandle(), m_bpHitFunc, m_preExFunc, m_posExFunc);
 		system_load_bios(sysBios, sysBiosSize);
 		system_load_mem(m_sysMem, m_sysMemSize);
@@ -101,17 +107,21 @@ namespace nsEmulator{
 
 	uint16 Emulator::StackPop(){ return stack_pop(); }
 
+	void Emulator::MakeExternInt(uint8 inum){ extern_int(inum); }
+	void Emulator::SetStepThroughExternInt(bool v){ set_step_through_extern_int((int)v); }
+
+	void Emulator::SetSysMutex(Mutex& sysMutex){ set_sys_mutex(sysMutex.GetHandle()); }
+
 	int Emulator::Execute(){ return system_execute(); }
 
 	void Emulator::Stop(){
 		system_halt();
-		m_sysMutex.Lock();
-		m_sysMutex.Unlock();
 	}
 
 	void Emulator::Reset(){
 		system_destroy();
 		system_init((MUTEX*)m_sysMutex.GetHandle(), m_bpHitFunc, m_preExFunc, m_posExFunc);
+		system_load_bios(m_sysBios, m_sysBiosSize);
 		system_load_mem(m_sysMem, m_sysMemSize);
 	}
 

@@ -89,7 +89,12 @@ namespace nsEmulator{
 		void StackPush(uint16 val);
 		uint16 StackPop();
 
+		void MakeExternInt(uint8 inum);
+		void SetStepThroughExternInt(bool v);
+
 		sys_state_ptr SystemState(){ return get_system_state(); }
+
+		void SetSysMutex(Mutex& sysMutex);
 
 		int Execute();
 		void Stop();
@@ -98,6 +103,9 @@ namespace nsEmulator{
 	protected:
 		uint8* m_sysMem;
 		uint32 m_sysMemSize;
+
+		uint8* m_sysBios;
+		uint32 m_sysBiosSize;
 
 		Mutex m_sysMutex;
 		DBGCALLBACK m_bpHitFunc, m_preExFunc, m_posExFunc;

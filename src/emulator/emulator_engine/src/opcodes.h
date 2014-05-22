@@ -189,4 +189,15 @@ void op_0xcd();
 /* IRET */
 void op_0xcf();
 
+/* LAHF/SAHF */
+void op_0x9e();
+void op_0x9f();
+
+/* LEA */
+void op_0x8d();
+
+/* MOVS */
+void op_0xa4();
+void op_0xa5();
+
 #endif

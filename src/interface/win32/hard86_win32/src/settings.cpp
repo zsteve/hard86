@@ -51,6 +51,10 @@ namespace nsHard86Win32{
 		SET_COLOR(Colors::CODELIST_ITEM_COLOR, GET_INT("colors", "codelist_item_color", 0));
 		SET_COLOR(Colors::CODELIST_CURRENTLINE_COLOR, GET_INT("colors", "codelist_currentline_color", 0));
 
+		// Load animate speed
+		m_nums.SetNum(Nums::ANIMATE_SPEED, GET_INT("numbers", "animate_speed", 10));
+		m_nums.SetNum(Nums::STEP_INTO_EXTERN_INT, GET_INT("numbers", "step_into_extern_int", 0));
+
 #undef SET_COLOR
 
 #define SET_FONT(a, b) m_fonts.SetFont(a, b);

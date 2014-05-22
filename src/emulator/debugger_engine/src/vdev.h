@@ -41,13 +41,23 @@ namespace nsVDev{
 	protected:
 		pair<void*, void*> m_params;
 		std::wstring m_fileName;
+
 	public:
+
+#ifdef _WIN32
+		HMODULE m_hModule;
+#endif
+
 		/* Function Pointer Typedefs */
 		typedef int(*InitFunc)(void*, void*);
 		typedef int(*TermFunc)();
 		typedef int(*AcceptMutexFunc)(MUTEX, sys_state_ptr);
-
+#ifdef _WIN32
+		VDev(InitFunc initFunc, TermFunc termFunc, AcceptMutexFunc acceptFunc, wstring& fileName, HMODULE hModule, void* param1=NULL, void* param2=NULL);
+#else
 		VDev(InitFunc initFunc, TermFunc termFunc, AcceptMutexFunc acceptFunc, wstring& fileName, void* param1=NULL, void* param2=NULL);
+
+#endif
 		VDev(const VDev& src);
 		VDev(){}
 		VDev& operator=(const VDev& rhs){
@@ -86,6 +96,28 @@ namespace nsVDev{
 
 		static VDevList* m_instance;
 	public:
+
+#ifdef _WIN32
+		
+		bool LoadVDevDLL(const string& path);
+
+#endif
+
+		static void InitializeAll(){
+			for(iterator it=GetInstance()->begin();
+				it!=GetInstance()->end();
+				++it){
+				(*it).second.Initialize();
+			}
+		}
+
+		static void TerminateAll(){
+			for(iterator it=GetInstance()->begin();
+				it!=GetInstance()->end();
+				++it){
+				(*it).second.Terminate();
+			}
+		}
 
 		typedef pair<int, VDev> VDevPair;
 

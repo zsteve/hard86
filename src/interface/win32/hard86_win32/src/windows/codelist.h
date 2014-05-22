@@ -63,16 +63,26 @@ public:
 	bool Insert(const pair<uint32, std::wstring>& elem, int pos=-1){
 		if(pos==-1){
 			m_listData.push_back(elem);
+			if(m_hasScrollBar){
+				SetScrollRange(m_scrollBar.GetHWND(), SB_CTL, 0, m_listData.size(), false);
+			}
 			return true;
 		}
 		if(pos>m_listData.size()) return false;
 		m_listData.insert(m_listData.begin()+pos, elem);
+
+		if(m_hasScrollBar){
+			SetScrollRange(m_scrollBar.GetHWND(), SB_CTL, 0, m_listData.size(), false);
+		}
 		return true;
 	}
 
 	void Clear(){ m_listData.clear(); }
 
-	std::vector<pair<uint32, std::wstring> >::iterator GetIterator(){ return m_listData.begin(); }
+	std::vector<pair<uint32, std::wstring> >::iterator begin(){ return m_listData.begin(); }
+	std::vector<pair<uint32, std::wstring> >::iterator end(){ return m_listData.end(); }
+
+	std::vector<pair<uint32, std::wstring> >::iterator GetCurSel(){ return m_listData.begin()+m_curSel; }
 
 	void SetSelection(int i){
 		m_curSel=i;
@@ -83,6 +93,8 @@ public:
 		m_extraSel=i;
 		InvalidateRect(m_hWnd, NULL, true);
 	}
+
+	vector<pair<int, COLORREF> >& GetSelectionList(){ return m_selList; }
 
 	enum Styles{
 		CENTER,
@@ -111,9 +123,13 @@ protected:
 	int m_extraSel;	// extra selection
 	int m_basePos;	// index of item at y-position 0
 
+	vector<pair<int, COLORREF> > m_selList;	// extra selections list
+
 	int m_itemHeight;	// height of each item
 
 	int m_addrFieldWidth;	// width of address field
+
+	static const int m_sidePadding=16;	// side padding, only relevant if left-aligned
 
 	bool m_hasScrollBar;
 	ScrollBar m_scrollBar;		// only if scrollbar is enabled
@@ -123,6 +139,7 @@ protected:
 	};
 
 	bool m_enabledState;		// enabled/disabled state
+
 
 private:
 	static bool m_registered;

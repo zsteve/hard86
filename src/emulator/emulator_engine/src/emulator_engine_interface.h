@@ -106,6 +106,16 @@ extern "C"{
 			uint16 flags;
 		};
 
+		// Emulator specific data (non-8086 related ... kinda)
+		/*
+			* True if we want the debugger callbacks to be executed
+			* for each opcode while we are in an external interrupt.
+			* False if we want external interrupts to be 'invisible'
+			* to the rest of the program
+			*/
+		int step_through_extern_int;
+		int is_in_extern_int;	// in external interrupt?
+
 	}sys_state_type, *sys_state_ptr;
 
 typedef void(*DBGCALLBACK)(MUTEX, sys_state_ptr);
@@ -138,6 +148,12 @@ uint16 read_reg(int reg);
 void stack_push(uint16 val);
 uint16 stack_pop();
 int stack_empty();
+
+void extern_int(uint8 inum);
+void set_step_through_extern_int(int v);
+int* get_is_in_extern_int();
+
+void set_sys_mutex(MUTEX mutex);
 
 #ifdef __cplusplus
 }

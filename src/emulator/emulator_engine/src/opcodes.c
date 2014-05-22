@@ -490,6 +490,58 @@ int write_rm_val_16(uint16 val, uint16 seg){
 	return;
 }
 
+uint16 get_rm_addr(uint16 seg){
+	/* assumes you have mod-reg-rm */
+	/* does MOD RM <- VAL */
+	uint16 disp16=RRELIP16(2);
+	uint8 disp8=RRELIP8(2);
+	uint32 addr=0;
+	switch(op_data.mod){
+		/* modes */
+	case 0:
+		if(op_data.rm==6){
+			addr=disp16;
+			goto end;
+		}
+	case 1:
+	case 2:
+		/* two byte signed displacement */
+		switch(op_data.rm){
+		case 0:	/* BX + SI */
+			addr=BX+SI;
+			break;
+		case 1:	/* BX + DI */
+			addr=BX+DI;
+			break;
+		case 2:	/* BP + SI */
+			addr=BP+SI;
+			break;
+		case 3: /* BP + DI */
+			addr=BP+DI;
+		case 4:	/* SI */
+			addr=SI;
+			break;
+		case 5: /* DI */
+			addr=DI;
+			break;
+		case 6:	/* BP */
+			addr=BP;
+			break;
+		case 7:	/* BX */
+			addr=BX;
+			break;
+		}
+	end:
+		addr=GET_ADDR(addr&0xffff, seg);
+		return addr;
+	case 3:
+		/* register addressing */
+		return NULL;	// we cannot return the 'address' of a reg
+		break;
+	}
+	return 0;
+}
+
 static void set_def_segs(){
 	/* sets default segments to op_data._segs_*/
 	op_data.cs=CS;
@@ -507,6 +559,8 @@ static void set_all_segs(uint16 seg){
 	op_data.ds=seg;
 	op_data.es=seg;
 }
+
+int op_prefix_size=0;
 
 void process_instr_prefixes(){
 	/*	processes instruction prefixes
@@ -1638,9 +1692,9 @@ void op_0x03(){
 		WREG16(M_REG, add_16(r16, rm16));
 
 #ifdef SHOW_DEBUG
-	out_opinfo("ADD %s, %s", print_rm_val_16(OP_DS), text_regs[M_REG]);
+	out_opinfo("ADD %s, %s", text_regs[M_REG], print_rm_val_16(OP_DS));
 #endif
-	INC_IP(0+disp_size);
+	INC_IP(1+disp_size);
 	return;
 }
 
@@ -2360,8 +2414,11 @@ void op_0xf6(){
 			/* IDIV rm8 */
 			if(execute_flag){
 				int8 rm8=read_rm_val_8(OP_DS);
-				AH=AX % rm8;
-				AL=AX / rm8;
+				if(rm8==0) WRITE_DEBUG("Error : division by zero");
+				else{
+					AH=AX % rm8;
+					AL=AX / rm8;
+				}
 			}
 #ifdef SHOW_DEBUG
 			out_opinfo("IDIV %s", print_rm_val_8(OP_DS));
@@ -3008,6 +3065,10 @@ void int_return(){
 	IP=stack_pop();
 	CS=stack_pop();
 	FLAGS=stack_pop();
+	// if we were in an external interrupt
+	// decrement extern interrupt nest count
+	if(sys_state.is_in_extern_int) sys_state.is_in_extern_int--;
+
 }
 
 /* INT imm8 */
@@ -3033,4 +3094,79 @@ void op_0xcf(){
 	}else{
 		INC_IP(0);
 	}
+}
+
+/* LAHF */
+void op_0x9f(){
+	AH=NULL;
+	AH|=(FLAG_CF |
+		(1 << 1) |
+		(FLAG_PF << 2)|
+		(FLAG_AF << 4)|
+		(FLAG_ZF << 5)|
+		(FLAG_SF << 7));
+#ifdef SHOW_DEBUG
+	out_opinfo("LAHF");
+#endif
+	INC_IP(0);
+}
+
+/* SAHF */
+void op_0x9e(){
+	FLAG_CF=(AH & 1);
+	FLAG_PF=(AH & 4);
+	FLAG_AF=(AH & 16);
+	FLAG_ZF=(AH & 64);
+	FLAG_SF=(AH & 128);
+#ifdef SHOW_DEBUG
+	out_opinfo("SAHF");
+#endif
+	INC_IP(0);
+}
+
+/* LEA r16, m */
+void op_0x8d(){
+	uint16 m;
+	MOD_REG_RM(1);
+	m=get_rm_addr(OP_DS);
+	m-=(OP_DS << 4);	// we don't want segments here
+	WREG16(M_REG, m);
+#ifdef SHOW_DEBUG
+	out_opinfo("LEA %s, %x", TEXTREG16(M_REG), (uint32)m);
+#endif
+	INC_IP(1+get_rm_disp_size());
+}
+
+/* MOVS m8, m8 */
+void op_0xa4(){
+	SWMEM8(SRMEM8(SI, OP_DS), DI, OP_DS);
+	if(FLAG_DF == 0){
+		SI++;
+		DI++;
+	}
+	else{
+		SI--;
+		DI--;
+	}
+#ifdef SHOW_DEBUG
+	out_opinfo("MOVSB");
+#endif
+	INC_IP(0);
+}
+
+/* MOVS m16, m16 */
+void op_0xa5(){
+	SWMEM16(SRMEM16(SI, OP_DS), DI, OP_DS);
+	if(FLAG_DF == 0){
+		SI+=2;
+		DI+=2;
+	}
+	else{
+		SI-=2;
+		DI-=2;
+	}
+#ifdef SHOW_DEBUG
+	out_opinfo("MOVSW");
+#endif
+	INC_IP(0);
 }

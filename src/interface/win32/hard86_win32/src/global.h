@@ -55,7 +55,8 @@ namespace nsHard86Win32{
 	 * WPARAM - system mutex handle
 	 * LPARAM - system state struct pointer
 	 */
-#define H86_UPDATE_SYS_DATA WM_USER+1
+#define H86_UPDATE_SYS_DATA	WM_USER+1
+#define H86_BREAKPOINT_HIT	WM_USER+2
 
 }
 

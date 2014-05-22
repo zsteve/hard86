@@ -182,7 +182,7 @@
 //#define op_0x8a op_unknown
 //#define op_0x8b op_unknown
 //#define op_0x8c op_unknown
-#define op_0x8d op_unknown
+//#define op_0x8d op_unknown
 //#define op_0x8e op_unknown
 //#define op_0x8f op_unknown
 #define op_0x90 op_unknown
@@ -199,14 +199,14 @@
 #define op_0x9b op_unknown
 #define op_0x9c op_unknown
 #define op_0x9d op_unknown
-#define op_0x9e op_unknown
-#define op_0x9f op_unknown
+//#define op_0x9e op_unknown
+//#define op_0x9f op_unknown
 //#define op_0xa0 op_unknown
 //#define op_0xa1 op_unknown
 //#define op_0xa2 op_unknown
 //#define op_0xa3 op_unknown
-#define op_0xa4 op_unknown
-#define op_0xa5 op_unknown
+//#define op_0xa4 op_unknown
+//#define op_0xa5 op_unknown
 #define op_0xa6 op_unknown
 #define op_0xa7 op_unknown
 #define op_0xa8 op_unknown
@@ -349,18 +349,18 @@ typedef struct{
 #define REG_8_LO(rg) *((uint8*)sys_state.rg+0)	/* assuming little endian host machine */
 #define REG_8_HI(rg) *((uint8*)sys_state.rg+1)
 
-#define AX REG_16(ax)
-#define AL REG_8_LO(ax)
-#define AH REG_8_HI(ax)
-#define BX REG_16(bx)
-#define BL REG_8_LO(bx)
-#define BH REG_8_HI(bx)
-#define CX REG_16(cx)
-#define CL REG_8_LO(cx)
-#define CH REG_8_HI(cx)
-#define DX REG_16(dx)
-#define DL REG_8_LO(dx)
-#define DH REG_8_HI(dx)
+#define AX (REG_16(ax))
+#define AL (REG_8_LO(ax))
+#define AH (REG_8_HI(ax))
+#define BX (REG_16(bx))
+#define BL (REG_8_LO(bx))
+#define BH (REG_8_HI(bx))
+#define CX (REG_16(cx))
+#define CL (REG_8_LO(cx))
+#define CH (REG_8_HI(cx))
+#define DX (REG_16(dx))
+#define DL (REG_8_LO(dx))
+#define DH (REG_8_HI(dx))
 
 #define IP sys_state.ip
 #define CS sys_state.cs

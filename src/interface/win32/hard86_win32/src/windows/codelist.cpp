@@ -25,6 +25,8 @@
 #include "../../../objwin32/src/gui/global.h"
 #include "../global.h"
 
+#include "../emulator.h"
+
 #include "../../../../../ext_itoa/ext_itoa.h"
 
 using namespace nsObjWin32::nsGUI;
@@ -140,6 +142,7 @@ MSGHANDLER(LButtonDown){
 }
 
 MSGHANDLER(Paint){
+
 	PAINTSTRUCT ps;
 	HDC hDC=BeginPaint(hWnd, &ps);
 
@@ -185,9 +188,25 @@ MSGHANDLER(Paint){
 			TextOut(hDC, Center(m_addrFieldWidth, (int)(w-(m_listData[i].second.size()*tm.tmAveCharWidth))), ypos+1, m_listData[i].second.c_str(), m_listData[i].second.size());
 		}
 		else if(m_textAlignStyle==LEFT){
-			TextOut(hDC, 4, ypos+1, address.c_str(), address.size());
-			TextOut(hDC, m_addrFieldWidth, ypos+1, m_listData[i].second.c_str(), m_listData[i].second.size());
+			TextOut(hDC, m_sidePadding, ypos+1, address.c_str(), address.size());
+			TextOut(hDC, m_sidePadding+m_addrFieldWidth, ypos+1, m_listData[i].second.c_str(), m_listData[i].second.size());
 		}
+
+
+		Debugger* debugger=Debugger::GetInstance();
+		for(BreakpointList::iterator it=debugger->BreakpointBegin();
+			it!=debugger->BreakpointEnd();
+			++it){
+			if(it->second.Addr()==DWORD_B(seg, addr)){
+				HBRUSH hBrush=CreateSolidBrush(RGB(255, 0, 0));
+				HGDIOBJ hOldBrush=SelectObject(hDC, (HGDIOBJ)hBrush);
+				Rectangle(hDC, 0, ypos, m_sidePadding, ypos+m_itemHeight);
+				SelectObject(hDC, hOldBrush);
+				DeleteObject((HGDIOBJ)hBrush);
+				break;
+			}
+		}
+
 		SetBkColor(hDC, Settings::GetColor(Settings::Colors::BK_COLOR));
 		SelectObject(hDC, hOldBrush);
 		DeleteObject(hBrush);

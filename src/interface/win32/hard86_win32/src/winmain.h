@@ -46,6 +46,10 @@ private:
 			wchar_t path[MAX_PATH];
 			GetCurrentDirectory(MAX_PATH, path);
 			appDir=path;
+			appDir+=L"\\";
+
+			// Also set the DLL directory
+			SetDllDirectory(appDir.c_str());
 		}
 
 		// initialize common controls
@@ -53,6 +57,10 @@ private:
 		icx.dwSize=sizeof(icx);
 		icx.dwICC=ICC_BAR_CLASSES;
 		InitCommonControlsEx(&icx);
+
+		// load accelerator table
+		hMainAccel=LoadAccelerators(hInstance, MAKEINTRESOURCE(IDR_MAINACCEL));
+		int e=GetLastError();
 
 		// initialize nsDebugger::Debugger
 		nsDebugger::Debugger::Init(nsVDev::VDevList::GetInstance());
@@ -63,8 +71,10 @@ public:
 
 	~Application()
 	{
+		DestroyWindow(mainFrame->GetHWND());
 		EmulatorThread::DisposeInstance();
-		H86Project::DisposeInstance();
+		if(H86Project::HasInstance())
+			H86Project::GetInstance()->UpdateFile();
 	}
 
 	static Application* GetInstance(){
@@ -80,6 +90,8 @@ public:
 	static wstring& GetAppDirectory(){ return GetInstance()->appDir; }
 
 	static HINSTANCE hInstance;
+
+	static HACCEL hMainAccel;
 
 	// Main Window
 	MainFrame* mainFrame;
@@ -102,6 +114,8 @@ public:
 private:
 protected:
 };
+
+extern wstring& GetAppDir();
 
 }
 

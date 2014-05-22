@@ -68,8 +68,9 @@ namespace nsDebugger{
 			* debugger
 			*/
 			void Activate(){
-				m_orig_byte=read_mem_8(m_addr);
-				write_mem_8(m_new_byte, m_addr);
+				uint32 realAddr=(HI_WORD(m_addr)<<4) + LO_WORD(m_addr);
+				m_orig_byte=read_mem_8(realAddr);
+				write_mem_8(m_new_byte, realAddr);
 				m_active=true;
 			}
 
@@ -79,8 +80,13 @@ namespace nsDebugger{
 			* debugger
 			*/
 			void Deactivate(){
-				write_mem_8(m_orig_byte, m_addr);
+				uint32 realAddr=(HI_WORD(m_addr)<<4) + LO_WORD(m_addr);
+				write_mem_8(m_orig_byte, realAddr);
 				m_active=false;
+			}
+
+			uint32 Addr(){
+				return m_addr;
 			}
 
 		protected:

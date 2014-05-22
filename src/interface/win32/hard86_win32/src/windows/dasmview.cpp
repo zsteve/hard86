@@ -123,12 +123,16 @@ namespace nsHard86Win32{
 
 		m_dasmList=dasm.Disassemble(Child<CodeList>(CODELIST)->GetCapacity(), ip, cs, EmulatorThread::GetSymData());
 		Child<CodeList>(CODELIST)->Clear();
+		Child<CodeList>(CODELIST)->GetSelectionList().clear();
+
 		for(DasmList::iterator it=m_dasmList.begin();
 			it!=m_dasmList.end();
 			++it){
 			Child<CodeList>(CODELIST)->Insert(make_pair(DWORD_B(it->GetSeg(), it->GetAddr()), strtowstr(it->GetCStr())));
+
 		}
 		Child<CodeList>(CODELIST)->SetExtraSelection(0);
+
 
 		sysMutex.Unlock();
 		InvalidateRect(hWnd, NULL, false);
@@ -182,7 +186,7 @@ namespace nsHard86Win32{
 		codeList->SetFont(Settings::GetFont(Settings::Fonts::MONOSPACE_FONT));
 		
 		// Disassembly not loaded, so we inform the user
-		codeList->Insert(make_pair(0, L"Disassembly not loaded"));
+		Reset();
 
 		codeList->Show();
 

@@ -32,13 +32,22 @@
 #include "../../emulator_engine/src/emulator_engine_interface.h"
 #include "../../../system/multithreading/mutex/c/cmutex.h"
 
+#ifdef _WIN32
+#include "../../../interface/win32/hard86_win32/src/global.h"
+#endif
+
 using namespace std;
 
 namespace nsVDev{
 
 	// VDev
-
-	VDev::VDev(InitFunc initFunc, TermFunc termFunc, AcceptMutexFunc acceptFunc, wstring& fileName, void* param1, void* param2){
+#ifdef _WIN32
+	VDev::VDev(InitFunc initFunc, TermFunc termFunc, AcceptMutexFunc acceptFunc, wstring& fileName, HMODULE hModule, void* param1, void* param2)
+#else
+	VDev::VDev(InitFunc initFunc, TermFunc termFunc, AcceptMutexFunc acceptFunc, wstring& fileName, void* param1, void* param2)
+#endif
+	
+	{
 		m_initFunc=initFunc;
 		m_termFunc=termFunc;
 		m_acceptMutexFunc=acceptFunc;
@@ -47,6 +56,10 @@ namespace nsVDev{
 		m_params.second=param2;
 
 		m_fileName=fileName;
+
+#ifdef _WIN32
+		m_hModule=hModule;
+#endif
 	}
 
 	VDev::VDev(const VDev& src){
@@ -55,10 +68,16 @@ namespace nsVDev{
 		this->m_acceptMutexFunc=src.m_acceptMutexFunc;
 		this->m_params=src.m_params;
 		this->m_fileName=src.m_fileName;
+
+#ifdef _WIN32
+		m_hModule=src.m_hModule;
+#endif
 	}
 
 	VDev::~VDev(){
-
+#ifdef _WIN32
+		m_hModule=NULL;
+#endif
 	}
 
 	int VDev::Initialize(void* param1, void* param2){
@@ -73,11 +92,58 @@ namespace nsVDev{
 		return m_acceptMutexFunc(emuMutex, sysState);
 	}
 
-	int VDev::Terminate(){
+	int VDev::Terminate()
+	{
+#ifdef _WIN32
+		int retv=m_termFunc();
+		FreeLibrary(m_hModule);
+		return retv;
+#else
 		return m_termFunc();
+#endif
 	}
 
 	// VDevList
+
+#ifdef _WIN32
+	using namespace nsHard86Win32;
+
+	inline wstring& TidySlashes(wstring& str){
+		for(wstring::iterator it=str.begin();
+			it!=str.end();
+			++it){
+			if((*it)==L'/'){
+				(*it)=L'\\';
+			}
+		}
+		return str;
+	}
+
+	/**
+	 * Load DLL as VDev
+	 * @return true for success, false for failure
+	 */
+	bool VDevList::LoadVDevDLL(const string& path){
+		HMODULE hMod=LoadLibrary(TidySlashes(strtowstr(path)).c_str());
+		if(hMod){
+			VDev::InitFunc initFunc=(VDev::InitFunc)GetProcAddress(hMod, "VirtualDevice_Initialize");
+			VDev::TermFunc termFunc=(VDev::TermFunc)GetProcAddress(hMod, "VirtualDevice_Terminate");
+			VDev::AcceptMutexFunc acceptMutexFunc=(VDev::AcceptMutexFunc)GetProcAddress(hMod, "VirtualDevice_AcceptEmulationMutex");
+
+			if(initFunc && termFunc && acceptMutexFunc){
+				this->Add(VDev(initFunc, termFunc, acceptMutexFunc, strtowstr(path), hMod));
+				return true;
+			}
+			else{
+				return false;
+			}
+		}
+		else{
+			return false;
+		}
+	}
+
+#endif
 
 	VDevList* VDevList::m_instance=NULL;
 

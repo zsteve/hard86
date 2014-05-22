@@ -80,190 +80,37 @@ namespace nsHard86Win32{
 			return m_instance ? true : false;
 		}
 
+		void UpdateFile();
+
 		/// @return a pair containing [seg, addr]
-		pair<uint16, uint16> Get_LoadSegAddr(){
-			try{
-				xml_node<>* node=m_doc->first_node("Hard86Project");
-				if(!node){
-					OUT_DEBUG("RapidXML failed to locate node");
-					return make_pair(0, 0);
-				}
-				node=node->first_node("Variables");
-				if(!node){
-					OUT_DEBUG("RapidXML failed to locate node");
-					return make_pair(0, 0);
-				}
-				node=node->first_node("LoadSegAddr");
-				if(!node){
-					OUT_DEBUG("RapidXML failed to locate node");
-					return make_pair(0, 0);
-				}
-				xml_attribute<> *seg, *addr;
-				seg=node->first_attribute("seg");
-				addr=node->first_attribute("addr");
-				return make_pair(strtol(seg->value(), NULL, 16), strtol(addr->value(), NULL, 16));
-			}
-			catch(rapidxml::parse_error e){
-				OUT_DEBUG("RapidXML parse error encountered");
-				return make_pair(0, 0);
-			}
-		}
+		pair<uint16, uint16> Get_LoadSegAddr();
 
 		/// @return std::string path to binary file
-		string Get_BinaryPath(){
-			try{
-				xml_node<>* node=m_doc->first_node("Hard86Project");
-				if(!node){
-					OUT_DEBUG("RapidXML failed to locate node");
-					return string("");
-				}
-				node=node->first_node("Paths");
-				if(!node){
-					OUT_DEBUG("RapidXML failed to locate node");
-					return string("");
-				}
-				xml_attribute<> *path;
-				path=node->first_attribute("binaryPath");
-				return string(path->value());
-			}
-			catch(rapidxml::parse_error e){
-				OUT_DEBUG("RapidXML parse error encountered");
-				return string("");
-			}
-		}
+		string Get_BinaryPath();
 
 		/// @return std::string path to FAS file
-		string Get_FASPath(){
-			try{
-				xml_node<>* node=m_doc->first_node("Hard86Project");
-				if(!node){
-					OUT_DEBUG("RapidXML failed to locate node");
-					return string("");
-				}
-				node=node->first_node("Paths");
-				if(!node){
-					OUT_DEBUG("RapidXML failed to locate node");
-					return string("");
-				}
-				xml_attribute<> *path;
-				path=node->first_attribute("FASPath");
-				return string(path->value());
-			}
-			catch(rapidxml::parse_error e){
-				OUT_DEBUG("RapidXML parse error encountered");
-				return string("");
-			}
-		}
+		string Get_FASPath();
 
 		/// @return std::string path to user vdev directory
-		string Get_UserVDevPath(){
-			try{
-				xml_node<>* node=m_doc->first_node("Hard86Project");
-				if(!node){
-					OUT_DEBUG("RapidXML failed to locate node");
-					return string("");
-				}
-				node=node->first_node("Paths");
-				if(!node){
-					OUT_DEBUG("RapidXML failed to locate node");
-					return string("");
-				}
-				xml_attribute<> *path;
-				path=node->first_attribute("userVDevPath");
-				return string(path->value());
-			}
-			catch(rapidxml::parse_error e){
-				OUT_DEBUG("RapidXML parse error encountered");
-				return string("");
-			}
-		}
+		string Get_UserVDevPath();
 
 		/// @return vector<pair<string, string> > list of names and paths of included vdevs
-		vector<pair<string, string> > Get_VDevList(){
-			vector<pair<string, string> > vdevList(0);
+		vector<pair<string, string> > Get_VDevList();
 
-			try{
-				xml_node<>* node=m_doc->first_node("Hard86Project");
-				if(!node){
-					OUT_DEBUG("RapidXML failed to locate node");
-					return vector<pair<string, string> >(0);
-				}
-				node=node->first_node("VDevs");
-				if(!node){
-					OUT_DEBUG("RapidXML failed to locate node");
-					return vector<pair<string, string> >(0);
-				}
-				node=node->first_node();
-				while(node){
-					xml_attribute<> *name, *path;
-					name=node->first_attribute("name");
-					path=node->first_attribute("path");
-					vdevList.push_back(make_pair(string(name->value()), string(path->value())));
-					
-					node=node->next_sibling();
-				}
-				return vdevList;
-			}
-			catch(rapidxml::parse_error e){
-				OUT_DEBUG("RapidXML parse error encountered");
-				return vector<pair<string, string> >(0);
-			}
-		}
-
-		// Removes all children of the VDevs node
-		void Remove_VDevList(){
-			try{
-				xml_node<>* node=m_doc->first_node("Hard86Project");
-				if(!node){
-					OUT_DEBUG("RapidXML failed to locate node");
-					return;
-				}
-				xml_node<>* vdevNode=node->first_node("VDevs");
-				if(!node){
-					OUT_DEBUG("RapidXML failed to locate node");
-					return;
-				}
-				node->remove_node(vdevNode);
-			}
-			catch(rapidxml::parse_error e){
-				OUT_DEBUG("RapidXML parse error encountered");
-				return;
-			}
-			
-		}
+		// Removes the VDevs node
+		void Remove_VDevList();
 
 		// Appends a vector<pair<string, string> > of VDev <name, path> 
-		void Add_VDevList(vector<pair<string, string> >& vdevList){
-			try{
-				xml_node<>* node=m_doc->first_node("Hard86Project");
-				if(!node){
-					OUT_DEBUG("RapidXML failed to locate node");
-					return;
-				}
-				xml_node<>* test=node->first_node("VDevs");
-				if(!test){
-					node->append_node(m_doc->allocate_node(node_element, "VDevs"));
-					node=node->last_node();
-				}
-				else{
-					node=test;
-				}
-				for(vector<pair<string, string> >::iterator it=vdevList.begin();
-					it!=vdevList.end();
-					++it){
+		void Add_VDevList(vector<pair<string, string> >& vdevList);
 
-					node->append_node(m_doc->allocate_node(node_element, "VDev"));
-					xml_node<> *appendedNode=node->last_node();
-					appendedNode->append_attribute(m_doc->allocate_attribute("name", m_doc->allocate_string(it->first.c_str())));
-					appendedNode->append_attribute(m_doc->allocate_attribute("path", m_doc->allocate_string(it->second.c_str())));
+		// @return vector<pair<uint16, uint16> > of breakpoint <seg, addr>
+		vector<pair<uint16, uint16> > Get_BPList();
 
-				}
-			}
-			catch(rapidxml::parse_error e){
-				OUT_DEBUG("RapidXML parse error encountered");
-				return;
-			}
-		}
+		// Removes the BPList node
+		void Remove_BPList();
+
+		// Appends a vector<pair<uint16, uint16>> to the BPList node
+		void Add_BPList(vector<pair<uint16, uint16> >& bpList);
 
 	protected:
 		xml_document<>* m_doc;

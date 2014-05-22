@@ -25,7 +25,12 @@ using namespace nsObjWin32::nsGUI;
 using namespace nsHard86Win32;
 
 Application* Application::m_instance=NULL;
-HINSTANCE Application::hInstance;
+HINSTANCE Application::hInstance=NULL;
+HACCEL Application::hMainAccel=NULL;
+
+namespace nsHard86Win32{
+	wstring& GetAppDir(){ return Application::GetAppDirectory(); }
+}
 
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
@@ -40,7 +45,8 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 	MSG msg;
 	while(GetMessage(&msg, NULL, NULL, NULL)){
-		TranslateMessage(&msg);
+		if(!TranslateAccelerator(app->mainFrame->GetHWND(), Application::hMainAccel, &msg))
+			TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
 

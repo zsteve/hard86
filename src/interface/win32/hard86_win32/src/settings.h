@@ -68,6 +68,10 @@ namespace nsHard86Win32{
 			return GetInstance()->m_paths.GetPath(id);
 		}
 
+		static int GetNum(int id){
+			return GetInstance()->m_nums.GetNum(id);
+		}
+
 		struct Colors{
 			enum{
 				// General
@@ -92,6 +96,13 @@ namespace nsHard86Win32{
 		struct Paths{
 			enum{
 				BIOS_PATH
+			};
+		};
+
+		struct Nums{
+			enum{
+				ANIMATE_SPEED,
+				STEP_INTO_EXTERN_INT
 			};
 		};
 
@@ -143,6 +154,19 @@ namespace nsHard86Win32{
 
 			map<int, string> m_paths;
 		}m_paths;
+
+		class{
+			int& GetNum(int id){
+				return m_nums[id];
+			}
+		private:
+			friend class Settings;
+			void SetNum(int id, int val){
+				m_nums[id]=val;
+			}
+
+			map<int, int> m_nums;
+		}m_nums;
 
 		static const char m_appIniPath[];
 		INIReader m_appIni;

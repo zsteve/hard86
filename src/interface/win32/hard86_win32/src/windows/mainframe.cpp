@@ -25,6 +25,9 @@
 #include "statusbar.h"
 
 #include "../../../objwin32/src/gui/global.h"
+
+#include "../../../../../ext_itoa/ext_itoa.h"
+
 #include "../resource/resource.h"
 
 namespace nsHard86Win32{
@@ -58,7 +61,6 @@ LRESULT CALLBACK MainFrame::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 		break;
 	case WM_CLOSE:
 		Application::SetExiting(true);
-		EmulatorThread::SetMsgWindow(NULL);	// quick hack to make emulator thread exit without blocking
 		SendMessage(WM_DESTROY, NULL, NULL);
 		break;
 	case WM_SIZING:
@@ -83,6 +85,10 @@ LRESULT CALLBACK MainFrame::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 		break;
 	case H86_UPDATE_SYS_DATA:
 		OnH86UpdateSysData(hWnd, uMsg, wParam, lParam);
+		break;
+	case H86_BREAKPOINT_HIT:
+		SendMessage(WM_COMMAND, ID_EXECUTION_BREAK, NULL);
+		Child<StatusBar>(STATUSBAR)->SetStatus(L"Breakpoint Hit");
 		break;
 	default:
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);
@@ -174,6 +180,12 @@ MSGHANDLER(Create){
 	m_memWatchers.push_back(MemoryWatcher());
 	m_memWatchers.back().Create(CW_USEDEFAULT, CW_USEDEFAULT, 320, 240, hWnd);
 
+	m_stackWatcher.Create(CW_USEDEFAULT, CW_USEDEFAULT, 320, 240, hWnd);
+	m_stackWatcher.Show();
+
+	m_bpList.Create(CW_USEDEFAULT, CW_USEDEFAULT, 320, 240, hWnd);
+	m_bpList.Show();
+
 	// Register with EmulatorThread
 	EmulatorThread::SetMsgWindow(this);
 }
@@ -205,6 +217,7 @@ MSGHANDLER(Command){
 		if(!Emulator::HasInstance()) break;
 		EmulatorThread::SetSingleStep(false);
 		EmulatorThread::Resume();
+		EmulatorThread::SysMutex().Unlock();
 		Child<StatusBar>(STATUSBAR)->SetStatus(L"Running");
 		break;
 	case ID_EXECUTION_BREAK:
@@ -218,12 +231,24 @@ MSGHANDLER(Command){
 		break;
 	case ID_EXECUTION_RELOAD:
 		if(!Emulator::HasInstance()) break;
-		EmulatorThread::SetMsgWindow(NULL);	// quick hack to make emulator thread exit without blocking
-		EmulatorThread::DisposeInstance();
-		EmulatorThread::SetMsgWindow(this);	// set msg window again
-		EmulatorThread::GetInstance();
-		Emulator::GetInstance()->Reset();
-		Child<StatusBar>(STATUSBAR)->SetStatus(L"Suspended");
+		{
+			bool wasTerminated=(EmulatorThread::State()==EmulatorThread::Terminated);
+
+			SendMessage(WM_COMMAND, ID_EXECUTION_BREAK, NULL);
+
+			EmulatorThread::SetSingleStep(false);
+			if(wasTerminated){
+				EmulatorThread::DisposeInstance();
+				EmulatorThread::GetInstance()->SetMsgWindow(this);
+			}
+
+			EmulatorThread::SysMutex().Unlock();
+			Emulator::GetInstance()->Reset();
+			Emulator::GetInstance()->SetSysMutex(EmulatorThread::SysMutex());
+			Emulator::GetInstance()->SetStepThroughExternInt(Settings::GetNum(Settings::Nums::STEP_INTO_EXTERN_INT));
+			EmulatorThread::NotifyMsgWindow();
+			Child<StatusBar>(STATUSBAR)->SetStatus(L"Reloaded");
+		}
 		break;
 	case ID_EXECUTION_STEPINTO:
 		if(!Emulator::HasInstance()) break;
@@ -232,15 +257,28 @@ MSGHANDLER(Command){
 		Child<StatusBar>(STATUSBAR)->SetStatus(L"Suspended");
 		break;
 	case ID_EXECUTION_ANIMATE:
+		if(!Emulator::HasInstance()) break;
 		{
 			if(isAnimating){
-				KillTimer(hWnd, 10);
+				KillTimer(hWnd, ANIMATION_TIMER);
 				isAnimating=false;
 			}
 			else{
-				SetTimer(hWnd, 10, 10, NULL);
+				SetTimer(hWnd, ANIMATION_TIMER, Settings::GetNum(Settings::Nums::ANIMATE_SPEED), NULL);
 				isAnimating=true;
 			}
+		}
+		break;
+	case ID_EXECUTION_TOGGLEBREAKPOINT:
+		if(!Emulator::HasInstance()) break;
+		{
+			uint32 addr=Child<DasmView>(DASMVIEW)->GetCursorSelection();
+			if(Debugger::GetInstance()->BreakpointExists(addr))
+				Debugger::GetInstance()->RemoveBreakpoint(addr);
+			else
+				Debugger::GetInstance()->AddBreakpoint(addr);
+			m_bpList.Update();
+			InvalidateRect(Child<DasmView>(DASMVIEW)->GetHWND(), NULL, false);
 		}
 		break;
 	case ID_FILE_LOADPROJECT:
@@ -248,12 +286,33 @@ MSGHANDLER(Command){
 		Child<StatusBar>(STATUSBAR)->SetStatus(L"Ready");
 		break;
 	case ID_FILE_CLOSEPROJECT:
-		H86Project::DisposeInstance();
-		Child<StatusBar>(STATUSBAR)->SetInfo(L"Closed project");
+		if(H86Project::HasInstance()){
+			// Discard instances of objects
+			H86Project::DisposeInstance();
+			EmulatorThread::DisposeInstance();
+			Emulator::DisposeInstance();
+			VDevList::TerminateAll();
+			VDevList::DisposeInstance();
+
+			Child<DasmView>(DASMVIEW)->Reset();
+			Child<StatusBar>(STATUSBAR)->SetInfo(L"Closed project");
+		}
 		break;
 	case ID_FILE_LOAD:
 		LoadFile();
 		EmulatorThread::NotifyWindow(this);
+		break;
+	case ID_FILE_CLOSE:
+		if(Emulator::HasInstance() && !H86Project::HasInstance()){
+			// Discard instances of objects
+			EmulatorThread::DisposeInstance();
+			Emulator::DisposeInstance();
+			VDevList::TerminateAll();
+			VDevList::DisposeInstance();
+
+			Child<DasmView>(DASMVIEW)->Reset();
+			Child<StatusBar>(STATUSBAR)->SetInfo(L"Closed binary file");
+		}
 		break;
 	case ID_TOOLS_SETTINGS:
 		{
@@ -281,7 +340,12 @@ MSGHANDLER(H86UpdateSysData){
 			m_memWatchers[i].SendMessage(H86_UPDATE_SYS_DATA, wParam, lParam);
 		}
 
+		m_stackWatcher.SendMessage(H86_UPDATE_SYS_DATA, wParam, lParam);
+
 		EmulatorThread::Suspend();
+	}
+	else if(EmulatorThread::State()==EmulatorThread::Terminated){
+		Child<StatusBar>(STATUSBAR)->SetStatus(L"Terminated");
 	}
 
 }
@@ -345,7 +409,7 @@ void MainFrame::LoadFileToEmulator(const wstring& path, const wstring& fasPath){
 	}
 
 	// Load BIOS
-	File biosFile(Application::GetAppDirectory()+L"\\"+strtowstr(Settings::GetPath(Settings::Paths::BIOS_PATH)));
+	File biosFile(Application::GetAppDirectory()+strtowstr(Settings::GetPath(Settings::Paths::BIOS_PATH)));
 	if(!biosFile.Exists()){
 		OUT_DEBUG_FATAL("BIOS file does not exist");
 		return;
@@ -367,6 +431,8 @@ void MainFrame::LoadFileToEmulator(const wstring& path, const wstring& fasPath){
 		Debugger::PostInstructionExecute,
 		fileData, fileSize, biosData, biosSize
 		);
+
+	emulator->SetStepThroughExternInt(Settings::GetNum(Settings::Nums::STEP_INTO_EXTERN_INT));
 
 	delete[] fileData;
 	delete[] biosData;
@@ -399,6 +465,9 @@ void MainFrame::LoadProject(){
 	if(!GetOpenFileName(&ofn)) return;	// if user pressed cancel, abort operation
 
 	LoadProjectToFrontend(wstring(path));
+
+	m_bpList.Update();
+
 	Child<StatusBar>(STATUSBAR)->SetInfo(L"Loaded project");
 }
 
@@ -416,19 +485,19 @@ void MainFrame::LoadProjectToFrontend(const wstring& path){
 		it!=vdevListVect.end();
 		++it){
 		// Load library
-		HMODULE hMod=LoadLibrary(strtowstr(it->second).c_str());
-		if(hMod){
-			vdevList->Add(VDev((VDev::InitFunc)GetProcAddress(hMod, "VirtualDevice_Initialize"), \
-				(VDev::TermFunc)GetProcAddress(hMod, "VirtualDevice_Terminate"), \
-				(VDev::AcceptMutexFunc)GetProcAddress(hMod, "VirtualDevice_AcceptEmulationMutex"),
-				strtowstr(it->second)));
-		}
-		
+		vdevList->LoadVDevDLL(it->second);
 	}
-	
 	
 	LoadFileToEmulator(strtowstr(H86Project::GetInstance()->Get_BinaryPath()),
 		strtowstr(H86Project::GetInstance()->Get_FASPath()));
+
+	vector<pair<uint16, uint16> > bpListVect=project->Get_BPList();
+	for(vector<pair<uint16, uint16> >::iterator it=bpListVect.begin();
+		it!=bpListVect.end();
+		++it){
+		// Load breakpoint
+		Debugger::GetInstance()->AddBreakpoint(DWORD_B(it->first, it->second));
+	}
 
 }
 

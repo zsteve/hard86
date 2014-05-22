@@ -70,7 +70,7 @@ namespace nsDebugger{
 			for(VDevList::iterator it=m_vdevList->begin();
 				it!=m_vdevList->end();
 				++it){
-				(*it).second.Initialize((*it).second.GetParams().first, (*it).second.GetParams().second);
+				(*it).second.Initialize();
 			}
 		}
 	}
@@ -80,7 +80,9 @@ namespace nsDebugger{
 	 * @param sysMutex system MUTEX
 	 */
 	void Debugger::BreakPointHit(MUTEX sysMutex, sys_state_ptr sysState){
+		sys_state_ptr sys_state=get_system_state();
 
+		m_frontendBreakPointHit(sysMutex, sysState);
 	}
 
 	/**
@@ -106,7 +108,9 @@ namespace nsDebugger{
 	 * @param sysMutex system MUTEX
 	 */
 	void Debugger::PostInstructionExecute(MUTEX sysMutex, sys_state_ptr sysState){
-		
+		sys_state_ptr sys_state=get_system_state();
+
+		m_frontendPostInstructionExecute(sysMutex, sysState);
 	}
 
 	/**
@@ -116,6 +120,7 @@ namespace nsDebugger{
 	bool Debugger::AddBreakpoint(uint32 addr){
 		bool exists=m_bpList.Exists(addr);
 		m_bpList[addr]=BreakpointList::Breakpoint(addr);
+		m_bpList[addr].Activate();
 		return exists;
 	}
 
@@ -125,6 +130,7 @@ namespace nsDebugger{
 	 */
 	bool Debugger::RemoveBreakpoint(uint32 addr){
 		if(!m_bpList.Exists(addr)) return false;
+		m_bpList[addr].Deactivate();
 		m_bpList.erase(addr);
 		return true;
 	}

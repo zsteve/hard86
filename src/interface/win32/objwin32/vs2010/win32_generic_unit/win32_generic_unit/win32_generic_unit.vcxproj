@@ -87,6 +87,7 @@
     <ClCompile Include="..\..\..\src\gui\editbox.cpp" />
     <ClCompile Include="..\..\..\src\gui\frame.cpp" />
     <ClCompile Include="..\..\..\src\gui\global.cpp" />
+    <ClCompile Include="..\..\..\src\gui\listbox.cpp" />
     <ClCompile Include="..\..\..\src\gui\main.cpp" />
     <ClCompile Include="..\..\..\src\gui\progressbar.cpp" />
     <ClCompile Include="..\..\..\src\gui\scrollbar.cpp" />
@@ -101,6 +102,7 @@
     <ClInclude Include="..\..\..\src\gui\editbox.h" />
     <ClInclude Include="..\..\..\src\gui\frame.h" />
     <ClInclude Include="..\..\..\src\gui\global.h" />
+    <ClInclude Include="..\..\..\src\gui\listbox.h" />
     <ClInclude Include="..\..\..\src\gui\progressbar.h" />
     <ClInclude Include="..\..\..\src\gui\scrollbar.h" />
     <ClInclude Include="..\..\..\src\gui\static.h" />

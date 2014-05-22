@@ -55,6 +55,8 @@ sys_state_type sys_state;
 
 op_data_type op_data;
 
+extern int op_prefix_size;
+
 /* system MUTEX */
 MUTEX sys_mutex;
 DBGCALLBACK breakpoint_hit_callback;
@@ -328,6 +330,30 @@ void write_io_port(uint8 val, uint16 port){
 	*(sys_state.io_bus+port)=val;
 }
 
+/**
+ * Makes external interrupt
+ */
+
+// define int_call() from opcodes.c as an extern func
+extern void int_call(uint8 inum);
+
+void extern_int(uint8 inum){
+	sys_state.is_in_extern_int++;	// we are now in an external interrupt.
+						// we increment in order to allow for 
+						// nested external interrupts (possibly redundant, but added jic)
+	int_call(inum);
+}
+
+void set_step_through_extern_int(int v){
+	sys_state.step_through_extern_int=v;
+}
+
+int* get_is_in_extern_int(){ return &sys_state.is_in_extern_int; }
+
+void set_sys_mutex(MUTEX mutex){
+	sys_mutex=mutex;
+}
+
 void system_load_mem(uint8* data, uint32 size){
 	int i;
 	uint32 o=DS<<4;
@@ -405,6 +431,9 @@ int system_init(MUTEX sys_mutex_,
 	sys_state.f_bits.IOPL=0x0;	/* no IO protection */
 	sys_state.f_bits.NT=0;		/* no nested tasks */
 
+	sys_state.is_in_extern_int=0;
+	sys_state.step_through_extern_int=0;
+
 	return 0;
 }
 
@@ -413,7 +442,7 @@ int system_destroy(){
 		free(sys_state.mem);
 	if(sys_state.io_bus)
 		free(sys_state.io_bus);
-
+	halt_flag=0;
 	return 0;
 }
 
@@ -438,8 +467,11 @@ void system_print_state(){
 	//getch();
 }
 
+static void reset_op_data(){
+	op_data.rep=op_data.repne=0;
+}
+
 int system_execute(){
-	clist dasm_list;
 	int i;
 	extern int halt_flag;
 
@@ -447,13 +479,17 @@ int system_execute(){
 		R_IP=GET_ADDR(IP, CS);
 		process_instr_prefixes();
 
-		pre_execute_callback(sys_mutex, &sys_state);
+		/* do not execute this if we are in an external interrupt
+			and step_through_extern_int flag is clear
+		*/
+		if(!sys_state.is_in_extern_int || (sys_state.is_in_extern_int && sys_state.step_through_extern_int))
+			pre_execute_callback(sys_mutex, &sys_state);
+
 		mutex_lock(sys_mutex);
-		/* update r_ip */
+		R_IP=GET_ADDR(IP, CS);
 
 		if(read_mem_8(GET_ADDR(IP, CS))==0xcc){
 			/* int3 debug interrupt - hand control to debugger */
-			IP++;
 			mutex_unlock(sys_mutex);
 			breakpoint_hit_callback(sys_mutex, &sys_state);
 			continue;
@@ -461,10 +497,27 @@ int system_execute(){
 
 		system_print_state();
 
-		(*op_table[read_mem_8(GET_ADDR(IP, CS))])();
+		if(op_data.rep || op_data.repne){
+			while(CX){
+				uint16 old_ip=IP;
+				R_IP=GET_ADDR(IP, CS);
+				(*op_table[read_mem_8(GET_ADDR(IP, CS))])();
+				CX--;
+				if(CX)
+					IP=old_ip;
+			}
+			// reset rep/repne
+			reset_op_data();
+		}
+		else{
+			(*op_table[read_mem_8(GET_ADDR(IP, CS))])();
+		}
+
+		if(!sys_state.is_in_extern_int || (sys_state.is_in_extern_int && sys_state.step_through_extern_int))
+			post_execute_callback(sys_mutex, &sys_state);
 		mutex_unlock(sys_mutex);
-		post_execute_callback(sys_mutex, &sys_state);
 	}
+	halt_flag=0;
 	return 0;
 }
 

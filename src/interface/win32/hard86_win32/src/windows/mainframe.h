@@ -29,6 +29,8 @@
 #include "codelist.h"
 #include "register_watcher.h"
 #include "mem_watcher.h"
+#include "stack_watcher.h"
+#include "bp_list.h"
 
 #include "../../../objwin32/src/gui/frame.h"
 #include "../../../objwin32/src/file/file.h"
@@ -39,6 +41,9 @@ using namespace nsObjWin32::nsFiles;
 namespace nsHard86Win32{
 
 class MainFrame : public Frame, public StickyWindow{
+
+	static const int ANIMATION_TIMER=1;
+
 public:
 	MainFrame() : m_memWatchers(0){
 		m_className=L"MainFrame";
@@ -93,6 +98,8 @@ protected:
 	// Tool Windows
 	RegisterWatcher m_regWatcher;
 	std::vector<MemoryWatcher> m_memWatchers;
+	StackWatcher m_stackWatcher;
+	BPList m_bpList;
 
 private:
 };

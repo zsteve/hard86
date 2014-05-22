@@ -7,7 +7,7 @@
 
 using namespace std;
 
-void ext_itoa(int value, char* str, int radix, int padto=0, char padchar='0'){
+static void ext_itoa(int value, char* str, int radix, int padto=0, char padchar='0'){
 	char buf[10]="";
 	itoa(value, buf, radix);
 	if(padto){
@@ -25,7 +25,7 @@ void ext_itoa(int value, char* str, int radix, int padto=0, char padchar='0'){
 	strcpy(str, buf);
 }
 
-void ext_itow(int value, wchar_t* str, int radix, int padto=0, wchar_t padchar=L'0'){
+static void ext_itow(int value, wchar_t* str, int radix, int padto=0, wchar_t padchar=L'0'){
 	wchar_t buf[10]=L"";
 	_itow(value, buf, radix);
 	if(padto){
@@ -43,7 +43,7 @@ void ext_itow(int value, wchar_t* str, int radix, int padto=0, wchar_t padchar=L
 	wcscat(str, buf);
 }
 
-wstring ext_itow(int value, int radix, int padto=0, wchar_t padchar=L'0'){
+static wstring ext_itow(int value, int radix, int padto=0, wchar_t padchar=L'0'){
 	wchar_t* buf=new wchar_t[padto+10];
 	buf[0]=NULL;
 	ext_itow(value, buf, radix, padto, padchar);
@@ -52,7 +52,7 @@ wstring ext_itow(int value, int radix, int padto=0, wchar_t padchar=L'0'){
 	return retv;
 }
 
-string ext_itoa(int value, int radix, int padto=0, char padchar=L'0'){
+static string ext_itoa(int value, int radix, int padto=0, char padchar=L'0'){
 	char* buf=new char[padto+10];
 	buf[0]=NULL;
 	ext_itoa(value, buf, radix, padto, padchar);

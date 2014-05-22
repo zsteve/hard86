@@ -38,11 +38,11 @@
 #define LO_BYTE(w) (unsigned char)(w & 0xff)
 #define HI_BYTE(w) (unsigned char)(w & 0xff00) >> 8
 
-#define HI_WORD(d) (unsigned short)(d & 0xffff0000)>>16
+#define HI_WORD(d) (unsigned short)((d & 0xffff0000)>>16)
 #define LO_WORD(d) (unsigned short)(d & 0xffff)
 
-#define WORD_B(h, l) ((unsigned short)h)<<8 | l
-#define DWORD_B(h, l) ((unsigned long)h)<<16 | l
+#define WORD_B(h, l) (((unsigned short)h)<<8 | l)
+#define DWORD_B(h, l) (((unsigned long)h)<<16 | l)
 
 /* MB and KB, RANGE_8/16 definitions */
 #define KB 1024

@@ -50,15 +50,21 @@ namespace nsHard86Win32{
 					PostInstructionExecute,
 					BreakPointHit);
 			m_singleStep=false;
+		
 		}
 
 		static EmulatorThread* m_instance;
+
+		static bool m_breakpointHit;	// true if breakpoint was hit during last instruction
 	public:
 
 		~EmulatorThread(){
 
+			m_msgWindow=NULL;
+
 			try{
 				Emulator* emulator=Emulator::GetInstance();
+
 				emulator->Stop();
 
 				m_sysMutex.Unlock();
@@ -112,7 +118,7 @@ namespace nsHard86Win32{
 		static Mutex& SysMutex(){ return GetInstance()->m_sysMutex; }
 
 		enum EmulatorState{
-			Running, Suspended
+			Running, Suspended, Terminated
 		};
 
 		static EmulatorState State(){ return GetInstance()->m_state; }

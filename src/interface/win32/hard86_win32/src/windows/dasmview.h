@@ -45,6 +45,19 @@ namespace nsHard86Win32{
 
 		LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
+		void Reset(){
+			CodeList* codeList=Child<CodeList>(CODELIST);
+			codeList->Clear();
+			codeList->Insert(make_pair(0, wstring(L"Disassembly not loaded")));
+			InvalidateRect(codeList->GetHWND(), NULL, false);
+		}
+
+		// returns the seg:addr of the cursor selected entry
+		uint32 GetCursorSelection(){
+			vector<pair<uint32, wstring> >::iterator entry=Child<CodeList>(CODELIST)->GetCurSel();
+			return entry->first;
+		}
+
 	private:
 
 		static bool m_registered;

@@ -23,12 +23,18 @@ namespace nsHard86Win32{
 
 	using namespace nsEmulator;
 
+	// TODO : fix the #include file mess-up bug
+	// quick hack while we wait...
+	extern wstring& GetAppDir();
+
 	EmulatorThread* EmulatorThread::m_instance=NULL;
 
 	/// single step flag
 	bool EmulatorThread::m_singleStep=false;
 
 	EmulatorThread::EmulatorState EmulatorThread::m_state;
+
+	bool EmulatorThread::m_breakpointHit=false;
 	
 	/**
 	 * The main thread of the emulator
@@ -42,7 +48,7 @@ namespace nsHard86Win32{
 
 		emulator->Execute();
 
-		emuThread->m_state=Suspended;
+		emuThread->m_state=Terminated;
 		emuThread->SysMutex().Unlock();
 		emuThread->NotifyMsgWindow();
 
@@ -62,12 +68,33 @@ namespace nsHard86Win32{
 
 	void EmulatorThread::PostInstructionExecute(MUTEX sysMutex, sys_state_ptr sysState)
 	{
-
+		// if a breakpoint was hit last time, we enable it again
+		if(m_breakpointHit){
+			for(BreakpointList::iterator it=Debugger::GetInstance()->BreakpointBegin();
+				it!=Debugger::GetInstance()->BreakpointEnd();
+				++it){
+				it->second.Activate();
+			}
+			m_breakpointHit=false;
+		}
 	}
 
 	void EmulatorThread::BreakPointHit(MUTEX sysMutex, sys_state_ptr sysState)
 	{
+		// disable all breakpoints
+		m_breakpointHit=true;
 
+		for(BreakpointList::iterator it=Debugger::GetInstance()->BreakpointBegin();
+			it!=Debugger::GetInstance()->BreakpointEnd();
+			++it){
+			it->second.Deactivate();
+		}
+
+		EmulatorThread& e=*GetInstance();
+		if(e.m_msgWindow)
+			e.m_msgWindow->SendMessage(H86_BREAKPOINT_HIT, (WPARAM)sysMutex, (LPARAM)sysState);
+		else
+			OUT_DEBUG("m_msgWindow is a null pointer, failed to send message");
 	}
 
 	// VDevDlg
@@ -78,19 +105,6 @@ namespace nsHard86Win32{
 	{
 		switch(uMsg){
 		case WM_CLOSE:
-			if(H86Project::HasInstance()){
-				H86Project* project=H86Project::GetInstance();
-				VDevList* vdevList=VDevList::GetInstance();
-				project->Remove_VDevList();
-
-				vector<pair<string, string> > vdevListVect(0);
-				for(VDevList::iterator it=vdevList->begin();
-					it!=vdevList->end();
-					++it){
-					vdevListVect.push_back(make_pair(wstrtostr((*it).second.GetFileName()), wstrtostr((*it).second.GetFileName())));
-				}
-				project->Add_VDevList(vdevListVect);
-			}
 			EndDialog(hWnd, WM_CLOSE);
 			break;
 		case WM_INITDIALOG:
@@ -116,7 +130,7 @@ namespace nsHard86Win32{
 				for(int i=0; i<nFiles; i++){
 					wchar_t fName[MAX_PATH]=L"";
 					DragQueryFile(hDrop, i, fName, MAX_PATH);
-					dropFiles.push_back(wstring(fName));
+					dropFiles[i]=wstring(fName);
 				}
 
 				VDevList* vdevList=VDevList::GetInstance();
@@ -124,14 +138,10 @@ namespace nsHard86Win32{
 					it!=dropFiles.end();
 					++it){
 					// Load library
-					HMODULE hMod=LoadLibrary(it->c_str());
-					if(hMod){
-						vdevList->Add(VDev((VDev::InitFunc)GetProcAddress(hMod, "VirtualDevice_Initialize"), \
-							(VDev::TermFunc)GetProcAddress(hMod, "VirtualDevice_Terminate"), \
-							(VDev::AcceptMutexFunc)GetProcAddress(hMod, "VirtualDevice_AcceptEmulationMutex"),
-							*it));
-						::SendMessage(GetDlgItem(hWnd, IDC_VDEVLISTBOX), LB_ADDSTRING, NULL, (LPARAM)(*it).c_str());
-					}
+					wstring path=File::GetRelativePath((*it), GetAppDir());
+					path=path.substr(1, wstring::npos);
+					vdevList->LoadVDevDLL(wstrtostr(path));
+					::SendMessage(GetDlgItem(hWnd, IDC_VDEVLISTBOX), LB_ADDSTRING, NULL, (LPARAM)(path).c_str());
 				}
 			}
 			break;
@@ -146,6 +156,22 @@ namespace nsHard86Win32{
 						SendDlgItemMessage(hWnd, IDC_VDEVLISTBOX, LB_DELETESTRING, (WPARAM)item, NULL);
 					}
 				}
+				break;
+			case IDOK:
+				if(H86Project::HasInstance()){
+					H86Project* project=H86Project::GetInstance();
+					VDevList* vdevList=VDevList::GetInstance();
+					project->Remove_VDevList();
+
+					vector<pair<string, string> > vdevListVect(0);
+					for(VDevList::iterator it=vdevList->begin();
+						it!=vdevList->end();
+						++it){
+						vdevListVect.push_back(make_pair(wstrtostr((*it).second.GetFileName()), wstrtostr((*it).second.GetFileName())));
+					}
+					project->Add_VDevList(vdevListVect);
+				}
+				SendMessage(WM_CLOSE, NULL, NULL);
 				break;
 			}
 			break;

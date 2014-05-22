@@ -13,6 +13,12 @@ db "Hard86 Emulator BIOS", 0h
 cur_x db 19h
 cur_y db 19h
 
+kb_buf_size equ 64
+
+kb_buf db kb_buf_size dup(0) ; keyboard buffer
+kb_buf_begin dw 0
+kb_buf_end dw 0
+
 ; interrupts
 
 
@@ -24,6 +30,54 @@ int_04:
 int_05:
 int_06:
 int_07:
+  ; hard86 specific interrupt
+  ; key pressed
+  ; data in port 0x60
+  push ax
+  push bx
+  push ds
+  
+  mov bx, bios_seg
+  mov ds, bx
+  
+  in al, 0x60
+  
+  mov bx, offset kb_buf
+  add bx, word [kb_buf_end]
+  mov byte [bx], al
+  mov bx, offset kb_buf_end
+  
+  cmp [kb_buf_end], kb_buf_size-1
+  je int7_out_of_space
+  
+  inc [kb_buf_end]
+  
+  pop ds
+  pop bx
+  pop ax
+  iret
+  
+int7_out_of_space:
+  cmp kb_buf_begin, 0
+  je int7_buffer_full
+  ; otherwise, wrap around to the beginning
+  mov [kb_buf_end], 0
+  
+  pop ds
+  pop bx
+  pop ax
+  iret
+  
+int7_buffer_full:
+  ; keyboard buffer is truly full.
+  
+  
+  pop ds
+  pop bx
+  pop ax
+  
+  iret
+  
 int_08:
 int_09:
 int_0a:
@@ -35,6 +89,8 @@ int_0f:
 int_10:
 	cmp ah, 02h
 	je int10_ah2
+  cmp ah, 08h
+  je int10_ah8
 	cmp ah, 09h
 	je int10_ah9
 	
@@ -51,6 +107,10 @@ int10_ah2:
 	pop bx
 	pop ds
 	iret
+  
+int10_ah8:
+  ; read character and attribute at cursor position
+  iret
 
 int10_ah9:
 	; write character and attribute at cursor position
@@ -89,12 +149,64 @@ int10_ah9_cont1:
 	pop ds
 	iret
 
+
 int_11:
 int_12:
 int_13:
 int_14:
 int_15:
 int_16:
+  cmp ah, 0x00
+  je int16_ah0
+  cmp ah, 0x01
+  je int16_ah1
+  iret
+int16_ah0:
+  push ax
+  push bx
+  push ds
+  
+  mov bx, bios_seg
+  mov ds, bx
+  
+  mov bx, [kb_buf_end]
+  mov ax, [kb_buf_begin]
+  cmp bx, ax
+  jne int16_ah0_hasdata
+  pop ds
+  pop bx
+  pop ax
+  xor ax, ax
+  iret
+  
+int16_ah0_hasdata:
+  mov bx, offset kb_buf
+  add bx, [kb_buf_begin]
+  mov al, byte [bx]
+  mov ah, al
+  inc [kb_buf_begin]
+  
+  pop ds
+  pop bx
+  sub sp, 2
+  iret
+  
+int16_ah1:
+  push ax
+  push bx
+  push ds
+  
+  mov bx, bios_seg
+  mov ds, bx
+  
+  mov bx, [kb_buf_end]
+  mov ax, [kb_buf_begin]
+  cmp bx, ax
+  jne int16_ah1_hasdata
+  
+int16_ah1_hasdata:
+  
+  iret
 int_17:
 int_18:
 int_19:
