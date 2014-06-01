@@ -36,6 +36,7 @@ namespace nsFiles{
 
 		static wstring GetRelativePath(const wstring& absPath, const wstring& relativeTo);
 		static wstring GetAbsolutePath(const wstring& relPath, const wstring& relativeTo);
+		static wstring GetDirectory(const wstring& path);
 	protected:
 		wstring m_path;
 		bool m_bOpened;

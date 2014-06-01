@@ -57,6 +57,15 @@ namespace nsHard86Win32{
 
 	void EmulatorThread::PreInstructionExecute(MUTEX sysMutex, sys_state_ptr sysState)
 	{
+		// if a breakpoint was hit last time, we enable it again
+		if(m_breakpointHit){
+			for(BreakpointList::iterator it=Debugger::GetInstance()->BreakpointBegin();
+				it!=Debugger::GetInstance()->BreakpointEnd();
+				++it){
+				it->second.Activate();
+			}
+			m_breakpointHit=false;
+		}
 		EmulatorThread& e=*GetInstance();
 		if(m_singleStep || m_state==EmulatorState::Suspended){
 			if(e.m_msgWindow)
@@ -68,15 +77,7 @@ namespace nsHard86Win32{
 
 	void EmulatorThread::PostInstructionExecute(MUTEX sysMutex, sys_state_ptr sysState)
 	{
-		// if a breakpoint was hit last time, we enable it again
-		if(m_breakpointHit){
-			for(BreakpointList::iterator it=Debugger::GetInstance()->BreakpointBegin();
-				it!=Debugger::GetInstance()->BreakpointEnd();
-				++it){
-				it->second.Activate();
-			}
-			m_breakpointHit=false;
-		}
+
 	}
 
 	void EmulatorThread::BreakPointHit(MUTEX sysMutex, sys_state_ptr sysState)
@@ -95,6 +96,16 @@ namespace nsHard86Win32{
 			e.m_msgWindow->SendMessage(H86_BREAKPOINT_HIT, (WPARAM)sysMutex, (LPARAM)sysState);
 		else
 			OUT_DEBUG("m_msgWindow is a null pointer, failed to send message");
+	}
+
+	void EmulatorThread::UserInput(MUTEX sysMutex, sys_state_ptr sysState){
+		EmulatorThread& e=*GetInstance();
+		if(m_singleStep || m_state==EmulatorState::Suspended){
+			if(e.m_msgWindow)
+				e.m_msgWindow->SendMessage(H86_USER_INPUT, (WPARAM)sysMutex, (LPARAM)sysState);
+			else
+				OUT_DEBUG("m_msgWindow is a null pointer, failed to send message");
+		}
 	}
 
 	// VDevDlg
@@ -139,7 +150,6 @@ namespace nsHard86Win32{
 					++it){
 					// Load library
 					wstring path=File::GetRelativePath((*it), GetAppDir());
-					path=path.substr(1, wstring::npos);
 					vdevList->LoadVDevDLL(wstrtostr(path));
 					::SendMessage(GetDlgItem(hWnd, IDC_VDEVLISTBOX), LB_ADDSTRING, NULL, (LPARAM)(path).c_str());
 				}

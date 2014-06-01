@@ -50,6 +50,7 @@ void op_0x77();
 void op_0x7b();
 void op_0x71();
 void op_0x79();
+void op_0x0f();
 
 /* MOV */
 void op_0xb8();
@@ -199,5 +200,32 @@ void op_0x8d();
 /* MOVS */
 void op_0xa4();
 void op_0xa5();
+
+/* STOS */
+void op_0xaa();
+void op_0xab();
+
+/* XCHG */
+void op_0x90();
+void op_0x86();
+void op_0x87();
+
+/* PUSHA */
+void op_0x60();
+
+/* POPA */
+void op_0x61();
+
+/* PUSHF */
+void op_0x9c();
+
+/* POPF */
+void op_0x9d();
+
+/* TEST */
+void op_0xa8();
+void op_0xa9();
+void op_0x84();
+void op_0x85();
 
 #endif

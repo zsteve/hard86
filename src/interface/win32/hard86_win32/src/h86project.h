@@ -27,6 +27,10 @@
 
 #include "global.h"
 
+#include "resource/resource.h"
+
+#include "../../objwin32/src/gui/dialog.h"
+
 #include "../../objwin32/src/file/file.h"
 #include "../../../../lib/rapidxml/rapidxml.hpp"
 #include "../../../../lib/rapidxml/rapidxml_print.hpp"
@@ -117,6 +121,26 @@ namespace nsHard86Win32{
 		char* m_data;
 	private:
 
+	};
+
+	using namespace nsObjWin32::nsGUI;
+
+	class NewH86ProjectDlg : public Dialog {
+
+	public:
+		NewH86ProjectDlg() : m_projectPath(L""), m_binPath(L"") {
+			m_resId=IDD_NEWPROJECT;
+		}
+
+		virtual ~NewH86ProjectDlg(){
+			DestroyWindow(m_hWnd);
+		}
+
+		virtual INT_PTR CALLBACK DlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	protected:
+		wstring m_projectPath;
+		wstring m_binPath;
+		wstring m_fasPath;
 	};
 
 }

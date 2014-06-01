@@ -47,6 +47,7 @@ namespace nsEmulator{
 			DBGCALLBACK bpHitFunc,
 			DBGCALLBACK preExFunc,
 			DBGCALLBACK posExFunc,
+			DBGCALLBACK userInputFunc,
 			uint8* sysMem,
 			uint32 sysMemSize,
 			uint8* sysBios,
@@ -61,6 +62,7 @@ namespace nsEmulator{
 									DBGCALLBACK bpHitFunc,
 									DBGCALLBACK preExFunc,
 									DBGCALLBACK posExFunc,
+									DBGCALLBACK userInputFunc,
 									uint8* sysMem,
 									uint32 sysMemSize,
 									uint8* sysBios,
@@ -92,6 +94,8 @@ namespace nsEmulator{
 		void MakeExternInt(uint8 inum);
 		void SetStepThroughExternInt(bool v);
 
+		void SetStepThroughInt(bool v);
+
 		sys_state_ptr SystemState(){ return get_system_state(); }
 
 		void SetSysMutex(Mutex& sysMutex);
@@ -108,7 +112,7 @@ namespace nsEmulator{
 		uint32 m_sysBiosSize;
 
 		Mutex m_sysMutex;
-		DBGCALLBACK m_bpHitFunc, m_preExFunc, m_posExFunc;
+		DBGCALLBACK m_bpHitFunc, m_preExFunc, m_posExFunc, m_userInputFunc;
 	private:
 	};
 

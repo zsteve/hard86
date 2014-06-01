@@ -30,6 +30,7 @@ namespace nsHard86Win32{
 bool HexGrid::m_registered=false;
 
 HexGrid::HexGrid(bool hasScrollBar) : m_gridData(0), m_sel(0, 0){
+	m_enabled=true;
 	m_style|=WS_CHILD;
 	m_className=L"Hard86_HexGrid";
 	if(!m_registered){
@@ -45,6 +46,7 @@ HexGrid::HexGrid(bool hasScrollBar) : m_gridData(0), m_sel(0, 0){
 	m_hexColumns=m_ascColumns=0;
 	m_basePos=0;
 	m_isSelecting=false;
+	m_lastClickedPane=false;
 }
 
 ATOM HexGrid::Register(){
@@ -91,7 +93,13 @@ LRESULT CALLBACK HexGrid::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
 	case WM_VSCROLL:
 		OnVScroll(hWnd, uMsg, wParam, lParam);
 		break;
-
+	case WM_CHAR:
+		OnChar(hWnd, uMsg, wParam, lParam);
+		break;
+	case WM_ENABLE:
+		m_enabled=(bool)wParam;
+		InvalidateRect(hWnd, NULL, false);
+		break;
 	default:
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
@@ -151,7 +159,11 @@ MSGHANDLER(Paint){
 			_itow(m_gridData[index+m_basePos], hex, 16);
 
 			if(index >= m_sel.first && index <= m_sel.second){
-				SetBkColor(hMemDC, Settings::GetColor(Settings::Colors::SEL_COLOR));
+				if(m_enabled)
+					SetBkColor(hMemDC, Settings::GetColor(Settings::Colors::SEL_COLOR));
+				else
+					SetBkColor(hMemDC, Settings::GetColor(Settings::Colors::INACTIVE_SEL_COLOR));
+
 				TextOut(hMemDC, j*m_itemWidth, i*m_itemHeight, hex, 2);
 				SetBkColor(hMemDC, Settings::GetColor(Settings::Colors::BK_COLOR));
 			}
@@ -178,7 +190,11 @@ MSGHANDLER(Paint){
 
 			wchar_t asc[2]={ (wchar_t)(char)m_gridData[index+m_basePos], L'\0' };
 			if(index >= m_sel.first && index <= m_sel.second){
-				SetBkColor(hMemDC, Settings::GetColor(Settings::Colors::SEL_COLOR));
+				if(m_enabled)
+					SetBkColor(hMemDC, Settings::GetColor(Settings::Colors::SEL_COLOR));
+				else
+					SetBkColor(hMemDC, Settings::GetColor(Settings::Colors::INACTIVE_SEL_COLOR));
+
 				TextOut(hMemDC,
 					(j*(m_itemWidth/2))+(m_hexColumns*m_itemWidth)+m_itemWidth,
 					i*m_itemHeight,
@@ -245,16 +261,27 @@ MSGHANDLER(Size){
 }
 
 MSGHANDLER(LButtonDown){
+	if(m_enabled){
+		int x, y;
+		x=GET_X_LPARAM(lParam);
+		y=GET_Y_LPARAM(lParam);
+		SetSelection(x, y);
+		InvalidateRect(hWnd, NULL, false);
 
-	int x, y;
-	x=GET_X_LPARAM(lParam);
-	y=GET_Y_LPARAM(lParam);
-	SetSelection(x, y);
-	InvalidateRect(hWnd, NULL, false);
+		// Set keyboard focus
+		SetFocus(hWnd);
+		if(x > m_hexColumns*m_itemWidth+(m_itemWidth/2)){
+			m_lastClickedPane=true;		// ascii pane
+		}
+		else{
+			m_lastClickedPane=false;	// hex pane
+		}
+	}
 }
 
 MSGHANDLER(LButtonUp){
-	m_isSelecting=false;
+	if(m_enabled)
+		m_isSelecting=false;
 }
 
 MSGHANDLER(MouseMove){
@@ -299,6 +326,38 @@ MSGHANDLER(VScroll){
 	si.fMask=SIF_POS;
 	SetScrollInfo(m_scrollBar.GetHWND(), SB_CTL, &si, TRUE);
 	RedrawWindow(m_hWnd, NULL, NULL, RDW_INVALIDATE);
+}
+
+MSGHANDLER(Char){
+	if(!m_enabled) return;
+	static bool editingCell=false;
+	if(!m_gridData.empty()){
+		char c[2]={ (char)wParam, NULL };
+		if(m_lastClickedPane==false){	// hex pane
+			if(isxdigit(c[0]) && m_sel.first == m_sel.second){
+				uint8 val=strtol(c, NULL, 16);
+				if(!editingCell){
+					m_gridData[m_sel.first]&=0x0f;
+					m_gridData[m_sel.first]|=(val << 4);
+					editingCell=true;
+				}
+				else{
+					m_gridData[m_sel.first]&=0xf0;
+					m_gridData[m_sel.first]|=(val & 0xf);
+					editingCell=false;
+					// add edit entry
+					m_editList[m_sel.first]=m_gridData[m_sel.first];
+					m_sel.first=m_sel.second+=1;
+				}
+			}
+		}
+		else{	// ascii pane
+			m_gridData[m_sel.first]=(uint8)c[0];
+			m_editList[m_sel.first]=m_gridData[m_sel.first];
+			m_sel.first=m_sel.second+=1;
+		}
+		InvalidateRect(hWnd, NULL, false);
+	}
 }
 
 #undef MSGHANDLER

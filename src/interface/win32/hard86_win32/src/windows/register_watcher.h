@@ -87,7 +87,7 @@ namespace nsHard86Win32{
 	class RegisterWatcher : public Hard86ToolWindow{
 	public:
 		RegisterWatcher() : Hard86ToolWindow(m_registered){
-
+			m_enabled=true;
 		}
 
 		virtual ~RegisterWatcher(){
@@ -110,6 +110,8 @@ namespace nsHard86Win32{
 #define MSGHANDLER(name) void  On##name(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		MSGHANDLER(Create);
 #undef MSGHANDLER
+
+		bool m_enabled;
 
 		void CreateChildren(HWND hWnd);
 
@@ -134,6 +136,53 @@ namespace nsHard86Win32{
 		SingleRegWatcher* m_regWatchers[REGWATCHER_IP+1];
 
 		WinManager m_children;
+	private:
+		static bool m_registered;
+	};
+
+	class FlagWatcherDlg : public Dialog{
+	public:
+		FlagWatcherDlg(){
+			m_resId=IDD_FLAGSWATCHER;
+		}
+
+		virtual ~FlagWatcherDlg(){
+
+		}
+
+		INT_PTR CALLBACK DlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	private:
+	};
+
+	class FlagWatcher : public Hard86ToolWindow{
+	public:
+		FlagWatcher() : Hard86ToolWindow(m_registered), m_flagWatcherDlg() {
+			m_enabled=true;
+		}
+
+		virtual ~FlagWatcher(){
+			DestroyWindow(m_hWnd);
+		}
+
+		LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+		HWND Create(int x, int y, int w, int h, HWND hwndParent, HMENU hMenu=NULL){
+			Window::Create(m_exStyle, L"Flags", m_style, x, y, w, h, hwndParent, hMenu);
+			Show();
+			return m_hWnd;
+		}
+
+	protected:
+		// message handlers
+#define MSGHANDLER(name) void  On##name(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+		MSGHANDLER(Create);
+#undef MSGHANDLER
+
+		bool m_enabled;
+
+		void CreateChildren(HWND hWnd);
+
+		FlagWatcherDlg m_flagWatcherDlg;
 	private:
 		static bool m_registered;
 	};

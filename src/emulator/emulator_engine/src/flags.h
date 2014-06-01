@@ -75,5 +75,7 @@ SETF_2OP_PROTO(setf_xor8, uint8);
 SETF_2OP_PROTO(setf_xor16, uint16);
 SETF_2OP_PROTO(setf_mul8, uint8);
 SETF_2OP_PROTO(setf_mul16, uint16);
+SETF_2OP_PROTO(setf_test8, uint8);
+SETF_2OP_PROTO(setf_test16, uint16);
 
 #endif

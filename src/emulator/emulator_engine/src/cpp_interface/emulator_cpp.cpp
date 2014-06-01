@@ -39,13 +39,14 @@ namespace nsEmulator{
 		DBGCALLBACK bpHitFunc,
 		DBGCALLBACK preExFunc,
 		DBGCALLBACK posExFunc,
+		DBGCALLBACK userInputFunc,
 		uint8* sysMem,
 		uint32 sysMemSize,
 		uint8* sysBios,
 		uint16 sysBiosSize){
 
 		if(!m_instance){
-			m_instance=new Emulator(sysMutex, bpHitFunc, preExFunc, posExFunc, sysMem, sysMemSize, sysBios, sysBiosSize);
+			m_instance=new Emulator(sysMutex, bpHitFunc, preExFunc, posExFunc, userInputFunc, sysMem, sysMemSize, sysBios, sysBiosSize);
 		}
 		return m_instance;
 	}
@@ -60,6 +61,7 @@ namespace nsEmulator{
 		DBGCALLBACK bpHitFunc,
 		DBGCALLBACK preExFunc,
 		DBGCALLBACK posExFunc,
+		DBGCALLBACK userInputFunc,
 		uint8* sysMem,
 		uint32 sysMemSize,
 		uint8* sysBios,
@@ -69,6 +71,7 @@ namespace nsEmulator{
 		m_bpHitFunc=bpHitFunc;
 		m_preExFunc=preExFunc;
 		m_posExFunc=posExFunc;
+		m_userInputFunc=userInputFunc;
 		m_sysMem=sysMem;
 		m_sysMemSize=sysMemSize;
 
@@ -82,7 +85,7 @@ namespace nsEmulator{
 
 		SetStepThroughExternInt(false);
 
-		system_init((MUTEX*)m_sysMutex.GetHandle(), m_bpHitFunc, m_preExFunc, m_posExFunc);
+		system_init((MUTEX*)m_sysMutex.GetHandle(), m_bpHitFunc, m_preExFunc, m_posExFunc, m_userInputFunc);
 		system_load_bios(sysBios, sysBiosSize);
 		system_load_mem(m_sysMem, m_sysMemSize);
 	}
@@ -110,6 +113,8 @@ namespace nsEmulator{
 	void Emulator::MakeExternInt(uint8 inum){ extern_int(inum); }
 	void Emulator::SetStepThroughExternInt(bool v){ set_step_through_extern_int((int)v); }
 
+	void Emulator::SetStepThroughInt(bool v){ set_step_through_int((int)v); }
+
 	void Emulator::SetSysMutex(Mutex& sysMutex){ set_sys_mutex(sysMutex.GetHandle()); }
 
 	int Emulator::Execute(){ return system_execute(); }
@@ -120,7 +125,7 @@ namespace nsEmulator{
 
 	void Emulator::Reset(){
 		system_destroy();
-		system_init((MUTEX*)m_sysMutex.GetHandle(), m_bpHitFunc, m_preExFunc, m_posExFunc);
+		system_init((MUTEX*)m_sysMutex.GetHandle(), m_bpHitFunc, m_preExFunc, m_posExFunc, m_userInputFunc);
 		system_load_bios(m_sysBios, m_sysBiosSize);
 		system_load_mem(m_sysMem, m_sysMemSize);
 	}

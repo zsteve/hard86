@@ -277,8 +277,6 @@ namespace nsDasm{
 			}
 		}
 
-		clist_destroy(&dasmList);
-
 		return dasmOut;
 	}
 }

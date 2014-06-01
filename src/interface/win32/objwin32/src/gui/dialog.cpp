@@ -35,6 +35,11 @@ namespace nsGUI{
 		return m_hWnd=CreateDialogParam(m_hInstance, MAKEINTRESOURCE(m_resId), hwndParent, Dialog::Base_DlgProc, (LPARAM)this);
 	}
 
+	void Dialog::CreateNoReturn(HWND hwndParent){
+		m_hInstance=Window::m_hInstance;
+		DialogBoxParam(m_hInstance, MAKEINTRESOURCE(m_resId), hwndParent, Dialog::Base_DlgProc, (LPARAM)this);
+	}
+
 	LRESULT Dialog::SendMessage(UINT uMsg, WPARAM wParam, LPARAM lParam){
 		return ::SendMessage(m_hWnd, uMsg, wParam, lParam);
 	}

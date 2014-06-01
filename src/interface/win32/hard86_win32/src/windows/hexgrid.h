@@ -64,7 +64,11 @@ public:
 
 	int GetColumns(){ return m_hexColumns; }
 
+	map<int, uint8>& GetEditList(){ return m_editList; }
+
 protected:
+
+	bool m_enabled;	// enabled/disabled state
 
 	// Window information
 	HFONT m_defFont;
@@ -99,6 +103,9 @@ protected:
 	// Selections
 	pair<int, int> m_sel;
 	bool m_isSelecting;
+	bool m_lastClickedPane;					// last clicked pane: false = hex pane, true = ascii pane
+
+	map<int, uint8> m_editList;	// list of bytes edited by user, <offset from base, new value>
 
 	// Message handlers
 #define MSGHANDLER(name) void On##name(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -111,6 +118,7 @@ protected:
 	MSGHANDLER(VScroll);
 	MSGHANDLER(LButtonUp);
 	MSGHANDLER(MouseMove);
+	MSGHANDLER(Char);
 
 #undef MSGHANDLER
 

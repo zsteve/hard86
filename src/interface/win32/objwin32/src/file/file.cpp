@@ -38,16 +38,17 @@ namespace nsFiles{
 	}
 	
 	wstring FileObject::GetRelativePath(const wstring& absPath, const wstring& relativeTo){
+		if(absPath==L"" || relativeTo==L"") return L"";
 		wstring relPath(L"");
 		wstring tmpPath=absPath;
 		wstring basePath=relativeTo;
 		WStrToLower(tmpPath);
 		WStrToLower(basePath);
 
-		int lastSimilar=GetLastSimilarDirIndex(tmpPath, basePath);
+		int lastSimilar=GetLastSimilarDirIndex(tmpPath, basePath)+1;
 		int dirLevelsUp=GetDirLevels(basePath.substr(lastSimilar));
-		for(int i=0; i<dirLevelsUp-1; i++){
-			relPath+=L"\\..";
+		for(int i=0; i<dirLevelsUp; i++){
+			relPath+=L"..\\";
 		}
 		relPath+=tmpPath.substr(lastSimilar);
 		TidySlashes(relPath);
@@ -59,7 +60,8 @@ namespace nsFiles{
 		const wstring& longer=(shorter==path1) ? path2 : path1;
 		int j=0;
 		for(int i=0; i<shorter.size(); i++){
-			if(shorter[i]!=longer[i]) return j;
+			if(shorter[i]!=longer[i]) 
+				return j;
 			if(shorter[i]==L'\\' || shorter[i]=='/') j=i;
 		}
 		return j;
@@ -133,6 +135,17 @@ namespace nsFiles{
 		return str;
 	}
 
+	wstring FileObject::GetDirectory(const wstring& path){
+		wstring outPath(L"");
+		for(int i=path.size()-1; i>=0; i--){
+			if(path[i]==L'\\' || path[i]==L'/'){
+				outPath=path.substr(0, i);
+				break;
+			}
+		}
+		return outPath;
+	}
+
 	// File
 	/**
 	 * Opens current file
@@ -153,7 +166,7 @@ namespace nsFiles{
 			Close();
 		}
 		m_hFile=CreateFile(m_path.c_str(), dwDesiredAccess, dwShareMode, NULL, CREATE_NEW, dwFlagsAndAttributes, NULL); 
-		return (m_bOpened=m_hFile==INVALID_HANDLE_VALUE ? true : false);
+		return (m_bOpened=(m_hFile==INVALID_HANDLE_VALUE ? false : true));
 	}
 
 	/**

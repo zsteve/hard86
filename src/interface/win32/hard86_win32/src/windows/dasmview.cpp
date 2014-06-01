@@ -139,7 +139,7 @@ namespace nsHard86Win32{
 	}
 
 	MSGHANDLER(VScroll){
-		SCROLLINFO si;
+		/*SCROLLINFO si;
 		si.cbSize=sizeof(si);
 		si.fMask=SIF_ALL;
 		ScrollBar* scrollBar=Child<ScrollBar>(SCROLLBAR);
@@ -166,7 +166,7 @@ namespace nsHard86Win32{
 		SetScrollInfo(scrollBar->GetHWND(), SB_CTL, &si, TRUE);
 		if(EmulatorThread::State()==EmulatorThread::Suspended){
 			EmulatorThread::NotifyWindow(this);
-		}
+		}*/
 	}
 
 	MSGHANDLER(Sizing){
@@ -182,7 +182,7 @@ namespace nsHard86Win32{
 
 		CodeList*& codeList=Child<CodeList>(CODELIST);
 		codeList=new CodeList(CodeList::LEFT, false);
-		codeList->Create(0, 0, w-ScrollBar::DEF_W, h, hWnd, CODELIST);
+		codeList->Create(0, 0, w, h, hWnd, CODELIST);
 		codeList->SetFont(Settings::GetFont(Settings::Fonts::MONOSPACE_FONT));
 		
 		// Disassembly not loaded, so we inform the user
@@ -190,11 +190,11 @@ namespace nsHard86Win32{
 
 		codeList->Show();
 
-		ScrollBar*& scrollBar=Child<ScrollBar>(SCROLLBAR);
+		/*ScrollBar*& scrollBar=Child<ScrollBar>(SCROLLBAR);
 		scrollBar=new ScrollBar();
 		scrollBar->Create(w-ScrollBar::DEF_W, 0, ScrollBar::DEF_W, h, hWnd, SCROLLBAR);
 		scrollBar->Show();
-		SetScrollRange(scrollBar->GetHWND(), SB_CTL, 0, nsEmulator::Emulator::MemSize-1, false);
+		SetScrollRange(scrollBar->GetHWND(), SB_CTL, 0, nsEmulator::Emulator::MemSize-1, false);*/
 	}
 
 }

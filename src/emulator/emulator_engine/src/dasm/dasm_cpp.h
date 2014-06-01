@@ -171,6 +171,7 @@ namespace nsDasm{
 		iterator begin(){ return iterator(m_dasmLines.begin()); }
 		iterator end(){ return iterator(m_dasmLines.end()); }
 		bool empty(){ return m_dasmLines.empty(); }
+		void clear(){ return m_dasmLines.clear(); }
 
 		// static 
 

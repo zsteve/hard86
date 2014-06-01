@@ -49,6 +49,7 @@ namespace nsHard86Win32{
 			CodeList* codeList=Child<CodeList>(CODELIST);
 			codeList->Clear();
 			codeList->Insert(make_pair(0, wstring(L"Disassembly not loaded")));
+			m_dasmList.clear();
 			InvalidateRect(codeList->GetHWND(), NULL, false);
 		}
 
@@ -64,7 +65,7 @@ namespace nsHard86Win32{
 
 		enum Children{
 			CODELIST,
-			SCROLLBAR
+			//SCROLLBAR
 		};
 
 		template<typename T>

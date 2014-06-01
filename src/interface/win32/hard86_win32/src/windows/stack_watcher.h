@@ -54,6 +54,8 @@ namespace nsHard86Win32{
 
 #undef MSGHANDLER
 
+		bool m_enabled;
+
 		void CreateChildren(HWND hWnd);
 
 		enum Children{

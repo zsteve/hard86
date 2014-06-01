@@ -107,6 +107,8 @@ extern "C"{
 		};
 
 		// Emulator specific data (non-8086 related ... kinda)
+		MUTEX sys_mutex;
+
 		/*
 			* True if we want the debugger callbacks to be executed
 			* for each opcode while we are in an external interrupt.
@@ -116,6 +118,11 @@ extern "C"{
 		int step_through_extern_int;
 		int is_in_extern_int;	// in external interrupt?
 
+		int step_through_int;
+		int is_in_int;			// in interrupt?
+
+		op_data_ptr op_data;
+
 	}sys_state_type, *sys_state_ptr;
 
 typedef void(*DBGCALLBACK)(MUTEX, sys_state_ptr);
@@ -123,7 +130,8 @@ typedef void(*DBGCALLBACK)(MUTEX, sys_state_ptr);
 int system_init(MUTEX sys_mutex_,
 				DBGCALLBACK bp_hit_func,
 				DBGCALLBACK pre_ex_func,
-				DBGCALLBACK pos_ex_func);
+				DBGCALLBACK pos_ex_func,
+				DBGCALLBACK user_input_func);
 int system_destroy();
 int system_execute();
 
@@ -152,6 +160,9 @@ int stack_empty();
 void extern_int(uint8 inum);
 void set_step_through_extern_int(int v);
 int* get_is_in_extern_int();
+
+void set_step_through_int(int v);
+int* get_is_in_int();
 
 void set_sys_mutex(MUTEX mutex);
 

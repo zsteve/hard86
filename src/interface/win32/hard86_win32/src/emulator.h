@@ -44,11 +44,13 @@ namespace nsHard86Win32{
 	private:
 		EmulatorThread() : m_thread(&EmulatorThreadProc, NULL)
 		{
+			m_thread.SetMaxSuspendCount(1);
 			m_state=Suspended;
 
 			Debugger::GetInstance()->RegisterFrontendCallbacks(PreInstructionExecute,
 					PostInstructionExecute,
-					BreakPointHit);
+					BreakPointHit,
+					UserInput);
 			m_singleStep=false;
 		
 		}
@@ -156,6 +158,7 @@ namespace nsHard86Win32{
 		static void PreInstructionExecute(MUTEX sysMutex, sys_state_ptr sysState);
 		static void PostInstructionExecute(MUTEX sysMutex, sys_state_ptr sysState);
 		static void BreakPointHit(MUTEX sysMutex, sys_state_ptr sysState);
+		static void UserInput(MUTEX sysMutex, sys_state_ptr sysState);
 
 		static EmulatorState m_state;
 

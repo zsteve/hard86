@@ -39,6 +39,8 @@ protected:
 	HANDLE m_hMutex;
 
 	int* m_nInstances;
+
+	int m_state;
 };
 
 #endif

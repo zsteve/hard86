@@ -29,6 +29,9 @@ int main(){
 		++it){
 		wcout << it->GetPath() << endl;
 	}
+
+	wcout << FileObject::GetRelativePath(L"C:\\test\\a.txt", L"C:\\test\\") << endl;
+	wcout << FileObject::GetRelativePath(L"C:\\test\\a.txt", L"C:\\test") << endl;
 	wcout << FileObject::GetAbsolutePath(L"../asdf", L"G:\\asdf\\asdf\\") << endl;
 	_getch();
 	return 0;

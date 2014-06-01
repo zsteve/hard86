@@ -45,7 +45,7 @@ class MainFrame : public Frame, public StickyWindow{
 	static const int ANIMATION_TIMER=1;
 
 public:
-	MainFrame() : m_memWatchers(0){
+	MainFrame(){
 		m_className=L"MainFrame";
 		m_style^=(WS_SIZEBOX | WS_MAXIMIZEBOX);
 	}
@@ -57,6 +57,12 @@ public:
 	ATOM Register();
 
 	LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+	void LoadFile();
+	void LoadFileToEmulator(const wstring& path, const wstring& fasPath);
+
+	void LoadProject();
+	void LoadProjectToFrontend(const wstring& path);
 protected:
 
 	// Message handlers
@@ -68,14 +74,11 @@ protected:
 	MSGHANDLER(NCLButtonDown);
 	MSGHANDLER(Command);
 	MSGHANDLER(H86UpdateSysData);
+	MSGHANDLER(H86UserInput);
 
 #undef MSGHANDLER
 
-	void LoadFile();
-	void LoadFileToEmulator(const wstring& path, const wstring& fasPath);
-
-	void LoadProject();
-	void LoadProjectToFrontend(const wstring& path);
+	void EnableToolWindows(bool state);
 
 	void CreateChildren(HWND hWnd);
 
@@ -84,22 +87,27 @@ protected:
 		return (T*&)m_children[id];
 	}
 
-	enum Children{ 
+	enum Children{
 		DASMVIEW,
-		STATUSBAR
+		STATUSBAR,
+		MEMWATCHER,
+		REGWATCHER,
+		FLAGWATCHER,
+		STACKWATCHER,
+		BPLIST
 	};
 
 	HWND m_hwndToolbar;
 	int m_toolbarHeight;
-	static const int NUM_TOOLBAR_BUTTONS=5;
+	static const int NUM_TOOLBAR_BUTTONS=7;
 
 	WinManager m_children;
-
+	/*
 	// Tool Windows
 	RegisterWatcher m_regWatcher;
-	std::vector<MemoryWatcher> m_memWatchers;
+	Memory m_memWatchers;
 	StackWatcher m_stackWatcher;
-	BPList m_bpList;
+	BPList m_bpList;*/
 
 private:
 };
