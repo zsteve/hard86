@@ -39,9 +39,20 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	Application* app=Application::GetInstance(hInstance);
 	app->mainFrame=new MainFrame();
 	app->mainFrame->Register();
-	app->mainFrame->Create(380, 480, CW_USEDEFAULT, CW_USEDEFAULT);
+	app->mainFrame->Create(480, 640, CW_USEDEFAULT, CW_USEDEFAULT);
 	app->winManager.AddWindow(WND_MAINFRAME, app->mainFrame);
 	app->mainFrame->Show();
+	
+	/*if(numArgs > 1){
+		// looks like there is a second argument - the file to open
+		if(File::GetExt(wstring(cmdLineArgs[1]))==wstring(L"h86")){
+			app->mainFrame->LoadProjectToFrontend(wstring(cmdLineArgs[1]));
+		}
+		else{
+			app->mainFrame->LoadFileToEmulator(wstring(cmdLineArgs[1]), wstring(L""));
+		};
+	}*/
+
 
 	MSG msg;
 	while(GetMessage(&msg, NULL, NULL, NULL)){

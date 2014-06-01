@@ -151,6 +151,7 @@ namespace nsDebugger{
 		static void BreakPointHit(MUTEX sysMutex, sys_state_ptr sysState);
 		static void PreInstructionExecute(MUTEX sysMutex, sys_state_ptr sysState);
 		static void PostInstructionExecute(MUTEX sysMutex, sys_state_ptr sysState);
+		static void UserInput(MUTEX sysMutex, sys_state_ptr sysState);
 
 		bool AddBreakpoint(uint32 addr);
 		bool RemoveBreakpoint(uint32 addr);
@@ -171,7 +172,8 @@ namespace nsDebugger{
 
 		void RegisterFrontendCallbacks(DBGCALLBACK preInstructionExecute,
 			DBGCALLBACK postInstructionExecute,
-			DBGCALLBACK breakPointHit);
+			DBGCALLBACK breakPointHit,
+			DBGCALLBACK userInput);
 
 	protected:
 		static VDevList* m_vdevList;
@@ -181,6 +183,7 @@ namespace nsDebugger{
 		static DBGCALLBACK m_frontendPreInstructionExecute;
 		static DBGCALLBACK m_frontendPostInstructionExecute;
 		static DBGCALLBACK m_frontendBreakPointHit;
+		static DBGCALLBACK m_userInput;
 	};
 }
 

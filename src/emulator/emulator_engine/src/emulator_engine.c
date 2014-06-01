@@ -57,11 +57,10 @@ op_data_type op_data;
 
 extern int op_prefix_size;
 
-/* system MUTEX */
-MUTEX sys_mutex;
 DBGCALLBACK breakpoint_hit_callback;
 DBGCALLBACK pre_execute_callback;
 DBGCALLBACK post_execute_callback;
+DBGCALLBACK user_input_callback;
 
 /* default register values */
 #define DEFAULT_CS 0x700
@@ -351,8 +350,14 @@ void set_step_through_extern_int(int v){
 int* get_is_in_extern_int(){ return &sys_state.is_in_extern_int; }
 
 void set_sys_mutex(MUTEX mutex){
-	sys_mutex=mutex;
+	sys_state.sys_mutex=mutex;
 }
+
+void set_step_through_int(int v){
+	sys_state.step_through_int=v;
+}
+
+int* get_is_in_int(){ return &sys_state.is_in_int; }
 
 void system_load_mem(uint8* data, uint32 size){
 	int i;
@@ -376,7 +381,7 @@ void system_load_bios(uint8* data, uint16 size){
 		/*	IDT format :
 			SEG:IP
 		*/
-		((uint16*)sys_state.mem)[(i*2)]=0;
+		((uint16*)sys_state.mem)[(i*2)]=BIOS_MEM_SEG;
 		((uint16*)sys_state.mem)[(i*2)+1]=((uint16*)(data+int_offset))[i];
 	}
 	// copy rest of BIOS
@@ -393,16 +398,20 @@ void system_load_bios(uint8* data, uint16 size){
 int system_init(MUTEX sys_mutex_,
 				DBGCALLBACK bp_hit_func,
 				DBGCALLBACK pre_ex_func,
-				DBGCALLBACK post_ex_func){
+				DBGCALLBACK post_ex_func,
+				DBGCALLBACK user_in_func){
 
-	sys_mutex=sys_mutex_;	/* system MUTEX */
 	breakpoint_hit_callback=bp_hit_func;
 	pre_execute_callback=pre_ex_func;
 	post_execute_callback=post_ex_func;
+	user_input_callback=user_in_func;
 
 	memset(&sys_state, 0, sizeof(sys_state));
 
+	sys_state.sys_mutex=sys_mutex_;	/* system MUTEX */
+	sys_state.op_data=&op_data;
 	sys_state.mem_size=MEM_SIZE;
+
 	if(!(sys_state.mem=(uint8*)malloc(MEM_SIZE))){
 		printf("Error : failed to allocate sys_state.mem\n");
 		abort();
@@ -434,6 +443,8 @@ int system_init(MUTEX sys_mutex_,
 	sys_state.is_in_extern_int=0;
 	sys_state.step_through_extern_int=0;
 
+	sys_state.is_in_int=0;
+	sys_state.step_through_int=0;
 	return 0;
 }
 
@@ -472,38 +483,50 @@ static void reset_op_data(){
 }
 
 int system_execute(){
-	int i;
+	int counter=0;
 	extern int halt_flag;
 
+
 	while(!halt_flag){
-		R_IP=GET_ADDR(IP, CS);
-		process_instr_prefixes();
+		counter++;
 
 		/* do not execute this if we are in an external interrupt
 			and step_through_extern_int flag is clear
 		*/
-		if(!sys_state.is_in_extern_int || (sys_state.is_in_extern_int && sys_state.step_through_extern_int))
-			pre_execute_callback(sys_mutex, &sys_state);
+		if((!sys_state.is_in_extern_int || (sys_state.is_in_extern_int && sys_state.step_through_extern_int))
+			&& (!sys_state.is_in_int || (sys_state.is_in_int && sys_state.step_through_int)))
+			post_execute_callback(sys_state.sys_mutex, &sys_state);
 
-		mutex_lock(sys_mutex);
+		if((!sys_state.is_in_extern_int || (sys_state.is_in_extern_int && sys_state.step_through_extern_int)))
+			mutex_lock(sys_state.sys_mutex);
+
+		/*	we make this callback to allow for user input to alter the system state
+		i.e - changing a register value, editing memory, etc
+		*/
+		if((!sys_state.is_in_extern_int || (sys_state.is_in_extern_int && sys_state.step_through_extern_int))
+			&& (!sys_state.is_in_int || (sys_state.is_in_int && sys_state.step_through_int))
+			&& counter)
+			user_input_callback(sys_state.sys_mutex, &sys_state);
+
 		R_IP=GET_ADDR(IP, CS);
 
 		if(read_mem_8(GET_ADDR(IP, CS))==0xcc){
 			/* int3 debug interrupt - hand control to debugger */
-			mutex_unlock(sys_mutex);
-			breakpoint_hit_callback(sys_mutex, &sys_state);
+			mutex_unlock(sys_state.sys_mutex);
+			breakpoint_hit_callback(sys_state.sys_mutex, &sys_state);
 			continue;
 		}
 
 		system_print_state();
 
+		op_data.rep_cond=1;
+
 		if(op_data.rep || op_data.repne){
-			while(CX){
+			while(op_data.rep_cond){
 				uint16 old_ip=IP;
 				R_IP=GET_ADDR(IP, CS);
 				(*op_table[read_mem_8(GET_ADDR(IP, CS))])();
-				CX--;
-				if(CX)
+				if(op_data.rep_cond)
 					IP=old_ip;
 			}
 			// reset rep/repne
@@ -513,10 +536,18 @@ int system_execute(){
 			(*op_table[read_mem_8(GET_ADDR(IP, CS))])();
 		}
 
-		if(!sys_state.is_in_extern_int || (sys_state.is_in_extern_int && sys_state.step_through_extern_int))
-			post_execute_callback(sys_mutex, &sys_state);
-		mutex_unlock(sys_mutex);
+		if((!sys_state.is_in_extern_int || (sys_state.is_in_extern_int && sys_state.step_through_extern_int)))
+			mutex_unlock(sys_state.sys_mutex);
+
+		R_IP=GET_ADDR(IP, CS);
+		process_instr_prefixes();
+
+		if((!sys_state.is_in_extern_int || (sys_state.is_in_extern_int && sys_state.step_through_extern_int))
+			&& (!sys_state.is_in_int || (sys_state.is_in_int && sys_state.step_through_int)))
+			pre_execute_callback(sys_state.sys_mutex, &sys_state);
+
 	}
+	post_execute_callback(sys_state.sys_mutex, &sys_state);
 	halt_flag=0;
 	return 0;
 }
@@ -524,6 +555,7 @@ int system_execute(){
 static int op_unknown(){
 	WRITE_DEBUG("Error : Unknown opcode encountered");
 	printf("Error : Unknown opcode\n");
+	out_opinfo("???");
 	IP++;
 	return 0;
 }

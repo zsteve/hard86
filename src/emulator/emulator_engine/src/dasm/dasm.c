@@ -35,13 +35,13 @@ extern op_func op_table[256];
 
 extern sys_state_type sys_state;
 extern op_data_type op_data;
-extern MUTEX sys_mutex;
 extern void(*out_opinfo_ptr)(char* str, va_list* v);
 
 static clist dasm_list={ 0, 0, 0 };
 
 void dasm_print_op(char* str, va_list* v){
 	static char dasm_out[80];
+	static int i=0;
 
 	dasm_list_entry* e=(dasm_list_entry*)malloc(sizeof(dasm_list_entry));
 
@@ -52,7 +52,7 @@ void dasm_print_op(char* str, va_list* v){
 
 	e->seg=CS;
 	e->addr=IP;
-
+	i++;
 	clist_push_back(&dasm_list, (void*)e);
 }
 
@@ -69,7 +69,7 @@ clist dasm_disassemble(int n_instr, uint16 initial_ip, uint16 initial_cs){
 
 	int i=0;
 
-	mutex_lock(sys_mutex);
+	mutex_lock(sys_state.sys_mutex);
 
 	execute_flag=0;
 
@@ -101,11 +101,8 @@ clist dasm_disassemble(int n_instr, uint16 initial_ip, uint16 initial_cs){
 
 	execute_flag=1;
 
-	mutex_unlock(sys_mutex);
+	mutex_unlock(sys_state.sys_mutex);
 
 	ret_list=dasm_list;
-	dasm_list.begin=0;
-	dasm_list.curr=0;
-	dasm_list.end=0;
 	return ret_list;
 }

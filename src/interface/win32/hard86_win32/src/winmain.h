@@ -40,17 +40,19 @@ private:
 	{
 		this->hInstance=hInstance;
 		Window::SetHInstance(hInstance);
-		settings=Settings::GetInstance();
+
+		// Load command line
+		cmdLine=CommandLineToArgvW(GetCommandLineW(), &numArgs);
 
 		{
-			wchar_t path[MAX_PATH];
-			GetCurrentDirectory(MAX_PATH, path);
-			appDir=path;
-			appDir+=L"\\";
+			appDir=File::GetDirectory(wstring(cmdLine[0]))+L"\\";
+			SetCurrentDirectory(appDir.c_str());
 
 			// Also set the DLL directory
 			SetDllDirectory(appDir.c_str());
 		}
+
+		settings=Settings::GetInstance();
 
 		// initialize common controls
 		INITCOMMONCONTROLSEX icx;
@@ -89,6 +91,9 @@ public:
 
 	static wstring& GetAppDirectory(){ return GetInstance()->appDir; }
 
+	static wchar_t** GetCmdLine(){ return GetInstance()->cmdLine; }
+	static int GetCmdArgsCount(){ return GetInstance()->numArgs; }
+
 	static HINSTANCE hInstance;
 
 	static HACCEL hMainAccel;
@@ -104,6 +109,10 @@ public:
 
 	// Application directory
 	wstring appDir;
+
+	// Command line
+	wchar_t** cmdLine;
+	int numArgs;
 
 	// Exiting condition
 	bool isExiting;

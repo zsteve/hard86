@@ -24,6 +24,8 @@ namespace nsGUI{
 
 		virtual HWND Create(HWND hwndParent=NULL);
 
+		void Dialog::CreateNoReturn(HWND hwndParent=NULL);
+
 		virtual INT_PTR CALLBACK DlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)=0;
 	
 		LRESULT SendMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);

@@ -2,19 +2,140 @@
 ; Licensed under the GNU GPL v2 License
 ; Stephen Zhang 2014
 
-offset equ
-bios_seg equ 0x40
-
 _data:
+; special header with offsets into file for certain data that 
+; needs to be available externally
+dw cur_x	; offsets into the file for cur_x and cur_y
+dw cur_y
+
 db "Hard86 Emulator BIOS", 0h
 
 ; data
 
-cur_x db 19h
-cur_y db 19h
+cur_x db 10
+cur_y db 0
 
+kb_buf_size equ 5
+
+kb_buf db kb_buf_size dup(0) ; keyboard buffer
+kb_buf_begin dw 0
+kb_buf_end dw 0
+
+; temp values
+tmp_byte db 0
+tmp_word dw 0
+
+; macros (equs)
+
+bios_seg equ 0x40
+
+; flag macros for LAHF/SAHF
+flag_sf equ 10000000b
+flag_zf equ 01000000b
+flag_af equ 00010000b
+flag_pf equ 00000100b
+flag_cf equ 00000001b
+
+not_flag_sf equ 01111111b
+not_flag_zf equ 10111111b
+not_flag_af equ 11101111b
+not_flag_pf equ 11111011b
+not_flag_cf equ 11111110b
+
+offset equ
+
+; internal procedures
+; these expect DS = bios segment
+
+; video procedures
+; these expect ES = video segment
+update_curxy_from_buffer_offset:
+; updates cursor x/y position from a buffer offset
+; parameters : ax contains the buffer offset from ES:0000
+; return : ah = new cur_y, al = new cur_x
+	push bx
+	push dx
+	
+	shr ax, 1
+	mov bx, 80
+	xor dx,  dx
+	div bx
+	; ax = y, dx = x
+	mov [cur_y], al
+	mov [cur_x], dl
+	
+	mov ah, al
+	mov al, dl
+	
+	pop dx
+	pop bx
+
+	ret
+
+get_offset_from_curxy:
+; returns buffer offset from x/y position of cursor
+; parameters : none
+; return : ax = offset into buffer
+	push bx
+	push dx
+	
+	xor ax, ax
+	mov al, [cur_y]
+	mov bx, 80
+	mul bx
+	xor bx, bx
+	mov bl, [cur_x]
+	add ax, bx
+	shl ax, 1
+	
+	pop bx
+	pop dx
+	
+	ret
+	
+update_curxy:
+; updates cursor x/y position
+; parameters : ah = y, al = x
+; return : none
+
+	mov [cur_y], ah
+	mov [cur_x], al
+	
+	ret
+	
+get_curxy:
+; returns cursor x/y position
+; parameters : none
+; return : ah = y, al = x
+	mov ah, [cur_y]
+	mov al, [cur_x]
+	ret
+	
+print_lf:
+; print linefeed
+; parameters: ah = character
+; return : zf = 1 if there was a line feed, 0 otherwise
+	push ax
+	cmp ah, 0ah
+	je print_lf_has_lf
+	lahf
+	and ah, not_flag_zf
+	sahf
+	pop ax
+	ret
+	
+print_lf_has_lf:
+	; has linefeed
+	call get_curxy
+	inc ah
+	call update_curxy
+	lahf
+	or ah, flag_zf
+	sahf
+	pop ax
+	ret
+	
 ; interrupts
-
 
 int_00:
 int_01:
@@ -24,6 +145,53 @@ int_04:
 int_05:
 int_06:
 int_07:
+	; hard86 specific interrupt
+	; key pressed
+	; data in port 0x60
+	push ax
+	push bx
+	push ds
+
+	mov bx, bios_seg
+	mov ds, bx
+
+	in al, 0x60
+
+	mov bx, offset kb_buf
+	add bx, word [kb_buf_end]
+	mov byte [bx], al
+	mov bx, offset kb_buf_end
+
+	cmp [kb_buf_end], kb_buf_size-1
+	je int7_out_of_space
+
+	inc [kb_buf_end]
+
+	pop ds
+	pop bx
+	pop ax
+	iret
+  
+int7_out_of_space:
+	cmp [kb_buf_begin], 0
+	je int7_buffer_full
+	; otherwise, wrap around to the beginning
+	mov [kb_buf_end], 0
+
+	pop ds
+	pop bx
+	pop ax
+	iret
+  
+int7_buffer_full:
+	; keyboard buffer is truly full.
+	; do nothing
+	pop ds
+	pop bx
+	pop ax
+
+	iret
+  
 int_08:
 int_09:
 int_0a:
@@ -33,68 +201,408 @@ int_0d:
 int_0e:
 int_0f:
 int_10:
+	cmp ah, 00h
+	je int10_ah0
+	cmp ah, 01h
+	je int10_ah1
 	cmp ah, 02h
 	je int10_ah2
+	cmp ah, 03h
+	je int10_ah3
+	cmp ah, 05h
+	je int10_ah5
+	cmp ah, 06h
+	je int10_ah6
+	cmp ah, 07h
+	je int10_ah7
+	cmp ah, 08h
+	je int10_ah8
 	cmp ah, 09h
 	je int10_ah9
+	cmp ah, 0ah
+	je int10_ah10
+	cmp ah, 0ch
+	je int10_ahc
+	cmp ah, 0dh
+	je int10_ahd
+	cmp ah, 0eh
+	je int10_ahe
+	cmp ah, 13h
+	je int10_ah13
+	iret
+	
+int10_ah0:
+	; set video mode - unimplemented
+	iret
+	
+int10_ah1:
+	; set cursor shape - unimplemented
+	iret
 	
 int10_ah2:
 	; set cursor position
-	push ds
+	push ax
 	push bx
+	push ds
 	
 	mov bx, bios_seg
 	mov ds, bx
-	mov [cur_y+_data], dh
-	mov [cur_x+_data], dl
 	
-	pop bx
+	mov al, dl
+	mov ah, dh
+	call update_curxy
+	
 	pop ds
+	pop bx
+	pop ax
+	iret
+	
+int10_ah3:
+	; get cursor position and size
+	push ax
+	push bx
+	push ds
+	
+	mov bx, bios_seg
+	mov ds, bx
+	call get_curxy
+	mov dh, ah
+	mov dl, al
+	mov ch, dh
+	mov cl, dl
+
+	pop ds
+	pop bx
+	pop ax
+	iret
+ 
+int10_ah5:
+	; set active video page - unimplemented
+	iret
+	
+int10_ah6:
+int10_ah7:
+	; scroll up/dn window - unimplemented
+	iret
+ 
+int10_ah8:
+	; read character and attribute at cursor position
+	push ax
+	push bx
+	push es
+	push ds
+	
+	mov bx, 0xb800
+	mov es, bx
+	mov bx, bios_seg
+	mov ds, bx
+	
+	call get_offset_from_curxy
+	mov bx, ax
+	mov ah, byte [es:bx]
+	inc bx
+	mov al, byte [es:bx]
+	
+	pop ds
+	pop es
+	pop bx
+	sub sp, 2
 	iret
 
 int10_ah9:
 	; write character and attribute at cursor position
 	; video memory is at B800:0000
-	push ds
-	push es
+	push ax
 	push bx
+	push cx
+	push es
+	push ds
+	
+	mov ah, bl
 	push ax
 	
-	mov bx, bios_seg
-	mov es, bx
-	
 	mov bx, 0xb800
+	mov es, bx
+	mov bx, bios_seg
 	mov ds, bx
 	
-	xor bx, bx
-	mov bl, [es:cur_y+_data]
-	mov ax, 80d
-	mul bx
+	call get_offset_from_curxy
+	mov di, ax
+	pop ax
+	
+	xchg ah, al
+	
+	rep stosw
+	
+	pop ds
+	pop es
+	pop cx
+	pop bx
+	pop ax
+	iret
+	
+int10_ah10:
+	; write character only at cursor position
+	; just calls int10_ah9 right now ...
+	mov bl, 0
+	jmp int10_ah9
+	
+int10_ahc:
+	; set pixel - unimplemented
+	iret
+	
+int10_ahd:
+	; get pixel - unimplemented
+	iret
+	
+int10_ahe:
+	; teletype output
+	; TODO - implement scrolling
+	push ax
+	push bx
+	push cx
+	push es
+	push ds
+	
+	mov ah, 0
+	push ax
+	
+	mov bx, 0xb800
+	mov es, bx
+	mov bx, bios_seg
+	mov ds, bx
+	
+	call get_offset_from_curxy
+	mov di, ax
+	pop ax
+	
+	xchg ah, al
+	
+	rep stosw
+	
+	mov ax, di
+	call update_curxy_from_buffer_offset
+	
+	pop ds
+	pop es
+	pop cx
+	pop bx
+	pop ax
+	iret
+	
+int10_ah13:
+	; write string
+	; al = write mode
+	; bit 0 -> update cursor?
+	; bit 1 -> has attributes?
+	; bh = page number
+	; bl = attribute if string only has chars
+	; cx = string size (not counting attributes)
+	; dl, dh = column, row to start writing from
+	; es:bp = string to be printed
+	pusha
+	
+	; first change es to point to video memory
+	push ds
+	push es
+	
+	push bx
+	push cx
+	push ax
+	
+	mov bx, 0b800h
+	mov es, bx
+	mov bx, bios_seg
+	mov ds, bx
+
+	; calculate offset into buffer
 	xor ax, ax
-	mov al, [es:cur_x+_data]
-	add bx, ax
+	xor bx, bx
+	mov al, dh	; calculate row
+	mov bx, 80
+	push dx
+	mul bx
+	pop dx
+	push dx
+	xor dh, dh
+	add ax, dx
+	pop dx
+	shl ax, 1
+	mov di, ax
+	; di = offset into video buffer
+	
+	pop ax
+	pop cx
+	pop bx
+	
+	test al, 10b
+	jnz int10_ah13_hasattrib
+	
+	; no attributes
+	
+	pop ds	; from 'push es' -> 'pop ds'
+	; ds:bp -> string to be printed
+	; es:di -> video memory
+	
+	push ax
+	
+int10_ah13_noattrib_loop:
+	mov ah, byte [ds:bp]
+	cmp ah, 0ah
+	je int10_ah13_noattrib_loop_has_lf
+	mov al, bl	; load attribute
+	mov word [es:di], ax
+	add di, 2
+	inc bp
+	dec cx
+	cmp cx, 0
+	jnz int10_ah13_noattrib_loop
 	
 	pop ax
 	
-int10_ah9_cont1:
-	mov byte [bx], al
-	inc bx
-	mov byte [bx], ah
-	dec cx
-	cmp cx, 0
-	jne int10_ah9_cont1
-
-	pop bx
-	pop es
+	; al:0 = update cursor?
+	test al, 1b
+	
+	; load data segment
+	mov bx, bios_seg
+	mov ds, bx
+	
+	jnz int10_ah13_noattrib_loop_update_cursor
+	
 	pop ds
+	popa
 	iret
 
+int10_ah13_noattrib_loop_has_lf:
+	mov ax, 80
+	xor dx, dx
+	mov dl, [cur_x]
+	sub ax, dx
+	add di, ax
+	inc bp
+	dec cx
+	cmp cx, 0
+	jnz int10_ah13_noattrib_loop
+	
+int10_ah13_noattrib_loop_update_cursor:
+	; di = offset into video memory
+	mov ax, di
+	call update_curxy_from_buffer_offset
+	pop ds
+	popa
+	iret
+	
+int10_ah13_hasattrib:
+	; unimplemented
+	pop es
+	pop ds
+	popa 
+	iret
+	
 int_11:
+	; unimplemented
+	xor ax, ax
+	iret
 int_12:
+	; get memory size
+	mov ax, 1024	; fixed at 1024k memory for 8086
+	iret
 int_13:
+	; disk operations - unimplemented
+	iret
 int_14:
 int_15:
+	; BIOS wait function - unimplemented
+	iret
+	
 int_16:
+	cmp ah, 0x00
+	je int16_ah0
+	cmp ah, 0x01
+	je int16_ah1
+	iret
+int16_ah0:
+	; get keystroke from keyboard
+	push bx
+	push cx
+	push ds
+	
+	mov bx, bios_seg
+	mov ds, bx
+
+int10_ah0_waitdata:
+	mov bx, [kb_buf_begin]
+	mov cx, [kb_buf_end]
+	cmp bx, cx
+	je int10_ah0_waitdata
+	
+	; data available
+	xchg cx, bx
+	mov bx, kb_buf
+	add bx, cx
+	mov al, byte [bx]
+	mov ah, al
+	
+	mov bx, [kb_buf_begin]
+	mov cx, [kb_buf_end]
+	inc bx
+	cmp bx, kb_buf_size
+	jne int10_ah0_cont1
+	
+	cmp bx, cx
+	je int10_ah0_cont1
+	
+	xor bx, bx
+	
+int10_ah0_cont1:
+	mov [kb_buf_begin], bx
+	
+	pop ds
+	pop cx
+	pop bx
+	iret
+
+  
+int16_ah1:
+	; check for keystroke in keyboard
+	push bx
+	push cx
+	push ds
+	
+	mov bx, bios_seg
+	mov ds, bx
+
+	mov bx, [kb_buf_begin]
+	mov cx, [kb_buf_end]
+	cmp bx, cx
+	jne int10_ah1_hasdata
+	
+	pop ds
+	pop cx
+	pop bx
+	
+	lahf
+	or ah, flag_zf
+	sahf
+	iret
+	
+int10_ah1_hasdata:
+	
+	; data available
+	xchg cx, bx
+	mov bx, kb_buf
+	add bx, cx
+	mov al, byte [bx]
+	mov ah, al
+	
+	pop ds
+	pop cx
+	pop bx
+	lahf
+	and ah, not_flag_zf
+	sahf
+	iret
+
 int_17:
 int_18:
 int_19:
@@ -105,6 +613,9 @@ int_1d:
 int_1e:
 int_1f:
 int_20:
+	mov sp, 0xfffe
+	ret	; this will bring the system to a halt
+	iret	; just for uniformity
 int_21:
 int_22:
 int_23:

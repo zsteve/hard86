@@ -102,7 +102,8 @@ namespace nsHard86Win32{
 		struct Nums{
 			enum{
 				ANIMATE_SPEED,
-				STEP_INTO_EXTERN_INT
+				STEP_INTO_EXTERN_INT,
+				STEP_INTO_INT
 			};
 		};
 

@@ -86,9 +86,16 @@ LRESULT CALLBACK MainFrame::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 	case H86_UPDATE_SYS_DATA:
 		OnH86UpdateSysData(hWnd, uMsg, wParam, lParam);
 		break;
+	case H86_USER_INPUT:
+		OnH86UserInput(hWnd, uMsg, wParam, lParam);
+		break;
 	case H86_BREAKPOINT_HIT:
 		SendMessage(WM_COMMAND, ID_EXECUTION_BREAK, NULL);
+		EmulatorThread::GetInstance()->NotifyMsgWindow();
 		Child<StatusBar>(STATUSBAR)->SetStatus(L"Breakpoint Hit");
+		break;
+	case H86_TERMINATE:
+		EmulatorThread::DisposeInstance();
 		break;
 	default:
 		return DefWindowProc(hWnd, uMsg, wParam, lParam);
@@ -135,6 +142,20 @@ void MainFrame::CreateChildren(HWND hWnd){
 		btns[4].dwData		=0;
 		btns[4].iString		=0;
 
+		btns[5].iBitmap		=5;
+		btns[5].idCommand	=ID_EXECUTION_TOGGLEBREAKPOINT;
+		btns[5].fsState		=TBSTATE_ENABLED;
+		btns[5].fsStyle		=TBSTYLE_BUTTON;
+		btns[5].dwData		=0;
+		btns[5].iString		=0;
+
+		btns[6].iBitmap		=6;
+		btns[6].idCommand	=ID_TOOLS_CALCULATOR;
+		btns[6].fsState		=TBSTATE_ENABLED;
+		btns[6].fsStyle		=TBSTYLE_BUTTON;
+		btns[6].dwData		=0;
+		btns[6].iString		=0;
+
 		m_hwndToolbar=CreateToolbarEx(hWnd, 
 										WS_VISIBLE | WS_CHILD | WS_BORDER,
 										IDR_TOOLBAR1,
@@ -176,18 +197,37 @@ MSGHANDLER(Create){
 	CreateChildren(hWnd);
 
 	// Create tool windows
-	m_regWatcher.Create(CW_USEDEFAULT, CW_USEDEFAULT, 320, 240, hWnd);
-	m_memWatchers.push_back(MemoryWatcher());
-	m_memWatchers.back().Create(CW_USEDEFAULT, CW_USEDEFAULT, 320, 240, hWnd);
+	RegisterWatcher*& regWatcher=Child<RegisterWatcher>(REGWATCHER);
+	regWatcher=new RegisterWatcher();
+	regWatcher->Create(CW_USEDEFAULT, CW_USEDEFAULT, 320, 240, hWnd);
+	MemoryWatcher*& memWatcher=Child<MemoryWatcher>(MEMWATCHER);
+	memWatcher=new MemoryWatcher();
+	memWatcher->Create(CW_USEDEFAULT, CW_USEDEFAULT, 320, 240, hWnd);
 
-	m_stackWatcher.Create(CW_USEDEFAULT, CW_USEDEFAULT, 320, 240, hWnd);
-	m_stackWatcher.Show();
+	StackWatcher*& stackWatcher=Child<StackWatcher>(STACKWATCHER);
+	stackWatcher=new StackWatcher();
+	stackWatcher->Create(CW_USEDEFAULT, CW_USEDEFAULT, 320, 240, hWnd);
+	stackWatcher->Show();
 
-	m_bpList.Create(CW_USEDEFAULT, CW_USEDEFAULT, 320, 240, hWnd);
-	m_bpList.Show();
+	BPList*& bpList=Child<BPList>(BPLIST);
+	bpList=new BPList();
+	bpList->Create(CW_USEDEFAULT, CW_USEDEFAULT, 320, 240, hWnd);
+	bpList->Show();
 
-	// Register with EmulatorThread
-	EmulatorThread::SetMsgWindow(this);
+	FlagWatcher*& flagWatcher=Child<FlagWatcher>(FLAGWATCHER);
+	flagWatcher=new FlagWatcher();
+	flagWatcher->Create(CW_USEDEFAULT, CW_USEDEFAULT, 320, 240, hWnd);
+	flagWatcher->Show();
+
+	// Check if the command line specifies a file to load
+	if(Application::GetCmdArgsCount() > 1){
+		if(File::GetExt(wstring(Application::GetCmdLine()[1]))==wstring(L"h86")){
+			LoadProjectToFrontend(wstring(Application::GetCmdLine()[1]));
+		}
+		else{
+			LoadFileToEmulator(wstring(Application::GetCmdLine()[1]), wstring(L""));
+		};
+	}
 }
 
 MSGHANDLER(Sizing){
@@ -211,7 +251,11 @@ MSGHANDLER(Command){
 		this->Close();
 		break;
 	case ID_HELP_ABOUTHARD86:
-		MessageBox(hWnd, L"Hard86 - 8086 Emulator with support for virtual devices", L"About Hard86", MB_ICONINFORMATION);
+		MessageBox(hWnd, L"Hard86 - 8086 Emulator with support for virtual devices\n"
+							L"Version 0.20 alpha \n"
+							L"(c) 2014 Stephen Zhang - zsteve.phatcode.net/hard86\n"
+							L"Hard86 is licensed under the GNU GPL v2\n"
+							L"For the latest version and source, visit https://github.com/zsteve/hard86", L"About Hard86", MB_ICONINFORMATION);
 		break;
 	case ID_EXECUTION_RUN:
 		if(!Emulator::HasInstance()) break;
@@ -219,6 +263,8 @@ MSGHANDLER(Command){
 		EmulatorThread::Resume();
 		EmulatorThread::SysMutex().Unlock();
 		Child<StatusBar>(STATUSBAR)->SetStatus(L"Running");
+		// Disable all tool windows
+		EnableToolWindows(false);
 		break;
 	case ID_EXECUTION_BREAK:
 		if(!Emulator::HasInstance()) break;
@@ -228,33 +274,35 @@ MSGHANDLER(Command){
 			SendMessage(WM_COMMAND, ID_EXECUTION_ANIMATE, NULL);
 			EmulatorThread::SetSingleStep(false);
 		}
+		// Enable all tool windows
+		EnableToolWindows(true);
 		break;
 	case ID_EXECUTION_RELOAD:
 		if(!Emulator::HasInstance()) break;
 		{
-			bool wasTerminated=(EmulatorThread::State()==EmulatorThread::Terminated);
-
-			SendMessage(WM_COMMAND, ID_EXECUTION_BREAK, NULL);
-
-			EmulatorThread::SetSingleStep(false);
-			if(wasTerminated){
-				EmulatorThread::DisposeInstance();
-				EmulatorThread::GetInstance()->SetMsgWindow(this);
-			}
-
-			EmulatorThread::SysMutex().Unlock();
-			Emulator::GetInstance()->Reset();
-			Emulator::GetInstance()->SetSysMutex(EmulatorThread::SysMutex());
-			Emulator::GetInstance()->SetStepThroughExternInt(Settings::GetNum(Settings::Nums::STEP_INTO_EXTERN_INT));
+			Emulator* emulator=Emulator::GetInstance();
+			EmulatorThread::DisposeInstance();
+			EmulatorThread::GetInstance()->SetMsgWindow(this);
+			emulator->Reset();
+			emulator->SetSysMutex(EmulatorThread::SysMutex());
+			emulator->SetStepThroughExternInt(Settings::GetNum(Settings::Nums::STEP_INTO_EXTERN_INT));
 			EmulatorThread::NotifyMsgWindow();
+
+			VDevList::TerminateAll();
+			VDevList::InitializeAll();
+
 			Child<StatusBar>(STATUSBAR)->SetStatus(L"Reloaded");
 		}
+		// Enable all tool windows
+		EnableToolWindows(true);
 		break;
 	case ID_EXECUTION_STEPINTO:
 		if(!Emulator::HasInstance()) break;
 		EmulatorThread::SetSingleStep(true);
 		EmulatorThread::Resume();
 		Child<StatusBar>(STATUSBAR)->SetStatus(L"Suspended");
+		// Enable all tool windows
+		EnableToolWindows(true);
 		break;
 	case ID_EXECUTION_ANIMATE:
 		if(!Emulator::HasInstance()) break;
@@ -277,11 +325,21 @@ MSGHANDLER(Command){
 				Debugger::GetInstance()->RemoveBreakpoint(addr);
 			else
 				Debugger::GetInstance()->AddBreakpoint(addr);
-			m_bpList.Update();
+			Child<BPList>(BPLIST)->Update();
 			InvalidateRect(Child<DasmView>(DASMVIEW)->GetHWND(), NULL, false);
 		}
 		break;
+	case ID_FILE_NEWPROJECT:
+		{
+			SendMessage(WM_COMMAND, ID_FILE_CLOSE, NULL);
+			SendMessage(WM_COMMAND, ID_FILE_CLOSEPROJECT, NULL);
+			NewH86ProjectDlg newProjectDlg;
+			newProjectDlg.CreateNoReturn();
+		}
+		break;
 	case ID_FILE_LOADPROJECT:
+		SendMessage(WM_COMMAND, ID_FILE_CLOSE, NULL);
+		SendMessage(WM_COMMAND, ID_FILE_CLOSEPROJECT, NULL);
 		LoadProject();
 		Child<StatusBar>(STATUSBAR)->SetStatus(L"Ready");
 		break;
@@ -293,12 +351,15 @@ MSGHANDLER(Command){
 			Emulator::DisposeInstance();
 			VDevList::TerminateAll();
 			VDevList::DisposeInstance();
+			VDevList::GetInstance();
 
 			Child<DasmView>(DASMVIEW)->Reset();
 			Child<StatusBar>(STATUSBAR)->SetInfo(L"Closed project");
 		}
 		break;
 	case ID_FILE_LOAD:
+		SendMessage(WM_COMMAND, ID_FILE_CLOSE, NULL);
+		SendMessage(WM_COMMAND, ID_FILE_CLOSEPROJECT, NULL);
 		LoadFile();
 		EmulatorThread::NotifyWindow(this);
 		break;
@@ -322,6 +383,24 @@ MSGHANDLER(Command){
 	case ID_TOOLS_VIRTUALDEVICES:
 		VDevDlg::GetInstance()->Create();
 		break;
+	case ID_TOOLS_CALCULATOR:
+		ShellExecute(hWnd, L"open", L"calc", NULL, NULL, SW_SHOW);
+		break;
+	case ID_VIEW_FLAGS:
+		Child<FlagWatcher>(FLAGWATCHER)->Show();
+		break;
+	case ID_VIEW_REGISTERS:
+		Child<RegisterWatcher>(REGWATCHER)->Show();
+		break;
+	case ID_VIEW_STACK:
+		Child<StackWatcher>(STACKWATCHER)->Show();
+		break;
+	case ID_VIEW_MEMORY:
+		Child<MemoryWatcher>(MEMWATCHER)->Show();
+		break;
+	case ID_VIEW_BREAKPOINTS:
+		Child<BPList>(BPLIST)->Show();
+		break;
 	}
 }
 
@@ -331,26 +410,73 @@ MSGHANDLER(H86UpdateSysData){
 
 	if(EmulatorThread::IsSingleStep() || EmulatorThread::State()==EmulatorThread::Suspended){
 
+		BPList*& bpList=Child<BPList>(BPLIST);
+		StackWatcher*& stackWatcher=Child<StackWatcher>(STACKWATCHER);
+		MemoryWatcher*& memWatcher=Child<MemoryWatcher>(MEMWATCHER);
+		RegisterWatcher*& regWatcher=Child<RegisterWatcher>(REGWATCHER);
+		FlagWatcher*& flagWatcher=Child<FlagWatcher>(FLAGWATCHER);
+
 		DasmView* dasmView=Child<DasmView>(DASMVIEW);
 		dasmView->SendMessage(H86_UPDATE_SYS_DATA, wParam, lParam);
 
-		m_regWatcher.SendMessage(H86_UPDATE_SYS_DATA, wParam, lParam);
+		regWatcher->SendMessage(H86_UPDATE_SYS_DATA, wParam, lParam);
 
-		for(int i=0; i<m_memWatchers.size(); i++){
-			m_memWatchers[i].SendMessage(H86_UPDATE_SYS_DATA, wParam, lParam);
-		}
+		flagWatcher->SendMessage(H86_UPDATE_SYS_DATA, wParam, lParam);
 
-		m_stackWatcher.SendMessage(H86_UPDATE_SYS_DATA, wParam, lParam);
+		memWatcher->SendMessage(H86_UPDATE_SYS_DATA, wParam, lParam);
+
+		stackWatcher->SendMessage(H86_UPDATE_SYS_DATA, wParam, lParam);
 
 		EmulatorThread::Suspend();
 	}
 	else if(EmulatorThread::State()==EmulatorThread::Terminated){
 		Child<StatusBar>(STATUSBAR)->SetStatus(L"Terminated");
 	}
+}
 
+MSGHANDLER(H86UserInput){
+	sys_state_ptr sysState=(sys_state_ptr)lParam;
+
+	if(EmulatorThread::IsSingleStep() || EmulatorThread::State()==EmulatorThread::Suspended){
+
+		BPList*& bpList=Child<BPList>(BPLIST);
+		StackWatcher*& stackWatcher=Child<StackWatcher>(STACKWATCHER);
+		MemoryWatcher*& memWatcher=Child<MemoryWatcher>(MEMWATCHER);
+		RegisterWatcher*& regWatcher=Child<RegisterWatcher>(REGWATCHER);
+		FlagWatcher*& flagWatcher=Child<FlagWatcher>(FLAGWATCHER);
+
+		DasmView* dasmView=Child<DasmView>(DASMVIEW);
+		dasmView->SendMessage(H86_USER_INPUT, wParam, lParam);
+
+		regWatcher->SendMessage(H86_USER_INPUT, wParam, lParam);
+
+		flagWatcher->SendMessage(H86_USER_INPUT, wParam, lParam);
+
+		memWatcher->SendMessage(H86_USER_INPUT, wParam, lParam);
+
+		stackWatcher->SendMessage(H86_USER_INPUT, wParam, lParam);
+
+	}
 }
 
 #undef MSGHANDLER
+
+void MainFrame::EnableToolWindows(bool state){
+	// Enable all tool windows
+	{
+		BPList*& bpList=Child<BPList>(BPLIST);
+		StackWatcher*& stackWatcher=Child<StackWatcher>(STACKWATCHER);
+		MemoryWatcher*& memWatcher=Child<MemoryWatcher>(MEMWATCHER);
+		RegisterWatcher*& regWatcher=Child<RegisterWatcher>(REGWATCHER);
+		FlagWatcher*& flagWatcher=Child<FlagWatcher>(FLAGWATCHER);
+
+		bpList->SendMessage(WM_ENABLE, (WPARAM)state, NULL);
+		stackWatcher->SendMessage(WM_ENABLE, (WPARAM)state, NULL);
+		memWatcher->SendMessage(WM_ENABLE, (WPARAM)state, NULL);
+		regWatcher->SendMessage(WM_ENABLE, (WPARAM)state, NULL);
+		flagWatcher->SendMessage(WM_ENABLE, (WPARAM)state, NULL);
+	}
+}
 
 void MainFrame::LoadFile(){
 
@@ -407,6 +533,7 @@ void MainFrame::LoadFileToEmulator(const wstring& path, const wstring& fasPath){
 	else{
 		EmulatorThread::GetInstance()->GetSymData()=SymbolData();
 	}
+	EmulatorThread::SetMsgWindow(this);
 
 	// Load BIOS
 	File biosFile(Application::GetAppDirectory()+strtowstr(Settings::GetPath(Settings::Paths::BIOS_PATH)));
@@ -424,15 +551,18 @@ void MainFrame::LoadFileToEmulator(const wstring& path, const wstring& fasPath){
 	using namespace nsDebugger;
 	if(Emulator::HasInstance()) Emulator::DisposeInstance();
 	Debugger::Reset();
+	Debugger::Init(VDevList::GetInstance());
 
 	Emulator* emulator=Emulator::GetInstance(EmulatorThread::SysMutex(),
 		Debugger::BreakPointHit,
 		Debugger::PreInstructionExecute,
 		Debugger::PostInstructionExecute,
+		Debugger::UserInput,
 		fileData, fileSize, biosData, biosSize
 		);
 
 	emulator->SetStepThroughExternInt(Settings::GetNum(Settings::Nums::STEP_INTO_EXTERN_INT));
+	emulator->SetStepThroughInt(Settings::GetNum(Settings::Nums::STEP_INTO_INT));
 
 	delete[] fileData;
 	delete[] biosData;
@@ -465,19 +595,20 @@ void MainFrame::LoadProject(){
 	if(!GetOpenFileName(&ofn)) return;	// if user pressed cancel, abort operation
 
 	LoadProjectToFrontend(wstring(path));
-
-	m_bpList.Update();
-
-	Child<StatusBar>(STATUSBAR)->SetInfo(L"Loaded project");
 }
 
 void MainFrame::LoadProjectToFrontend(const wstring& path){
+
+	SetCurrentDirectory(File::GetDirectory(path).c_str());
 
 	// Load to Application::project
 	H86Project* project=H86Project::GetInstance(path);
 
 	// Load project data
 	Application* app=Application::GetInstance();
+
+	if(VDevList::HasInstance()) VDevList::DisposeInstance();
+
 	VDevList* vdevList=VDevList::GetInstance();
 
 	vector<pair<string, string> > vdevListVect=project->Get_VDevList();
@@ -498,7 +629,8 @@ void MainFrame::LoadProjectToFrontend(const wstring& path){
 		// Load breakpoint
 		Debugger::GetInstance()->AddBreakpoint(DWORD_B(it->first, it->second));
 	}
-
+	Child<BPList>(BPLIST)->Update();
+	Child<StatusBar>(STATUSBAR)->SetInfo(L"Loaded project");
 }
 
 }

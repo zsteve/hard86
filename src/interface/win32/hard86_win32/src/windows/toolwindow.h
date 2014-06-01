@@ -45,6 +45,7 @@ namespace nsHard86Win32{
 		MSGHANDLER(Sizing);
 		MSGHANDLER(Moving);
 		MSGHANDLER(NCLButtonDown);
+		MSGHANDLER(Close);
 
 #undef MSGHANDLER
 	};

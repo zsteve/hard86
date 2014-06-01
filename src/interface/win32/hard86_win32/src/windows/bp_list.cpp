@@ -41,6 +41,9 @@ namespace nsHard86Win32{
 			OnCreate(hWnd, uMsg, wParam, lParam);
 			break;
 		}
+	case WM_CLOSE:
+		Hard86ToolWindow::OnClose(hWnd, uMsg, wParam, lParam);
+		break;
 	case WM_MOVING:
 		{
 			Hard86ToolWindow::OnMoving(hWnd, uMsg, wParam, lParam);
@@ -63,6 +66,9 @@ namespace nsHard86Win32{
 		{
 
 		}
+		break;
+	case WM_ENABLE:
+		EnableWindow(Child<ListBox>(LISTBOX)->GetHWND(), (BOOL)wParam);
 		break;
 	case WM_VSCROLL:
 		OnVScroll(hWnd, uMsg, wParam, lParam);

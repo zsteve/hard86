@@ -45,6 +45,7 @@ namespace nsDebugger{
 	DBGCALLBACK Debugger::m_frontendPreInstructionExecute;
 	DBGCALLBACK Debugger::m_frontendPostInstructionExecute;
 	DBGCALLBACK Debugger::m_frontendBreakPointHit;
+	DBGCALLBACK Debugger::m_userInput;
 
 	Debugger* Debugger::GetInstance(){
 		if(!m_instance){
@@ -93,14 +94,6 @@ namespace nsDebugger{
 		sys_state_ptr sys_state=get_system_state();
 
 		m_frontendPreInstructionExecute(sysMutex, sysState);
-
-		/* update virtual devices */
-		if(!m_vdevList->empty()){
-			VDevList::iterator it=m_vdevList->begin();
-			for(it; it!=m_vdevList->end(); ++it){
-				(*it).second.AcceptEmulationMutex(sysMutex, sysState);
-			}
-		}
 	}
 
 	/**
@@ -111,6 +104,18 @@ namespace nsDebugger{
 		sys_state_ptr sys_state=get_system_state();
 
 		m_frontendPostInstructionExecute(sysMutex, sysState);
+
+		/* update virtual devices */
+		if(!m_vdevList->empty()){
+			VDevList::iterator it=m_vdevList->begin();
+			for(it; it!=m_vdevList->end(); ++it){
+				(*it).second.AcceptEmulationMutex(sysMutex, sysState);
+			}
+		}
+	}
+
+	void Debugger::UserInput(MUTEX sysMutex, sys_state_ptr sysState){
+		m_userInput(sysMutex, sysState);
 	}
 
 	/**
@@ -174,11 +179,13 @@ namespace nsDebugger{
 
 	void Debugger::RegisterFrontendCallbacks(DBGCALLBACK preInstructionExecute,
 											DBGCALLBACK postInstructionExecute,
-											DBGCALLBACK breakPointHit)
+											DBGCALLBACK breakPointHit,
+											DBGCALLBACK userInput)
 	{
 		m_frontendPreInstructionExecute=preInstructionExecute;
 		m_frontendPostInstructionExecute=postInstructionExecute;
 		m_frontendBreakPointHit=breakPointHit;
+		m_userInput=userInput;
 	}
 }
 

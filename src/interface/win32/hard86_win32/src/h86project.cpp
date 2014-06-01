@@ -19,6 +19,7 @@
 
 #include "h86project.h"
 
+#include "winmain.h"
 #include "../../../../ext_itoa/ext_itoa.h"
 
 namespace nsHard86Win32{
@@ -323,4 +324,126 @@ namespace nsHard86Win32{
 		}
 	}
 
+	// NewH86ProjectDlg
+
+	INT_PTR CALLBACK NewH86ProjectDlg::DlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
+		switch(uMsg){
+		case WM_CLOSE:
+			EndDialog(hWnd, WM_QUIT);
+			break;
+		case WM_COMMAND:
+			switch(LOWORD(wParam)){
+			case IDC_BROWSE_PROJECT_PATH:
+				{
+					wchar_t path[MAX_PATH]={ 0 };
+
+					OPENFILENAME ofn;
+					ZeroMemory(&ofn, sizeof(ofn));
+					ofn.lStructSize=sizeof(ofn);
+					ofn.hwndOwner=m_hWnd;
+					ofn.hInstance=Application::hInstance;
+					ofn.lpstrFilter=L"Hard86 Project files\0*.h86\0\0All files\0*.*\0\0";
+					ofn.nFilterIndex=1;
+					ofn.lpstrFile=path;
+					ofn.nMaxFile=MAX_PATH;
+
+					if(!GetSaveFileName(&ofn)) break;	// if user pressed cancel, abort operation
+					SetDlgItemText(hWnd, IDC_PROJECT_PATH, path);
+				}
+				break;
+			case IDC_BROWSE_BINARY_PATH:
+				{
+					wchar_t path[MAX_PATH]={ 0 };
+
+					OPENFILENAME ofn;
+					ZeroMemory(&ofn, sizeof(ofn));
+					ofn.lStructSize=sizeof(ofn);
+					ofn.hwndOwner=m_hWnd;
+					ofn.hInstance=Application::hInstance;
+					ofn.lpstrFilter=L"Binary files\0*.com\0\0All files\0*.*\0\0";
+					ofn.nFilterIndex=1;
+					ofn.lpstrFile=path;
+					ofn.nMaxFile=MAX_PATH;
+
+					if(!GetSaveFileName(&ofn)) break;	// if user pressed cancel, abort operation
+					SetDlgItemText(hWnd, IDC_BINARY_PATH, path);
+				}
+				break;
+
+			case IDC_BROWSE_FAS_PATH:
+				{
+					wchar_t path[MAX_PATH]={ 0 };
+
+					OPENFILENAME ofn;
+					ZeroMemory(&ofn, sizeof(ofn));
+					ofn.lStructSize=sizeof(ofn);
+					ofn.hwndOwner=m_hWnd;
+					ofn.hInstance=Application::hInstance;
+					ofn.lpstrFilter=L"FASM symbol files\0*.fas\0\0All files\0*.*\0\0";
+					ofn.nFilterIndex=1;
+					ofn.lpstrFile=path;
+					ofn.nMaxFile=MAX_PATH;
+
+					if(!GetSaveFileName(&ofn)) break;	// if user pressed cancel, abort operation
+					SetDlgItemText(hWnd, IDC_FAS_PATH, path);
+				}
+				break;
+			case IDOK:
+			{
+					wchar_t tmp_path[MAX_PATH]={ 0 };
+					GetDlgItemText(hWnd, IDC_PROJECT_PATH, tmp_path, MAX_PATH);
+					m_projectPath=tmp_path;
+					GetDlgItemText(hWnd, IDC_BINARY_PATH, tmp_path, MAX_PATH);
+					m_binPath=File::GetRelativePath(tmp_path, m_projectPath);
+					GetDlgItemText(hWnd, IDC_FAS_PATH, tmp_path, MAX_PATH);
+					m_fasPath=File::GetRelativePath(tmp_path, m_projectPath);
+					try{
+						xml_document<>* doc=new xml_document<>();
+						doc->append_node(doc->allocate_node(node_element, "Hard86Project"));
+						xml_node<>* node=doc->first_node();
+						node->append_node(doc->allocate_node(node_element, "Variables"));
+						node=node->first_node();
+						node->append_node(doc->allocate_node(node_element, "LoadSegAddr"));
+						node=node->first_node();
+						node->append_attribute(doc->allocate_attribute("seg", doc->allocate_string("0")));
+						node->append_attribute(doc->allocate_attribute("addr", doc->allocate_string("0")));
+						node=node->parent();	// Variables
+						node=node->parent();	// Hard86Project
+						node->append_node(doc->allocate_node(node_element, "Paths"));
+						node=node->first_node("Paths");
+						node->append_attribute(doc->allocate_attribute("binaryPath", doc->allocate_string(wstrtostr(m_binPath).c_str())));
+						node->append_attribute(doc->allocate_attribute("FASPath", doc->allocate_string(wstrtostr(m_fasPath).c_str())));
+						node->append_attribute(doc->allocate_attribute("userVDevPath", ""));
+						node=node->parent();	// Hard86Project
+						node->append_node(doc->allocate_node(node_element, "VDevs"));
+						node->append_node(doc->allocate_node(node_element, "BPList"));
+
+						File projectFile(m_projectPath);
+						if(projectFile.Exists()){
+							projectFile.Delete();
+						}
+						projectFile.Create();
+						projectFile.Open();
+						
+						char* xmlBuffer=new char[1024*1024];
+
+						*(print(xmlBuffer, *doc, 0))=NULL;
+						projectFile.Write(xmlBuffer);
+						projectFile.Close();
+
+						delete[] xmlBuffer;
+					}
+					catch(rapidxml::parse_error e){
+						OUT_DEBUG("RapidXML error encountered");
+					}
+					Application::GetInstance()->mainFrame->LoadProjectToFrontend(m_projectPath);
+					EndDialog(hWnd, WM_QUIT);
+				}
+				break;
+			}
+		default:
+			return 0;
+		}
+		return 0;
+	}
 }

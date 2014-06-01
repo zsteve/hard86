@@ -26,7 +26,7 @@ namespace nsHard86Win32{
 bool StackWatcher::m_registered=false;
 
 StackWatcher::StackWatcher() : Hard86ToolWindow(m_registered){
-
+	m_enabled=true;
 }
 
 LRESULT CALLBACK StackWatcher::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
@@ -37,6 +37,9 @@ LRESULT CALLBACK StackWatcher::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPAR
 			OnCreate(hWnd, uMsg, wParam, lParam);
 			break;
 		}
+	case WM_CLOSE:
+		Hard86ToolWindow::OnClose(hWnd, uMsg, wParam, lParam);
+		break;
 	case WM_MOVING:
 		{
 			Hard86ToolWindow::OnMoving(hWnd, uMsg, wParam, lParam);
@@ -52,11 +55,16 @@ LRESULT CALLBACK StackWatcher::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPAR
 			Hard86ToolWindow::OnNCLButtonDown(hWnd, uMsg, wParam, lParam);
 			break;
 		}
+	case WM_ENABLE:
+		EnableWindow(Child<CodeList>(CODELIST)->GetHWND(), (BOOL)wParam);
+		m_enabled=(bool)wParam;
+		break;
 	case WM_COMMAND:
 		OnCommand(hWnd, uMsg, wParam, lParam);
 		break;
 	case H86_UPDATE_SYS_DATA:
 		{
+			if(!m_enabled) break;
 			sys_state_ptr sysState=(sys_state_ptr)lParam;
 
 			CodeList* codeList=Child<CodeList>(CODELIST);
@@ -64,12 +72,14 @@ LRESULT CALLBACK StackWatcher::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPAR
 			uint16 sp=sysState->sp;
 			codeList->Clear();
 
+			int count=0;
+
 			do{
 				uint32 addr=(sysState->ss << 4) + sp;
 				wstring data=ext_itow(Emulator::GetInstance()->ReadMem16(addr), 16, 4);
 				codeList->Insert(make_pair((sysState->ss << 16) | sp, data));
 				sp+=2;
-			} while(sp!=0);
+			} while(sp!=0 && count++ < 150);
 
 			InvalidateRect(codeList->GetHWND(), NULL, false);
 		}

@@ -87,6 +87,10 @@ private:
 	void SetAddr(uint32 i);
 	void SetSeg(uint32 i);
 
+	uint32 m_lastBaseAddr;
+
+	bool m_enabled;
+
 };
 
 }

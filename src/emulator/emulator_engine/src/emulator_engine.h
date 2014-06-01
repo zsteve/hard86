@@ -56,7 +56,7 @@
 //#define op_0x0c op_unknown
 //#define op_0x0d op_unknown
 //#define op_0x0e op_unknown
-#define op_0x0f op_unknown
+//#define op_0x0f op_unknown
 //#define op_0x10 op_unknown
 //#define op_0x11 op_unknown
 //#define op_0x12 op_unknown
@@ -137,8 +137,8 @@
 #define op_0x5d op_0x58
 #define op_0x5e op_0x58
 #define op_0x5f op_0x58
-#define op_0x60 op_unknown
-#define op_0x61 op_unknown
+//#define op_0x60 op_unknown
+//#define op_0x61 op_unknown
 #define op_0x62 op_unknown
 #define op_0x63 op_unknown
 #define op_0x64 op_unknown
@@ -173,10 +173,10 @@
 //#define op_0x81 op_unknown
 #define op_0x82 op_unknown
 //#define op_0x83 op_unknown
-#define op_0x84 op_unknown
-#define op_0x85 op_unknown
-#define op_0x86 op_unknown
-#define op_0x87 op_unknown
+//#define op_0x84 op_unknown
+//#define op_0x85 op_unknown
+//#define op_0x86 op_unknown
+//#define op_0x87 op_unknown
 //#define op_0x88 op_unknown
 //#define op_0x89 op_unknown
 //#define op_0x8a op_unknown
@@ -185,20 +185,20 @@
 //#define op_0x8d op_unknown
 //#define op_0x8e op_unknown
 //#define op_0x8f op_unknown
-#define op_0x90 op_unknown
-#define op_0x91 op_unknown
-#define op_0x92 op_unknown
-#define op_0x93 op_unknown
-#define op_0x94 op_unknown
-#define op_0x95 op_unknown
-#define op_0x96 op_unknown
-#define op_0x97 op_unknown
+//#define op_0x90 op_unknown
+#define op_0x91 op_0x90
+#define op_0x92 op_0x90
+#define op_0x93 op_0x90
+#define op_0x94 op_0x90
+#define op_0x95 op_0x90
+#define op_0x96 op_0x90
+#define op_0x97 op_0x90
 #define op_0x98 op_unknown
 #define op_0x99 op_unknown
 //#define op_0x9a op_unknown
 #define op_0x9b op_unknown
-#define op_0x9c op_unknown
-#define op_0x9d op_unknown
+//#define op_0x9c op_unknown
+//#define op_0x9d op_unknown
 //#define op_0x9e op_unknown
 //#define op_0x9f op_unknown
 //#define op_0xa0 op_unknown
@@ -209,10 +209,10 @@
 //#define op_0xa5 op_unknown
 #define op_0xa6 op_unknown
 #define op_0xa7 op_unknown
-#define op_0xa8 op_unknown
-#define op_0xa9 op_unknown
-#define op_0xaa op_unknown
-#define op_0xab op_unknown
+//#define op_0xa8 op_unknown
+//#define op_0xa9 op_unknown
+//#define op_0xaa op_unknown
+//#define op_0xab op_unknown
 #define op_0xac op_unknown
 #define op_0xad op_unknown
 #define op_0xae op_unknown
@@ -333,7 +333,11 @@ typedef struct{
 	uint16 cs, ss, ds, es;
 
 	uint8 op_size;
-}op_data_type;
+
+	/* information for the emulator */
+	int rep_cond;	// 1 - keep repeating, 0 - stop
+
+}op_data_type, *op_data_ptr;
 
 #define MOD_REG_RM(offset)\
 	op_data.mod_reg_rm=read_mem_8(R_IP+offset);
@@ -342,7 +346,7 @@ typedef struct{
 
 /* get the real address of a segment address and segment number */
 #define GET_ADDR(address, segment)\
-	(((uint32)segment)*0x10)+address
+	(((uint32)segment)<<4)+(uint32)(address)
 
 /* register access */
 #define REG_16(rg) *((uint16*)sys_state.rg)
@@ -421,8 +425,8 @@ void write_debug(char* file, int line, char* str);
 void out_opinfo(char* str, ...);
 
 /* BIOS */
-#define BIOS_MEM_SEG	0x0
-#define BIOS_MEM_OFFSET 0x400
+#define BIOS_MEM_SEG	0x40
+#define BIOS_MEM_OFFSET 0x000
 
 /* Video */
 #define VIDEO_MEM_SEG 0xb800

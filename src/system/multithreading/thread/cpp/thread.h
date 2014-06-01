@@ -28,12 +28,19 @@ public:
 		Running, Suspended, Terminated
 	};
 
+	void SetMaxSuspendCount(int c){ m_maxSuspendCount=c; }
+
 	ThreadState State(){ return m_state; }
+
+	int GetSuspendCount(){ return m_suspendCount; }
 private:
 protected:
 	HANDLE m_hThread;
 	DWORD m_threadID;
 	ThreadState m_state;
+
+	int m_suspendCount;
+	int m_maxSuspendCount;
 };
 
 #endif

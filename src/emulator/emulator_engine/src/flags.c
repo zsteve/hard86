@@ -337,4 +337,16 @@ void setf_xor16(uint16 a, uint16 b){
 	set_cf(0);
 }
 
+void setf_test8(uint8 a, uint8 b){
+	set_zf(a & b);
+	set_sf(a & b);
+	set_pf(a & b);
+}
+
+void setf_test16(uint16 a, uint16 b){
+	set_zf(a & b);
+	set_sf(a & b);
+	set_pf(a & b);
+}
+
 #undef HAS_OVERFLOW

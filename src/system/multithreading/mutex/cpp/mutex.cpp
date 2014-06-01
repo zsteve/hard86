@@ -13,19 +13,19 @@
 	when object is not signaled -> owned
 */
 
-Mutex::Mutex(){
+Mutex::Mutex() : m_state(0){
 	m_nInstances=new int;
 	(*m_nInstances)=1;
 	m_hMutex=CreateMutex(NULL, FALSE, NULL);
 }
 
-Mutex::Mutex(const Mutex& src){
+Mutex::Mutex(const Mutex& src) : m_state(0){
 	m_nInstances=src.m_nInstances;
 	(*m_nInstances)++;
 	m_hMutex=src.m_hMutex;
 }
 
-Mutex::Mutex(void* hMutex){
+Mutex::Mutex(void* hMutex) : m_state(0){
 	m_nInstances=new int;
 	// since we are initializing from a raw handle
 	// we don't know the lifetime of that handle.
@@ -58,6 +58,7 @@ Mutex& Mutex::operator=(const Mutex& src){
 
 int Mutex::Lock(){
 	int retv=WaitForSingleObject(m_hMutex, INFINITE);
+	m_state++;
 	return retv;
 }
 
@@ -66,10 +67,12 @@ bool Mutex::TryLock(){
 	if(dwReturn==WAIT_TIMEOUT){
 		return false;
 	}
+	m_state++;
 	return true;
 }
 
 int Mutex::Unlock(){
 	int retv=ReleaseMutex(m_hMutex);
+	m_state--;
 	return retv;
 }

@@ -21,6 +21,39 @@ typedef HANDLE MUTEX;
 
 #define DLL_EXPORT __declspec(dllexport)
 
+/*	opcode data structure
+	program may expect the prefixes to be initialized as boolean values,
+	signifying the presence of the prefixes.
+
+	mod reg r/m field may not be initialized or have meaningful information
+	depending on what is accessing it
+*/
+typedef struct{
+	/* prefixes */
+	int lock, rep, repne;	/* nonzero for present, 0 for not present */
+	uint8 seg_ovr;			/* segment override, 0 if none present */
+	union{
+		struct{
+			uint8 rm:3;
+			uint8 reg:3;
+			uint8 mod:2;
+		};
+		uint8 mod_reg_rm;
+	};
+
+	/*	these are the segments for the instruction to use
+		if not overridden, they will be their defaults 
+	*/
+
+	uint16 cs, ss, ds, es;
+
+	uint8 op_size;
+
+	/* information for the emulator */
+	int rep_cond;	// 1 - keep repeating, 0 - stop
+
+}op_data_type, *op_data_ptr;
+
 typedef struct{
 	/* system memory */
 	uint8* mem;
@@ -88,6 +121,8 @@ typedef struct{
 	};
 
 	// Emulator specific data (non-8086 related ... kinda)
+	MUTEX sys_mutex;
+
 	/*
 		* True if we want the debugger callbacks to be executed
 		* for each opcode while we are in an external interrupt.
@@ -96,6 +131,9 @@ typedef struct{
 		*/
 	int step_through_extern_int;
 	int is_in_extern_int;	// in external interrupt?
+
+	op_data_ptr op_data;
+
 }sys_state_type, *sys_state_ptr;
 
 #define DEFAULT_SP 0xfffe
@@ -240,7 +278,7 @@ static void make_int_call(sys_state_ptr sys_state, uint8 inum){
 	uint16 new_cs, new_ip;
 	uint16 mem_offset=inum<<2;
 	new_cs=read_mem_16(sys_state, mem_offset);
-	new_ip=read_mem_16(sys_state, mem_offset+2)+0x400;
+	new_ip=read_mem_16(sys_state, mem_offset+2);
 	stack_push(sys_state, FLAGS);
 	stack_push(sys_state, CS);
 	stack_push(sys_state, IP);

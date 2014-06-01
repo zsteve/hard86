@@ -38,6 +38,10 @@ namespace nsHard86Win32{
 		DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
 
+	MSGHANDLER(Close){
+		Show(SW_HIDE);
+	}
+
 #undef MSGHANDLER
 
 }

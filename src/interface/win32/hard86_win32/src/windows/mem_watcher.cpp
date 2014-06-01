@@ -27,7 +27,9 @@ namespace nsHard86Win32{
 bool MemoryWatcher::m_registered=false;
 
 MemoryWatcher::MemoryWatcher() : Hard86ToolWindow(m_registered){
+	m_enabled=true;
 	m_style|=WS_SIZEBOX;
+	m_lastBaseAddr=NULL;
 }
 
 LRESULT CALLBACK MemoryWatcher::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
@@ -38,6 +40,9 @@ LRESULT CALLBACK MemoryWatcher::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPA
 			OnCreate(hWnd, uMsg, wParam, lParam);
 			break;
 		}
+	case WM_CLOSE:
+		Hard86ToolWindow::OnClose(hWnd, uMsg, wParam, lParam);
+		break;
 	case WM_MOVING:
 		{
 			Hard86ToolWindow::OnMoving(hWnd, uMsg, wParam, lParam);
@@ -56,14 +61,19 @@ LRESULT CALLBACK MemoryWatcher::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPA
 			Hard86ToolWindow::OnNCLButtonDown(hWnd, uMsg, wParam, lParam);
 			break;
 		}
+	case WM_ENABLE:
+		EnableWindow(Child<HexGrid>(MEMGRID)->GetHWND(), (BOOL)wParam);
+		EnableWindow(Child<EditBox>(ADDRBOX)->GetHWND(), (BOOL)wParam);
+		EnableWindow(Child<EditBox>(SEGBOX)->GetHWND(), (BOOL)wParam);
+		EnableWindow(Child<ScrollBar>(SCROLLBAR)->GetHWND(), (BOOL)wParam);
+		m_enabled=(bool)wParam;
+		break;
 	case WM_COMMAND:
 		OnCommand(hWnd, uMsg, wParam, lParam);
 		break;
 	case H86_UPDATE_SYS_DATA:
 		{
-			Mutex sysMutex((void*)wParam);
-			sysMutex.Lock();
-
+			if(!m_enabled) break;
 			sys_state_ptr sysState=(sys_state_ptr)lParam;
 			HexGrid* hexGrid=Child<HexGrid>(MEMGRID);
 			vector<uint8>& gridData=hexGrid->GetData();
@@ -74,8 +84,24 @@ LRESULT CALLBACK MemoryWatcher::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPA
 			for(int i=0; i<capacity; i++){
 				gridData[i]=nsEmulator::Emulator::GetInstance()->ReadMem8(i+baseAddr);
 			}
-			sysMutex.Unlock();
+			m_lastBaseAddr=baseAddr;
 
+			InvalidateRect(hexGrid->GetHWND(), NULL, false);
+		}
+		break;
+	case H86_USER_INPUT:
+		{
+			if(!m_enabled) break;
+			sys_state_ptr sysState=(sys_state_ptr)lParam;
+			HexGrid* hexGrid=Child<HexGrid>(MEMGRID);
+			map<int, uint8>& gridEditList=hexGrid->GetEditList();
+			nsEmulator::Emulator* emulator=nsEmulator::Emulator::GetInstance();
+			for(map<int, uint8>::iterator it=gridEditList.begin();
+				it!=gridEditList.end();
+				++it){
+				emulator->WriteMem8(it->second, m_lastBaseAddr+it->first);
+			}
+			gridEditList.clear();
 			InvalidateRect(hexGrid->GetHWND(), NULL, false);
 		}
 		break;
