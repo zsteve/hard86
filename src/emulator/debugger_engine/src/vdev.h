@@ -73,6 +73,7 @@ namespace nsVDev{
 		int Initialize();
 		int AcceptEmulationMutex(MUTEX emuMutex, sys_state_ptr sysState);
 		int Terminate();
+		bool Free();
 		std::wstring& GetFileName(){ return m_fileName; }
 
 		pair<void*, void*>& GetParams(){

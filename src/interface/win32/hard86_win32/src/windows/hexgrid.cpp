@@ -25,6 +25,8 @@
 #include "../emulator.h"
 #include "../../../../../system/multithreading/mutex/cpp/mutex.h"
 
+#include "../../../../../ext_itoa/ext_itoa.h"
+
 namespace nsHard86Win32{
 
 bool HexGrid::m_registered=false;
@@ -155,8 +157,8 @@ MSGHANDLER(Paint){
 				break;
 			}
 
-			wchar_t hex[3];
-			_itow(m_gridData[index+m_basePos], hex, 16);
+			wchar_t hex[3]=L"";
+			ext_itow(m_gridData[index+m_basePos], hex, 16, 2);
 
 			if(index >= m_sel.first && index <= m_sel.second){
 				if(m_enabled)

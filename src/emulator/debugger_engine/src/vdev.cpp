@@ -96,10 +96,17 @@ namespace nsVDev{
 	{
 #ifdef _WIN32
 		int retv=m_termFunc();
-		FreeLibrary(m_hModule);
 		return retv;
 #else
 		return m_termFunc();
+#endif
+	}
+
+	bool VDev::Free(){
+#ifdef _WIN32
+		return (bool)FreeLibrary(m_hModule);
+#else
+		return false;
 #endif
 	}
 
