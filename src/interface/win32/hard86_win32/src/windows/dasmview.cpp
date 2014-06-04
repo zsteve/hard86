@@ -129,7 +129,6 @@ namespace nsHard86Win32{
 			it!=m_dasmList.end();
 			++it){
 			Child<CodeList>(CODELIST)->Insert(make_pair(DWORD_B(it->GetSeg(), it->GetAddr()), strtowstr(it->GetCStr())));
-
 		}
 		Child<CodeList>(CODELIST)->SetExtraSelection(0);
 

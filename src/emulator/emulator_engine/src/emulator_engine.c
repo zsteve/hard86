@@ -478,8 +478,9 @@ void system_print_state(){
 	//getch();
 }
 
-static void reset_op_data(){
+void reset_op_data(){
 	op_data.rep=op_data.repne=0;
+	op_data.seg_ovr=0;
 }
 
 int system_execute(){
@@ -517,7 +518,7 @@ int system_execute(){
 			continue;
 		}
 
-		system_print_state();
+		//system_print_state();
 
 		op_data.rep_cond=1;
 

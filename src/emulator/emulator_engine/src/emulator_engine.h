@@ -316,7 +316,11 @@
 typedef struct{
 	/* prefixes */
 	int lock, rep, repne;	/* nonzero for present, 0 for not present */
-	uint8 seg_ovr;			/* segment override, 0 if none present */
+	uint8 seg_ovr;			/* code of segment override, 0 if none present 
+							   0x2e		cs
+							   0x36		ss
+							   0x3e		ds
+							   0x26		es */
 	union{
 		struct{
 			uint8 rm:3;

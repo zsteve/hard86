@@ -610,18 +610,22 @@ void process_instr_prefixes(){
 		case 0x2e:
 			/* CS */
 			set_all_segs(CS);
+			op_data.seg_ovr=b;
 			break;
 		case 0x36:
 			/* SS */
 			set_all_segs(SS);
+			op_data.seg_ovr=b;
 			break;
 		case 0x3E:
 			/* DS */
 			set_all_segs(DS);
+			op_data.seg_ovr=b;
 			break;
 		case 0x26:
 			/* ES */
 			set_all_segs(ES);
+			op_data.seg_ovr=b;
 			break;
 		}
 

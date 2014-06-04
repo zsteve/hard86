@@ -202,7 +202,7 @@ MSGHANDLER(Paint){
 				HGDIOBJ hOldBrush=SelectObject(hDC, (HGDIOBJ)hBrush);
 				Rectangle(hDC, 0, ypos, m_sidePadding, ypos+m_itemHeight);
 				SelectObject(hDC, hOldBrush);
-				DeleteObject((HGDIOBJ)hBrush);
+				DeleteObject(hBrush);
 				break;
 			}
 		}

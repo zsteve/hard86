@@ -37,6 +37,8 @@ extern sys_state_type sys_state;
 extern op_data_type op_data;
 extern void(*out_opinfo_ptr)(char* str, va_list* v);
 
+extern void reset_op_data();
+
 static clist dasm_list={ 0, 0, 0 };
 
 void dasm_print_op(char* str, va_list* v){
@@ -47,8 +49,33 @@ void dasm_print_op(char* str, va_list* v){
 
 	vsprintf(dasm_out, str, *v);
 	/* must be freed upon list destroy */
-	e->line=(char*)malloc(sizeof(char)*(strlen(dasm_out)+1));
-	strcpy(e->line, dasm_out);
+	e->line=(char*)malloc(sizeof(char)*80);
+	e->line[0]=NULL;
+
+	if(op_data.seg_ovr){
+		switch(op_data.seg_ovr){
+		case 0x2e:
+			strcat(e->line, "CS: ");
+			break;
+		case 0x36:
+			strcat(e->line, "SS: ");
+			break;
+		case 0x3e:
+			strcat(e->line, "DS: ");
+			break;
+		case 0x26:
+			strcat(e->line, "ES: ");
+			break;
+		}
+	}
+	if(op_data.rep){
+		strcat(e->line, "REP ");
+	}
+	else if(op_data.repne){
+		strcat(e->line, "REPNE ");
+	}
+
+	strcat(e->line, dasm_out);
 
 	e->seg=CS;
 	e->addr=IP;
@@ -81,6 +108,14 @@ clist dasm_disassemble(int n_instr, uint16 initial_ip, uint16 initial_cs){
 
 
 	/* clear list */
+	{
+		clist_node* e=dasm_list.begin;
+		while(e!=0){
+			dasm_list_entry* d=e->data;
+			free(d->line);
+			e=e->next;
+		}
+	}
 	clist_destroy(&dasm_list);
 	dasm_list=clist_create();
 
@@ -89,11 +124,13 @@ clist dasm_disassemble(int n_instr, uint16 initial_ip, uint16 initial_cs){
 	CS=initial_cs;
 
 	while(i<n_instr){
+		reset_op_data();
 		R_IP=GET_ADDR(IP, CS);
 		process_instr_prefixes();
 		(*op_table[read_mem_8(GET_ADDR(IP, CS))])();
 		i++;
 	}
+	reset_op_data();
 	out_opinfo_ptr=0;
 
 	sys_state=tmp_sys_state;

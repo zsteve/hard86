@@ -40,7 +40,9 @@ namespace nsDasm{
 		*m_copyCount=1;	/* only one copy */
 	}
 
-	DasmList::DasmList(const DasmList& src) : m_dasmLines(src.m_dasmLines){
+	DasmList::DasmList(const DasmList& src){
+		clear();
+		m_dasmLines=src.m_dasmLines;
 		m_copyCount=src.m_copyCount;
 		(*m_copyCount)++;	/* one more copy */
 	}
@@ -64,6 +66,7 @@ namespace nsDasm{
 	const DasmList& DasmList::operator=(const DasmList& rhs){
 		// prevent self assignment!
 		if(this==&rhs) return *this;
+		clear();
 		m_dasmLines=rhs.m_dasmLines;
 		m_copyCount=rhs.m_copyCount;
 		(*m_copyCount)++;	/* one more copy */
@@ -73,7 +76,7 @@ namespace nsDasm{
 	/**
 	 * appends the DasmLine object to internal vector
 	 * assumes that DasmList object will now be responsible for
-	 * freeing object (caller must NOT use delete on dasmLine
+	 * freeing object (caller must NOT use delete on dasmLine)
 	 */
 	int DasmList::push_back(DasmLine* dasmLine){
 		m_dasmLines.push_back(dasmLine);
