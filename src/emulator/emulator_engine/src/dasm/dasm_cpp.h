@@ -177,6 +177,7 @@ namespace nsDasm{
 				++it){
 				delete *it;
 			}
+			m_dasmLines.clear();
 		}
 
 		// static 

@@ -25,7 +25,7 @@ INT_PTR CALLBACK DlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
 		SetTimer(hWnd, 0, 30, NULL);
 		break;
 	case WM_TIMER:
-		SetDlgItemInt(hWnd, IDC_PORTNUM, portVal, FALSE);
+		SetDlgItemInt(hWnd, IDC_PORTVAL, portVal, FALSE);
 		break;
 	case WM_COMMAND:
 		switch(LOWORD(wParam)){
