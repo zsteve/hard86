@@ -3,10 +3,14 @@
 
 #include "stdafx.h"
 
+#include <WindowsX.h>
+
 HANDLE mainThread=NULL;
 
 unsigned short portNum=0;
-static unsigned char portVal=0;
+static unsigned short portVal=0;
+
+bool readWord=false;	// 16 bit?
 
 HWND hDlg=NULL;
 HANDLE hMainThread=NULL;
@@ -18,6 +22,10 @@ INT_PTR CALLBACK DlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
 	switch(uMsg){
 	case WM_INITDIALOG:
 		::hDlg=hWnd;
+		SetTimer(hWnd, 0, 30, NULL);
+		break;
+	case WM_TIMER:
+		SetDlgItemInt(hWnd, IDC_PORTNUM, portVal, FALSE);
 		break;
 	case WM_COMMAND:
 		switch(LOWORD(wParam)){
@@ -26,6 +34,9 @@ INT_PTR CALLBACK DlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
 				portNum=GetDlgItemInt(hWnd, IDC_PORTNUM, NULL, FALSE);
 				SetDlgItemInt(hWnd, IDC_PORTNUM, (unsigned long)portNum, FALSE);
 			}
+			break;
+		case IDC_16:
+			readWord=Button_GetCheck(GetDlgItem(hWnd, IDC_16));
 			break;
 		}
 		break;
@@ -51,8 +62,15 @@ DWORD CALLBACK MainThread(LPVOID lpParam){
 int VirtualDevice_AcceptEmulationMutex(MUTEX a, sys_state_ptr b)
 {
 	if(::hDlg){
-		portVal=b->io_bus[portNum];
-		SendMessage(::hDlg, UPDATE_PORT_VAL, NULL, NULL);
+		if(readWord){
+			portVal=b->io_bus[portNum];
+			portVal<<=8;
+			if(portNum<65535){
+				portVal|=b->io_bus[portNum+1];
+			}
+		}else{
+			portVal=b->io_bus[portNum];
+		}
 	}
 	return 0;
 }

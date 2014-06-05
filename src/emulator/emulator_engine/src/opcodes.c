@@ -1521,16 +1521,13 @@ void call_far_abs(uint16 seg, uint16 addr){
 }
 
 void ret_near(uint16 pop_count){
-	int i=0;
-	while(i++<pop_count){
-		stack_pop();
-	}
 	if(stack_empty()){
 		// terminate
 		system_halt();
 		return;
 	}
 	IP=stack_pop();
+	SP+=pop_count;
 }
 
 

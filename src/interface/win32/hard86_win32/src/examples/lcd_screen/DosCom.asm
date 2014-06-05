@@ -4,7 +4,7 @@
 STAR struct
 	x	dw ?	; xpos
 	y	dw ?	; ypos
-	i	db ?	; intensity
+	s	dw ?	; speed
 STAR ends
 
 NUM_STARS equ 100
@@ -92,10 +92,11 @@ init_stars proc
 	call random
 	;xor ah, ah
 	mov [di].STAR.y, ax
-	;mov dx, 255
-	;call random
-	;xor ah, ah
-	mov [di].STAR.i, 255
+	
+	mov dx, 5
+	call random
+  inc ax
+	mov [di].STAR.s, ax
 	add di, sizeof(STAR)
 	inc cx
 	cmp cx, NUM_STARS
@@ -112,13 +113,18 @@ move_stars proc
 	lea di, stars
 	
 	.while cx<NUM_STARS
-		add [di].STAR.x, 2
+		mov ax, [di].STAR.s
+		add [di].STAR.x, ax
 		.if [di].STAR.x > 320
 			xor ax, ax
 			mov [di].STAR.x, ax
 			mov dx, 200
 			call random
 			mov [di].STAR.y, ax
+			mov dx, 5
+			call random
+      inc ax
+			mov [di].STAR.s, ax
 		.endif
 		add di, sizeof(STAR)
 		inc cx
@@ -147,7 +153,7 @@ draw_stars proc
 		add ax, [di].STAR.x
 		mov bx, ax
 		
-		mov al, [di].STAR.i
+		mov al, 255
 		
 		mov byte ptr es:[bx], al
 		
