@@ -14,3 +14,4 @@ del /S *.log
 del /S *.lastbuildstate
 del /S *.cache
 del /S *.o
+del /S *.ilk

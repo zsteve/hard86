@@ -1,0 +1,181 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\..\emulator\debugger_engine\src\debugger.h" />
+    <ClInclude Include="..\..\..\..\..\emulator\debugger_engine\src\device_test\device_test.h" />
+    <ClInclude Include="..\..\..\..\..\emulator\debugger_engine\src\vdev.h" />
+    <ClInclude Include="..\..\..\..\..\emulator\emulator_engine\src\cpp_interface\emulator_cpp.h" />
+    <ClInclude Include="..\..\..\..\..\emulator\emulator_engine\src\dasm\dasm.h" />
+    <ClInclude Include="..\..\..\..\..\emulator\emulator_engine\src\dasm\dasm_cpp.h" />
+    <ClInclude Include="..\..\..\..\..\emulator\emulator_engine\src\emulator_engine.h" />
+    <ClInclude Include="..\..\..\..\..\emulator\emulator_engine\src\emulator_engine_interface.h" />
+    <ClInclude Include="..\..\..\..\..\emulator\emulator_engine\src\flags.h" />
+    <ClInclude Include="..\..\..\..\..\emulator\emulator_engine\src\global.h" />
+    <ClInclude Include="..\..\..\..\..\emulator\emulator_engine\src\opcodes.h" />
+    <ClInclude Include="..\..\..\..\..\emulator\symbols_loader\src\sym_loader.h" />
+    <ClInclude Include="..\..\..\..\..\lib\inih\cpp\INIReader.h" />
+    <ClInclude Include="..\..\..\..\..\lib\inih\ini.h" />
+    <ClInclude Include="..\..\..\..\..\lib\rapidxml\rapidxml.hpp" />
+    <ClInclude Include="..\..\..\..\..\lib\rapidxml\rapidxml_iterators.hpp" />
+    <ClInclude Include="..\..\..\..\..\lib\rapidxml\rapidxml_print.hpp" />
+    <ClInclude Include="..\..\..\..\..\lib\rapidxml\rapidxml_utils.hpp" />
+    <ClInclude Include="..\..\..\..\..\lib\stickywindows\StickyDragManager.h" />
+    <ClInclude Include="..\..\..\..\..\system\datastruct\clist\clist.h" />
+    <ClInclude Include="..\..\..\..\..\system\multithreading\event\cpp\event.h" />
+    <ClInclude Include="..\..\..\..\..\system\multithreading\mutex\cpp\mutex.h" />
+    <ClInclude Include="..\..\..\..\..\system\multithreading\mutex\c\cmutex.h" />
+    <ClInclude Include="..\..\..\..\..\system\multithreading\thread\cpp\thread.h" />
+    <ClInclude Include="..\..\src\emulator.h" />
+    <ClInclude Include="..\..\src\global.h" />
+    <ClInclude Include="..\..\src\h86project.h" />
+    <ClInclude Include="..\..\src\resource\resource.h" />
+    <ClInclude Include="..\..\src\settings.h" />
+    <ClInclude Include="..\..\src\windows\bp_list.h" />
+    <ClInclude Include="..\..\src\windows\codelist.h" />
+    <ClInclude Include="..\..\src\windows\dasmview.h" />
+    <ClInclude Include="..\..\src\windows\hexgrid.h" />
+    <ClInclude Include="..\..\src\windows\mainframe.h" />
+    <ClInclude Include="..\..\src\windows\mem_watcher.h" />
+    <ClInclude Include="..\..\src\windows\register_watcher.h" />
+    <ClInclude Include="..\..\src\windows\stack_watcher.h" />
+    <ClInclude Include="..\..\src\windows\statusbar.h" />
+    <ClInclude Include="..\..\src\windows\toolwindow.h" />
+    <ClInclude Include="..\..\src\windows\winmanager.h" />
+    <ClInclude Include="..\..\src\winmain.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\..\emulator\debugger_engine\src\debugger.cpp" />
+    <ClCompile Include="..\..\..\..\..\emulator\debugger_engine\src\device_test\device_test.cpp" />
+    <ClCompile Include="..\..\..\..\..\emulator\debugger_engine\src\vdev.cpp" />
+    <ClCompile Include="..\..\..\..\..\emulator\emulator_engine\src\cpp_interface\emulator_cpp.cpp" />
+    <ClCompile Include="..\..\..\..\..\emulator\emulator_engine\src\dasm\dasm.c" />
+    <ClCompile Include="..\..\..\..\..\emulator\emulator_engine\src\dasm\dasm_cpp.cpp" />
+    <ClCompile Include="..\..\..\..\..\emulator\emulator_engine\src\emulator_engine.c" />
+    <ClCompile Include="..\..\..\..\..\emulator\emulator_engine\src\flags.c" />
+    <ClCompile Include="..\..\..\..\..\emulator\emulator_engine\src\global.c" />
+    <ClCompile Include="..\..\..\..\..\emulator\emulator_engine\src\opcodes.c" />
+    <ClCompile Include="..\..\..\..\..\emulator\symbols_loader\src\sym_loader.cpp" />
+    <ClCompile Include="..\..\..\..\..\lib\inih\cpp\INIReader.cpp" />
+    <ClCompile Include="..\..\..\..\..\lib\inih\ini.c" />
+    <ClCompile Include="..\..\..\..\..\lib\stickywindows\StickyDragManager.cpp" />
+    <ClCompile Include="..\..\..\..\..\system\datastruct\clist\clist.c" />
+    <ClCompile Include="..\..\..\..\..\system\multithreading\event\cpp\event.cpp" />
+    <ClCompile Include="..\..\..\..\..\system\multithreading\mutex\cpp\mutex.cpp" />
+    <ClCompile Include="..\..\..\..\..\system\multithreading\mutex\c\cmutex.c" />
+    <ClCompile Include="..\..\..\..\..\system\multithreading\thread\cpp\thread.cpp" />
+    <ClCompile Include="..\..\src\emulator.cpp" />
+    <ClCompile Include="..\..\src\frontend_global.cpp" />
+    <ClCompile Include="..\..\src\h86project.cpp" />
+    <ClCompile Include="..\..\src\objwin32_gui_static.cpp" />
+    <ClCompile Include="..\..\src\settings.cpp" />
+    <ClCompile Include="..\..\src\windows\bp_list.cpp" />
+    <ClCompile Include="..\..\src\windows\codelist.cpp" />
+    <ClCompile Include="..\..\src\windows\dasmview.cpp" />
+    <ClCompile Include="..\..\src\windows\mainframe.cpp" />
+    <ClCompile Include="..\..\src\windows\mem_watcher.cpp" />
+    <ClCompile Include="..\..\src\windows\register_watcher.cpp" />
+    <ClCompile Include="..\..\src\windows\stack_watcher.cpp" />
+    <ClCompile Include="..\..\src\windows\statusbar.cpp" />
+    <ClCompile Include="..\..\src\windows\toolwindow.cpp" />
+    <ClCompile Include="..\..\src\windows\winmanager.cpp" />
+    <ClCompile Include="..\..\src\winmain.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="Debug\win32_file_lib.lib" />
+    <Library Include="Debug\win32_ui_lib.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\src\resource\resource.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="application.manifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\windows\hexgrid.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\src\resource\appicon.ico" />
+    <None Include="..\..\src\resource\toolbar1.bmp" />
+    <None Include="appicon.ico" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{97CE327D-863A-4C46-B460-E27BED50A061}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>hard86_win32</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessToFile>false</PreprocessToFile>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BrowseInformation>false</BrowseInformation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>false</EnableCOMDATFolding>
+      <OptimizeReferences>false</OptimizeReferences>
+      <AdditionalDependencies>comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

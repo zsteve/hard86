@@ -291,6 +291,13 @@ MSGHANDLER(Command){
 			VDevList::TerminateAll();
 			VDevList::InitializeAll();
 
+			// enable all breakpoints
+			for(BreakpointList::iterator it=Debugger::GetInstance()->BreakpointBegin();
+				it!=Debugger::GetInstance()->BreakpointEnd();
+				++it){
+				it->second.Activate();
+			}
+
 			Child<StatusBar>(STATUSBAR)->SetStatus(L"Reloaded");
 		}
 		// Enable all tool windows

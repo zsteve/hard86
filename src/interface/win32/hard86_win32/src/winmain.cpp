@@ -34,7 +34,6 @@ namespace nsHard86Win32{
 
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-	OUT_DEBUG("WinMain() Startup");
 
 	Application* app=Application::GetInstance(hInstance);
 	app->mainFrame=new MainFrame();
